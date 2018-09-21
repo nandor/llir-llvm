@@ -25,6 +25,7 @@ subdirectories =
  AVR
  BPF
  CSKY
+ GenM
  Hexagon
  Lanai
  MSP430
