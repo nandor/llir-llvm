@@ -41,7 +41,7 @@ void GenMFrameLowering::emitPrologue(
     MachineFunction &MF,
     MachineBasicBlock &MBB) const
 {
-  assert(!"not implemented");
+  // TODO
 }
 
 MachineBasicBlock::iterator
@@ -58,7 +58,7 @@ void GenMFrameLowering::emitEpilogue(
     MachineFunction &MF,
     MachineBasicBlock &MBB) const
 {
-  assert(!"not implemented");
+  // TODO
 }
 
 bool GenMFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const
@@ -68,15 +68,11 @@ bool GenMFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const
 
 bool GenMFrameLowering::hasFP(const MachineFunction &MF) const
 {
-  assert(!"not implemented");
-}
-
-void GenMFrameLowering::determineCalleeSaves(
-    MachineFunction &MF,
-    BitVector &SavedRegs,
-    RegScavenger *RS) const
-{
-  assert(!"not implemented");
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  return MFI.isFrameAddressTaken()
+      || MFI.hasVarSizedObjects()
+      || MFI.hasStackMap()
+      || MFI.hasPatchPoint();
 }
 
 int GenMFrameLowering::getFrameIndexReference(

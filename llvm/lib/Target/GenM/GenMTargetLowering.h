@@ -19,6 +19,14 @@
 
 namespace llvm {
 
+namespace GenMISD {
+enum NodeType : unsigned {
+  FIRST_NUMBER = ISD::BUILTIN_OP_END,
+  ARGUMENT,
+  RETURN
+};
+} // end namespace GenMISD
+
 class GenMSubtarget;
 
 class GenMTargetLowering : public TargetLowering {
@@ -27,17 +35,6 @@ public:
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
 
   bool useSoftFloat() const override;
-
-  /// computeKnownBitsForTargetNode - Determine which of the bits specified
-  /// in Mask are known to be either zero or one and return them in the
-  /// KnownZero/KnownOne bitsets.
-  void computeKnownBitsForTargetNode(
-     const SDValue Op,
-     KnownBits &Known,
-     const APInt &DemandedElts,
-     const SelectionDAG &DAG,
-     unsigned Depth = 0
-   ) const override;
 
   MachineBasicBlock *EmitInstrWithCustomInserter(
       MachineInstr &MI,
@@ -111,6 +108,14 @@ public:
       SmallVectorImpl<SDValue> &InVals
   ) const override;
 
+  bool CanLowerReturn(
+      CallingConv::ID CallConv,
+      MachineFunction &MF,
+      bool isVarArg,
+      const SmallVectorImpl<ISD::OutputArg> &Outs,
+      LLVMContext &Context
+  ) const override;
+
   SDValue LowerReturn(
       SDValue Chain,
       CallingConv::ID CallConv,
@@ -119,8 +124,6 @@ public:
       const SmallVectorImpl<SDValue> &OutVals,
       const SDLoc &dl, SelectionDAG &DAG
   ) const override;
-
-  SDValue PerformDAGCombine(SDNode *N, DAGCombinerInfo &DCI) const override;
 
   bool ShouldShrinkFPConstant(EVT VT) const override;
 
@@ -135,6 +138,9 @@ public:
       SmallVectorImpl<SDValue>& Results,
       SelectionDAG &DAG
   ) const override;
+
+private:
+  const GenMSubtarget *Subtarget;
 };
 
 } // end namespace llvm

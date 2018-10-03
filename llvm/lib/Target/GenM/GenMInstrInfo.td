@@ -12,50 +12,80 @@
 //===----------------------------------------------------------------------===//
 
 
-// GenM Instruction Format
-class GenMInst<string cstr> : Instruction {
-  field bits<32> Inst;
-  let Namespace = "GenM";
+//===----------------------------------------------------------------------===//
+// GenM-specific DAG Node Types.
+//===----------------------------------------------------------------------===//
+
+def SDT_GenMArgument : SDTypeProfile<1, 1, [SDTCisVT<1, i32>]>;
+def SDT_GenMReturn   : SDTypeProfile<0, -1, []>;
+
+//===----------------------------------------------------------------------===//
+// GenM-specific DAG Nodes.
+//===----------------------------------------------------------------------===//
+
+def GenMargument : SDNode<"GenMISD::ARGUMENT", SDT_GenMArgument>;
+def GenMreturn   : SDNode<"GenMISD::RETURN",   SDT_GenMReturn, [SDNPHasChain]>;
+
+//===----------------------------------------------------------------------===//
+// WebAssembly-specific Operands.
+//===----------------------------------------------------------------------===//
+
+class GenMOperand<ValueType ty, string type> : Operand<ty>
+{
+  let OperandNamespace = "GenM";
+  let OperandType = type;
 }
 
-class I<dag oops, dag iops, string asm, string operands, string cstr, list<dag> pattern>
-  : GenMInst<cstr> {
-  let Size = 4;
-  let Pattern = pattern;
-  dag OutOperandList = oops;
-  dag InOperandList  = iops;
-  let AsmString      = !strconcat(asm, operands);
+def i32imm_op : GenMOperand<i32, "OPERAND_I32IMM">;
+def i64imm_op : GenMOperand<i64, "OPERAND_I64IMM">;
+
+//===----------------------------------------------------------------------===//
+// GenM Instruction Format Definitions.
+//===----------------------------------------------------------------------===//
+
+include "GenMInstrFormats.td"
+
+//===----------------------------------------------------------------------===//
+// Additional instructions.
+//===----------------------------------------------------------------------===//
+
+class ARGUMENT<GenMRegClass vt>
+  : I
+    < (outs vt:$res)
+    , (ins i32imm:$argno)
+    , [(set vt:$res, (GenMargument timm:$argno))]
+    >
+{
+  let hasSideEffects = 1;
+  let Uses = [ARGS];
+  let isCodeGenOnly = 1;
 }
 
-class AsmImmRange<int Low, int High> : AsmOperandClass {
-  let Name = "Imm" # Low # "_" # High;
-  let DiagnosticType = "InvalidImm" # Low # "_" # High;
-  let RenderMethod = "addImmOperands";
-  let PredicateMethod = "isImmInRange<" # Low # "," # High # ">";
+def ARG_I32 : ARGUMENT<I32>;
+def ARG_I64 : ARGUMENT<I64>;
+
+let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
+{
+  def CONST_I32 : I
+    < (outs I32:$res)
+    , (ins i32imm_op:$imm)
+    , [(set I32:$res, imm:$imm)]
+    , "i32.const\t$res, $imm"
+    , 0x00
+    >;
+
+  def CONST_I64 : I
+    < (outs I64:$res)
+    , (ins i64imm_op:$imm)
+    , [(set I64:$res, imm:$imm)]
+    , "i64.const\t$res, $imm"
+    , 0x01
+    >;
 }
 
-def Imm0_65535Operand : AsmImmRange<0, 65535>;
+//===----------------------------------------------------------------------===//
+// Additional sets of instructions.
+//===----------------------------------------------------------------------===//
 
-def movimm32_imm : Operand<i32> {
-  let ParserMatchClass = Imm0_65535Operand;
-  let EncoderMethod = "getMoveWideImmOpValue";
-}
-
-class BaseInsertImmediate<bits<2> opc, RegisterClass regtype, string asm>
-  : I<(outs regtype:$Rd),
-      (ins regtype:$src, movimm32_imm:$imm),
-       asm, "\t$Rd, $imm", "$src = $Rd", []> {
-  bits<5> Rd;
-  bits<16> imm;
-  bits<6> shift;
-
-  let Inst{30-29} = opc;
-  let Inst{28-23} = 0b100101;
-  let Inst{22-21} = shift{5-4};
-  let Inst{20-5}  = imm;
-  let Inst{4-0}   = Rd;
-
-  let DecoderMethod = "DecodeMoveImmInstruction";
-}
-
-def MOVK : BaseInsertImmediate<0b11, GPR, "movk">;
+include "GenMInstrControl.td"
+include "GenMInstrInteger.td"

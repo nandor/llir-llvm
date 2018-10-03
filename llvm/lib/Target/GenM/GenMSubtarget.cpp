@@ -41,5 +41,5 @@ GenMSubtarget::GenMSubtarget(
 
 bool GenMSubtarget::enableMachineScheduler() const
 {
-  assert(!"not implemented");
+  return false;
 }

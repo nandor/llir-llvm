@@ -14,14 +14,23 @@
 #ifndef LLVM_LIB_TARGET_GENM_MCTARGETDESC_GENMMCTARGETDESC_H
 #define LLVM_LIB_TARGET_GENM_MCTARGETDESC_GENMMCTARGETDESC_H
 
+#include "llvm/MC/MCInstrDesc.h"
 #include "llvm/Support/DataTypes.h"
-
 #include <memory>
 
 namespace llvm {
 class Target;
 
 Target &getTheGenMTarget();
+
+namespace GenM {
+  enum OperandType {
+    // 32-bit integer immediate.
+    OPERAND_I32IMM = MCOI::OPERAND_FIRST_TARGET,
+    // 64-bit integer immediate.
+    OPERAND_I64IMM,
+  };
+};
 
 } // End llvm namespace
 

@@ -47,7 +47,17 @@ GenMTargetLowering::GenMTargetLowering(
     const TargetMachine &TM,
     const GenMSubtarget &STI)
   : TargetLowering(TM)
+  , Subtarget(&STI)
 {
+  setBooleanContents(ZeroOrOneBooleanContent);
+  setHasFloatingPointExceptions(false);
+  setSchedulingPreference(Sched::RegPressure);
+  setMaxAtomicSizeInBitsSupported(64);
+
+  addRegisterClass(MVT::i32, &GenM::I32RegClass);
+  addRegisterClass(MVT::i64, &GenM::I64RegClass);
+  computeRegisterProperties(Subtarget->getRegisterInfo());
+
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
@@ -56,16 +66,6 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 }
 
 bool GenMTargetLowering::useSoftFloat() const
-{
-  assert(!"not implemented");
-}
-
-void GenMTargetLowering::computeKnownBitsForTargetNode(
-   const SDValue Op,
-   KnownBits &Known,
-   const APInt &DemandedElts,
-   const SelectionDAG &DAG,
-   unsigned Depth) const
 {
   assert(!"not implemented");
 }
@@ -79,7 +79,11 @@ MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
 
 const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
 {
-  assert(!"not implemented");
+  switch (static_cast<GenMISD::NodeType>(Opcode)) {
+  case GenMISD::FIRST_NUMBER: return nullptr;
+  case GenMISD::RETURN:       return "GenMISD::RETURN";
+  case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
+  }
 }
 
 GenMTargetLowering::ConstraintType
@@ -172,15 +176,19 @@ SDValue GenMTargetLowering::LowerFormalArguments(
     SelectionDAG &DAG,
     SmallVectorImpl<SDValue> &InVals) const
 {
-  if (CallConv != CallingConv::C) {
+  if (CallConv != CallingConv::C || isVarArg) {
     Fail(DL, DAG, "calling convention not supported");
   }
 
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
+  MF.getRegInfo().addLiveIn(GenM::ARGS);
 
   for (const auto &In : Ins) {
-    InVals.push_back(DAG.getNode())
+    InVals.push_back(DAG.getNode(
+        GenMISD::ARGUMENT, DL, In.VT,
+        DAG.getTargetConstant(InVals.size(), DL, MVT::i32)
+    ));
   }
 
   return Chain;
@@ -193,22 +201,33 @@ SDValue GenMTargetLowering::LowerCall(
   assert(!"not implemented");
 }
 
+bool GenMTargetLowering::CanLowerReturn(
+    CallingConv::ID CallConv,
+    MachineFunction &MF,
+    bool isVarArg,
+    const SmallVectorImpl<ISD::OutputArg> &Outs,
+    LLVMContext &Context) const
+{
+  return Outs.size() <= 1;
+}
+
 SDValue GenMTargetLowering::LowerReturn(
     SDValue Chain,
     CallingConv::ID CallConv,
     bool isVarArg,
     const SmallVectorImpl<ISD::OutputArg> &Outs,
     const SmallVectorImpl<SDValue> &OutVals,
-    const SDLoc &dl, SelectionDAG &DAG) const
+    const SDLoc &DL,
+    SelectionDAG &DAG) const
 {
-  assert(!"not implemented");
-}
+  if (CallConv != CallingConv::C || isVarArg || Outs.size() > 1) {
+    Fail(DL, DAG, "calling convention not supported");
+  }
 
-SDValue GenMTargetLowering::PerformDAGCombine(
-    SDNode *N,
-    DAGCombinerInfo &DCI) const
-{
-  assert(!"not implemented");
+  SmallVector<SDValue, 4> RetOps(1, Chain);
+  RetOps.append(OutVals.begin(), OutVals.end());
+  Chain = DAG.getNode(GenMISD::RETURN, DL, MVT::Other, RetOps);
+  return Chain;
 }
 
 bool GenMTargetLowering::ShouldShrinkFPConstant(EVT VT) const

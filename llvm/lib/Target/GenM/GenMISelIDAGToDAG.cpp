@@ -58,7 +58,7 @@ private:
 
 void GenMDAGToDAGISel::Select(SDNode *N)
 {
-  assert(!"not implemented");
+  SelectCode(N);
 }
 
 bool GenMDAGToDAGISel::SelectInlineAsmMemoryOperand(
