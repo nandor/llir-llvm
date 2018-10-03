@@ -37,7 +37,8 @@ GenMRegisterInfo::GenMRegisterInfo()
 const MCPhysReg *
 GenMRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
 {
-  assert(!"not implemented");
+  static const MCPhysReg CalleeSavedRegs[] = {0};
+  return CalleeSavedRegs;
 }
 
 const uint32_t *GenMRegisterInfo::getCallPreservedMask(
@@ -49,7 +50,11 @@ const uint32_t *GenMRegisterInfo::getCallPreservedMask(
 
 BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
-  assert(!"not implemented");
+  BitVector Reserved(getNumRegs());
+  for (auto Reg : { GenM::PC, GenM::SP }) {
+    Reserved.set(Reg);
+  }
+  return Reserved;
 }
 
 const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(

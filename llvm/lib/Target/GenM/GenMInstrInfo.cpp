@@ -54,7 +54,10 @@ bool GenMInstrInfo::analyzeBranch(
     SmallVectorImpl<MachineOperand> &Cond,
     bool AllowModify) const
 {
-  assert(!"not implemented");
+  for (MachineInstr &MI : MBB.terminators()) {
+    assert(!"not implemented");
+  }
+  return false;
 }
 
 unsigned GenMInstrInfo::removeBranch(

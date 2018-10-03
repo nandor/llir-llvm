@@ -12,7 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "GenMAsmPrinter.h"
 #include "GenM.h"
+#include "GenMMCInstLower.h"
 #include "GenMInstrInfo.h"
 #include "GenMTargetMachine.h"
 #include "MCTargetDesc/GenMMCTargetStreamer.h"
@@ -33,57 +35,28 @@ using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
 
-namespace {
-
-class GenMAsmPrinter : public AsmPrinter {
-public:
-  explicit GenMAsmPrinter(
-      TargetMachine &TM,
-      std::unique_ptr<MCStreamer> Streamer)
-    : AsmPrinter(TM, std::move(Streamer))
-  {
-  }
-
-  StringRef getPassName() const override { return "GenM Assembly Printer"; }
-
-  void EmitFunctionBodyStart() override;
-  void EmitInstruction(const MachineInstr *MI) override;
-
-  static const char *getRegisterName(unsigned RegNo)
-  {
-    assert(!"not implemented");
-  }
-
-  bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
-                       unsigned AsmVariant, const char *ExtraCode,
-                       raw_ostream &O) override;
-  bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
-                             unsigned AsmVariant, const char *ExtraCode,
-                             raw_ostream &O) override;
-
-private:
-  GenMMCTargetStreamer &getTargetStreamer()
-  {
-    return static_cast<GenMMCTargetStreamer &>(
-        *OutStreamer->getTargetStreamer()
-    );
-  }
-};
-
-} // end of anonymous namespace
-
 void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 {
-  assert(!"not implemented");
+  LLVM_DEBUG(dbgs() << "EmitInstruction: " << *MI << '\n');
+
+  switch (MI->getOpcode()) {
+    case GenM::ARG_I32:
+    case GenM::ARG_I64:
+      break;
+    default: {
+      GenMMCInstLower MCInstLowering(OutContext, *this);
+      MCInst TmpInst;
+      MCInstLowering.Lower(MI, TmpInst);
+      EmitToStreamer(*OutStreamer, TmpInst);
+    }
+  }
 }
 
 void GenMAsmPrinter::EmitFunctionBodyStart()
 {
-  assert(!"not implemented");
+  AsmPrinter::EmitFunctionBodyStart();
 }
 
-/// PrintAsmOperand - Print out an operand for an inline asm expression.
-///
 bool GenMAsmPrinter::PrintAsmOperand(
     const MachineInstr *MI,
     unsigned OpNo,
@@ -91,7 +64,7 @@ bool GenMAsmPrinter::PrintAsmOperand(
     const char *ExtraCode,
     raw_ostream &O)
 {
-  assert(!"not implemented");
+  return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, AsmVariant, ExtraCode, O);
 }
 
 bool GenMAsmPrinter::PrintAsmMemoryOperand(
@@ -101,8 +74,14 @@ bool GenMAsmPrinter::PrintAsmMemoryOperand(
     const char *ExtraCode,
     raw_ostream &O)
 {
-  assert(!"not implemented");
+  return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, AsmVariant, ExtraCode, O);
 }
+
+GenMMCTargetStreamer &GenMAsmPrinter::getTargetStreamer()
+{
+  return static_cast<GenMMCTargetStreamer &>(*OutStreamer->getTargetStreamer());
+}
+
 
 // Force static initialization.
 extern "C" void LLVMInitializeGenMAsmPrinter()
