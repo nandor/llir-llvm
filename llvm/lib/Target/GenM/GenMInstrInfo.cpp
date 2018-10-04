@@ -33,20 +33,6 @@ GenMInstrInfo::GenMInstrInfo(GenMSubtarget &ST)
 {
 }
 
-unsigned GenMInstrInfo::isLoadFromStackSlot(
-    const MachineInstr &MI,
-    int &FrameIndex) const
-{
-  assert(!"not implemented");
-}
-
-unsigned GenMInstrInfo::isStoreToStackSlot(
-    const MachineInstr &MI,
-    int &FrameIndex) const
-{
-  assert(!"not implemented");
-}
-
 bool GenMInstrInfo::analyzeBranch(
     MachineBasicBlock &MBB,
     MachineBasicBlock *&TBB,
@@ -55,7 +41,11 @@ bool GenMInstrInfo::analyzeBranch(
     bool AllowModify) const
 {
   for (MachineInstr &MI : MBB.terminators()) {
-    assert(!"not implemented");
+    switch (MI.getOpcode()) {
+      default: {
+        return true;
+      }
+    }
   }
   return false;
 }

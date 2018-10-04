@@ -16,6 +16,7 @@ add_llvm_target(GenMCodeGen
   GenMMachineFunctionInfo.cpp
   GenMMCInstLower.cpp
   GenMRegisterInfo.cpp
+  GenMRegisterNumbering.cpp
   GenMSubtarget.cpp
   GenMTargetLowering.cpp
   GenMTargetMachine.cpp

@@ -53,7 +53,6 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
 void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
 {
   OutMI.setOpcode(MI->getOpcode());
-
   const MCInstrDesc &Desc = MI->getDesc();
   for (unsigned i = 0, e = MI->getNumOperands(); i != e; ++i) {
     const MachineOperand &MO = MI->getOperand(i);
@@ -64,10 +63,18 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         assert(!"not implemented");
       }
       case MachineOperand::MO_Register: {
-        assert(!"not implemented");
+        if (MO.isImplicit()) {
+          continue;
+        }
+
+        const auto &MF = *MI->getParent()->getParent();
+        const auto &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
+        MCOp = MCOperand::createReg(MFI.getGMReg(MO.getReg()));
+        break;
       }
       case MachineOperand::MO_Immediate: {
-        assert(!"not implemented");
+        MCOp = MCOperand::createImm(MO.getImm());
+        break;
       }
       case MachineOperand::MO_FPImmediate: {
         assert(!"not implemented");

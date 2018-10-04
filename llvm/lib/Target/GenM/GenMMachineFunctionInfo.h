@@ -20,8 +20,22 @@ namespace llvm {
 
 class GenMMachineFunctionInfo : public MachineFunctionInfo {
 public:
-  GenMMachineFunctionInfo();
   GenMMachineFunctionInfo(const MachineFunction &MF);
+
+  void addParam(MVT VT) { Params.push_back(VT); }
+  const std::vector<MVT> &getParams() const { return Params; }
+
+  void setGMReg(unsigned VReg, unsigned GMReg);
+  unsigned getGMReg(unsigned VReg) const;
+  bool hasGMReg(unsigned VReg) const;
+
+private:
+  /// Reference to the machine function.
+  const MachineFunction &MF;
+  /// List of parameters to a function.
+  std::vector<MVT> Params;
+  /// A mapping from CodeGen vreg index to WebAssembly register number.
+  mutable std::vector<unsigned> GMRegs;
 };
 
 }

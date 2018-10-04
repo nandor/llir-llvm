@@ -15,13 +15,19 @@
 #ifndef LLVM_LIB_TARGET_GENM_GENM_H
 #define LLVM_LIB_TARGET_GENM_GENM_H
 
-#include "MCTargetDesc/GenMMCTargetDesc.h"
+#include "llvm/PassRegistry.h"
+#include "llvm/Support/CodeGen.h"
 
 namespace llvm {
 class FunctionPass;
 class GenMTargetMachine;
 
+// GenM-Specific passes.
 FunctionPass *createGenMISelDag(GenMTargetMachine &TM);
+FunctionPass *createGenMRegisterNumbering();
+
+// PassRegistry initialization declarations.
+void initializeGenMRegisterNumberingPass(PassRegistry &);
 
 } // end namespace llvm;
 

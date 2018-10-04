@@ -24,19 +24,8 @@ struct GenMRegisterInfo : public GenMGenRegisterInfo {
   GenMRegisterInfo();
 
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
-  const uint32_t *getCallPreservedMask(
-      const MachineFunction &MF,
-      CallingConv::ID CC
-  ) const override;
 
   BitVector getReservedRegs(const MachineFunction &MF) const override;
-
-  const TargetRegisterClass *getPointerRegClass(
-      const MachineFunction &MF,
-      unsigned Kind
-  ) const override;
-
-  bool enableMultipleCopyHints() const override;
 
   void eliminateFrameIndex(
       MachineBasicBlock::iterator II,
@@ -47,8 +36,12 @@ struct GenMRegisterInfo : public GenMGenRegisterInfo {
 
   unsigned getFrameRegister(const MachineFunction &MF) const override;
 
-  bool canRealignStack(const MachineFunction &MF) const override;
+  const TargetRegisterClass *getPointerRegClass(
+      const MachineFunction &MF,
+      unsigned Kind = 0
+  ) const override;
 
+  const uint32_t *getNoPreservedMask() const override { return nullptr; }
 };
 
 } // end namespace llvm

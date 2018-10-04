@@ -17,6 +17,7 @@
 #include "GenMRegisterInfo.h"
 #include "GenMTargetMachine.h"
 #include "GenMTargetObjectFile.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/CodeGen/CallingConvLower.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
@@ -189,6 +190,7 @@ SDValue GenMTargetLowering::LowerFormalArguments(
         GenMISD::ARGUMENT, DL, In.VT,
         DAG.getTargetConstant(InVals.size(), DL, MVT::i32)
     ));
+    MFI->addParam(In.VT);
   }
 
   return Chain;

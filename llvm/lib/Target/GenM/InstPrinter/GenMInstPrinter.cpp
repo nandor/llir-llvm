@@ -29,16 +29,16 @@ using namespace llvm;
 
 void GenMInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
 {
-  assert(!"not implemented");
+  OS << "$" << RegNo;
 }
 
 void GenMInstPrinter::printInst(
     const MCInst *MI,
-    raw_ostream &O,
+    raw_ostream &OS,
     StringRef Annot,
     const MCSubtargetInfo &STI)
 {
-  assert(!"not implemented");
+  printInstruction(MI, STI, OS);
 }
 
 
@@ -48,5 +48,22 @@ void GenMInstPrinter::printOperand(
     const MCSubtargetInfo &STI,
     raw_ostream &OS)
 {
-  assert(!"not implemented");
+  const MCOperand &MO = MI->getOperand (opNum);
+
+  if (MO.isReg()) {
+    printRegName(OS, MO.getReg());
+    return;
+  }
+
+  if (MO.isImm()) {
+    OS << MO.getImm();
+    return;
+  }
+
+  if (MO.isExpr()) {
+    assert(!"not implemented");
+    return;
+  }
+
+  assert(false && "Unknown operand kind");
 }

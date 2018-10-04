@@ -13,6 +13,7 @@
 #include "GenMTargetMachine.h"
 #include "GenM.h"
 #include "GenMTargetObjectFile.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/Support/TargetRegistry.h"
 using namespace llvm;
@@ -30,10 +31,37 @@ public:
     return getTM<GenMTargetMachine>();
   }
 
+  FunctionPass *createTargetRegisterAllocator(bool) override
+  {
+    return nullptr;
+  }
+
   bool addInstSelector() override
   {
     addPass(createGenMISelDag(getGenMTargetMachine()));
     return false;
+  }
+
+  void addIRPasses() override {
+    TargetPassConfig::addIRPasses();
+  }
+
+  void addPostRegAlloc() override {
+    disablePass(&MachineCopyPropagationID);
+    disablePass(&PostRAMachineSinkingID);
+    disablePass(&PostRASchedulerID);
+    disablePass(&FuncletLayoutID);
+    disablePass(&StackMapLivenessID);
+    disablePass(&LiveDebugValuesID);
+    disablePass(&PatchableFunctionID);
+    disablePass(&ShrinkWrapID);
+
+    TargetPassConfig::addPostRegAlloc();
+  }
+
+  void addPreEmitPass() override {
+    TargetPassConfig::addPreEmitPass();
+    addPass(createGenMRegisterNumbering());
   }
 };
 
@@ -42,6 +70,10 @@ public:
 extern "C" void LLVMInitializeGenMTarget() {
   // Register the target.
   RegisterTargetMachine<GenMTargetMachine> X(getTheGenMTarget());
+
+  // Register backend passes.
+  auto &PR = *PassRegistry::getPassRegistry();
+  initializeGenMRegisterNumberingPass(PR);
 }
 
 GenMTargetMachine::GenMTargetMachine(
@@ -116,4 +148,9 @@ TargetLoweringObjectFile *GenMTargetMachine::getObjFileLowering() const
 bool GenMTargetMachine::isMachineVerifierClean() const
 {
   assert(!"not implemented");
+}
+
+bool GenMTargetMachine::usesPhysRegsForPEI() const
+{
+  return false;
 }

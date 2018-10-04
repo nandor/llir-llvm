@@ -13,6 +13,7 @@
 
 #include "GenMTargetMachine.h"
 #include "GenM.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
 #include "llvm/IR/Intrinsics.h"
