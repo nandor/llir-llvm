@@ -17,6 +17,7 @@
 #include "GenMMCInstLower.h"
 #include "GenMInstrInfo.h"
 #include "GenMTargetMachine.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "MCTargetDesc/GenMMCTargetStreamer.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineInstr.h"

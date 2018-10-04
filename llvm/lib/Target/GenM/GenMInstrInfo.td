@@ -70,7 +70,7 @@ let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
     < (outs I32:$res)
     , (ins i32imm_op:$imm)
     , [(set I32:$res, imm:$imm)]
-    , "i32.const\t$res, $imm"
+    , "i32.const \t$res, $imm"
     , 0x00
     >;
 
@@ -78,7 +78,7 @@ let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
     < (outs I64:$res)
     , (ins i64imm_op:$imm)
     , [(set I64:$res, imm:$imm)]
-    , "i64.const\t$res, $imm"
+    , "i64.const \t$res, $imm"
     , 0x01
     >;
 }

@@ -14,6 +14,7 @@
 #include "GenMRegisterInfo.h"
 #include "GenM.h"
 #include "GenMSubtarget.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/ADT/BitVector.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
@@ -41,13 +42,6 @@ GenMRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
   return CalleeSavedRegs;
 }
 
-const uint32_t *GenMRegisterInfo::getCallPreservedMask(
-    const MachineFunction &MF,
-    CallingConv::ID CC) const
-{
-  assert(!"not implemented");
-}
-
 BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
   BitVector Reserved(getNumRegs());
@@ -55,18 +49,6 @@ BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
     Reserved.set(Reg);
   }
   return Reserved;
-}
-
-const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(
-    const MachineFunction &MF,
-    unsigned Kind) const
-{
-  assert(!"not implemented");
-}
-
-bool GenMRegisterInfo::enableMultipleCopyHints() const
-{
-  assert(!"not implemented");
 }
 
 void GenMRegisterInfo::eliminateFrameIndex(
@@ -83,7 +65,9 @@ unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
   assert(!"not implemented");
 }
 
-bool GenMRegisterInfo::canRealignStack(const MachineFunction &MF) const
+const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(
+    const MachineFunction &MF,
+    unsigned Kind) const
 {
   assert(!"not implemented");
 }

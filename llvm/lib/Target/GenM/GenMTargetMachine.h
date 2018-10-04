@@ -35,6 +35,8 @@ public:
 
   bool isMachineVerifierClean() const override;
 
+  bool usesPhysRegsForPEI() const override;
+
 private:
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
   mutable StringMap<std::unique_ptr<GenMSubtarget>> SubtargetMap;

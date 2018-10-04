@@ -17,13 +17,15 @@ class RETURN<GenMRegClass vt>
     < (outs)
     , (ins vt:$val)
     , [(GenMreturn vt:$val)]
-    , "return  \t$val"
+    , "return \t$val"
     , 0x70
     >
 {
+  let isTerminator = 1;
+  let hasCtrlDep = 1;
+  let isBarrier = 1;
+  let isReturn = 1;
 }
 
-let isReturn = 1 in {
-  def RETURN_I32: RETURN<I32>;
-  def RETURN_I64: RETURN<I64>;
-}
+def RETURN_I32: RETURN<I32>;
+def RETURN_I64: RETURN<I64>;
