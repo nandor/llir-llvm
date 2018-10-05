@@ -13,7 +13,7 @@ define void @f0() {
 }
 
 ; CHECK-LABEL: f1:
-; CHECK: i32.const   $0, 0
+; CHECK: imm.i32   $0, 0
 ; CHECK-NEXT: return  $0
 ; CHECK: .size f1,
  define i32 @f1() {
@@ -21,7 +21,7 @@ define void @f0() {
 }
 
 ; CHECK-LABEL: f2:
-; CHECK: i32.const   $2, 0
+; CHECK: imm.i32   $2, 0
 ; CHECK-NEXT: return  $2
 ; CHECK: .size f2,
 define i32 @f2(i32 %p1, float %p2) {

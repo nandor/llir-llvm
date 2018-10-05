@@ -24,7 +24,7 @@ multiclass BinaryInt
     < (outs I32:$dst)
     , (ins I32:$lhs, I32:$rhs)
     , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
-    , !strconcat("i32.", !strconcat(name, " \t$dst, $lhs, $rhs"))
+    , !strconcat(!strconcat(name, ".i32"), " \t$dst, $lhs, $rhs")
     , i32Inst
     >
   {
@@ -35,7 +35,7 @@ multiclass BinaryInt
     < (outs I64:$dst)
     , (ins I64:$lhs, I64:$rhs)
     , [(set I64:$dst, (node I64:$lhs, I64:$rhs))]
-    , !strconcat("i64.", !strconcat(name, " \t$dst, $lhs, $rhs"))
+    , !strconcat(!strconcat(name, ".i64"), " \t$dst, $lhs, $rhs")
     , i64Inst
     >
   {
@@ -43,5 +43,18 @@ multiclass BinaryInt
   }
 }
 
-defm ADD : BinaryInt<add, "add", 0x90, 0x91>;
-defm AND : BinaryInt<and, "and", 0xA0, 0xA1>;
+multiclass CommutativeInt
+  < SDNode node
+  , string name
+  , bits<32> i32Inst
+  , bits<32> i64Inst
+  >
+{
+  let isCommutable = 1 in
+  defm : BinaryInt<node, name, i32Inst, i64Inst>;
+}
+
+defm ADD : BinaryInt<add, "add",  0x90, 0x91>;
+defm XOR : BinaryInt<xor, "xor",  0x92, 0x93>;
+defm OR  : BinaryInt<or,  "or",   0x94, 0x95>;
+defm AND : BinaryInt<and, "and",  0x96, 0x97>;
