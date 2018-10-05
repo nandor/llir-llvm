@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=genm -debug -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=genm -verify-machineinstrs < %s | FileCheck %s
 
 ; Test that basic functions assemble as expected.
 
@@ -36,6 +36,10 @@ define void @f3(i32 %p1, float %p2) {
 }
 
 ; CHECK-LABEL: f4:
+; CHECK: jf
+; CHECK: jmp
+; CHECK: return
+; CHECK: return
 ; CHECK: .size f4,
 define i32 @f4(i32 %x) {
 entry:

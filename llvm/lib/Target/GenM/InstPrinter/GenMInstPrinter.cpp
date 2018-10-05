@@ -61,7 +61,7 @@ void GenMInstPrinter::printOperand(
   }
 
   if (MO.isExpr()) {
-    assert(!"not implemented");
+    MO.getExpr()->print(OS, &MAI);
     return;
   }
 

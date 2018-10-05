@@ -37,7 +37,7 @@ class I
 class TerminatorInst
   < dag iops
   , list<dag> pattern
-  , string asmstr = ""
+  , string asmstr
   , bits<32> inst
   >
   : I<(outs), iops, pattern, asmstr, inst>
@@ -45,4 +45,15 @@ class TerminatorInst
   let isTerminator = 1;
   let hasCtrlDep = 1;
   let isBarrier = 1;
+}
+
+class BranchInst
+  < dag iops
+  , list<dag> pattern
+  , string asmstr
+  , bits<32> inst
+  >
+  : TerminatorInst<iops, pattern, asmstr, inst>
+{
+  let isBranch = 1;
 }

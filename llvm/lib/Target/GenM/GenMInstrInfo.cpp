@@ -14,6 +14,7 @@
 #include "GenMInstrInfo.h"
 #include "GenM.h"
 #include "GenMSubtarget.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"

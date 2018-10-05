@@ -59,6 +59,12 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
+  // Expand conditional branches and selects.
+  for (auto T : { MVT::i32, MVT::i64 }) {
+    for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
+      setOperationAction(Op, T, Expand);
+    }
+  }
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
