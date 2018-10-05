@@ -87,11 +87,11 @@ public:
   bool useLoadStackGuardNode() const override;
   void insertSSPDeclarations(Module &M) const override;
 
-  /// getSetCCResultType - Return the ISD::SETCC ValueType
   EVT getSetCCResultType(
       const DataLayout &DL,
       LLVMContext &Context,
-      EVT VT) const override;
+      EVT VT
+  ) const override;
 
   SDValue LowerFormalArguments(
       SDValue Chain,

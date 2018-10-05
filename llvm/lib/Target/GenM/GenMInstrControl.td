@@ -12,20 +12,33 @@
 ///
 //===----------------------------------------------------------------------===//
 
-class RETURN<GenMRegClass vt>
-  : I
-    < (outs)
-    , (ins vt:$val)
+class Return<GenMRegClass vt>
+  : TerminatorInst
+    < (ins vt:$val)
     , [(GenMreturn vt:$val)]
     , "return \t$val"
     , 0x70
     >
 {
-  let isTerminator = 1;
-  let hasCtrlDep = 1;
-  let isBarrier = 1;
   let isReturn = 1;
 }
 
-def RETURN_I32: RETURN<I32>;
-def RETURN_I64: RETURN<I64>;
+class ReturnVoid
+  : TerminatorInst<(ins), [(GenMreturn)], "return", 0x70>
+{
+}
+
+def RETURN_I32: Return<I32>;
+def RETURN_I64: Return<I64>;
+def RETURN_VOID: ReturnVoid;
+
+let isBranch = 1, isTerminator = 1, hasCtrlDep = 1 in {
+  def BR_IF
+    : I
+      < (outs)
+      , (ins bb_op:$dst, I32:$cond)
+      , [(brcond I32:$cond, bb:$dst)]
+      , "br_if   \t$dst, $cond"
+      , 0x0d
+      >;
+}
