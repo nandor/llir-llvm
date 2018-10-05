@@ -33,3 +33,16 @@ class I
   dag InOperandList  = iops;
   let Pattern        = pattern;
 }
+
+class TerminatorInst
+  < dag iops
+  , list<dag> pattern
+  , string asmstr = ""
+  , bits<32> inst
+  >
+  : I<(outs), iops, pattern, asmstr, inst>
+{
+  let isTerminator = 1;
+  let hasCtrlDep = 1;
+  let isBarrier = 1;
+}

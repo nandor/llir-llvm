@@ -25,8 +25,10 @@ Target &getTheGenMTarget();
 
 namespace GenM {
   enum OperandType {
+    // Basic block address.
+    OPERAND_BASIC_BLOCK = MCOI::OPERAND_FIRST_TARGET,
     // 32-bit integer immediate.
-    OPERAND_I32IMM = MCOI::OPERAND_FIRST_TARGET,
+    OPERAND_I32IMM,
     // 64-bit integer immediate.
     OPERAND_I64IMM,
   };

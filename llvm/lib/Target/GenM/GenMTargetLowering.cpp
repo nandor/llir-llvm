@@ -68,7 +68,7 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 
 bool GenMTargetLowering::useSoftFloat() const
 {
-  assert(!"not implemented");
+  return false;
 }
 
 MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
@@ -165,7 +165,11 @@ EVT GenMTargetLowering::getSetCCResultType(
     LLVMContext &Context,
     EVT VT) const
 {
-  assert(!"not implemented");
+  if (!VT.isVector()) {
+    return MVT::i32;
+  } else {
+    assert(!"not implemented");
+  }
 }
 
 SDValue GenMTargetLowering::LowerFormalArguments(

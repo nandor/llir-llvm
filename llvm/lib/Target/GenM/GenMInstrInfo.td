@@ -36,6 +36,8 @@ class GenMOperand<ValueType ty, string type> : Operand<ty>
   let OperandType = type;
 }
 
+
+def bb_op : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
 def i32imm_op : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op : GenMOperand<i64, "OPERAND_I64IMM">;
 
