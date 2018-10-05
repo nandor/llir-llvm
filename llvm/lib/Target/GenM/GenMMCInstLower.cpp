@@ -60,7 +60,9 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
     MCOperand MCOp;
     switch (MO.getType()) {
       case MachineOperand::MO_MachineBasicBlock: {
-        assert(!"not implemented");
+        const MCSymbol *Sym = MO.getMBB()->getSymbol();
+        MCOp = MCOperand::createExpr(MCSymbolRefExpr::create(Sym, Ctx));
+        break;
       }
       case MachineOperand::MO_Register: {
         if (MO.isImplicit()) {

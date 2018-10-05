@@ -20,7 +20,7 @@ multiclass BinaryInt
   , bits<32> i64Inst
   >
 {
-  def I32 : I
+  def _I32 : I
     < (outs I32:$dst)
     , (ins I32:$lhs, I32:$rhs)
     , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
@@ -31,7 +31,7 @@ multiclass BinaryInt
     let Defs = [ARGS];
   }
 
-  def I64 : I
+  def _I64 : I
     < (outs I64:$dst)
     , (ins I64:$lhs, I64:$rhs)
     , [(set I64:$dst, (node I64:$lhs, I64:$rhs))]
@@ -44,3 +44,4 @@ multiclass BinaryInt
 }
 
 defm ADD : BinaryInt<add, "add", 0x90, 0x91>;
+defm AND : BinaryInt<and, "and", 0xA0, 0xA1>;
