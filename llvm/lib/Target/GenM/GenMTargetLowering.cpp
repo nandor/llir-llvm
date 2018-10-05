@@ -57,6 +57,7 @@ GenMTargetLowering::GenMTargetLowering(
 
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
+
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   // Expand conditional branches and selects.
