@@ -22,14 +22,11 @@ subdirectories = InstPrinter MCTargetDesc TargetInfo
 type = TargetGroup
 name = GenM
 parent = Target
-has_asmparser = 1
 has_asmprinter = 1
-has_disassembler = 1
-has_jit = 1
 
 [component_1]
 type = Library
 name = GenMCodeGen
 parent = GenM
-required_libraries = AsmPrinter CodeGen Core MC SelectionDAG Support Target
+required_libraries = AsmPrinter CodeGen Core MC SelectionDAG Support Target GenMAsmPrinter GenMDesc GenMInfo
 add_to_library_groups = GenM

@@ -31,13 +31,13 @@ using namespace llvm;
 MCSymbol *
 GenMMCInstLower::GetGlobalAddressSymbol(const MachineOperand &MO) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 MCSymbol *
 GenMMCInstLower::GetExternalSymbolSymbol(const MachineOperand &MO) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 MCOperand GenMMCInstLower::LowerSymbolOperand(
@@ -46,7 +46,7 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
     bool IsFunc,
     bool IsGlob) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 
@@ -79,13 +79,13 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         break;
       }
       case MachineOperand::MO_FPImmediate: {
-        assert(!"not implemented");
+        llvm_unreachable("not implemented");
       }
       case MachineOperand::MO_GlobalAddress: {
-        assert(!"not implemented");
+        llvm_unreachable("not implemented");
       }
       case MachineOperand::MO_ExternalSymbol: {
-        assert(!"not implemented");
+        llvm_unreachable("not implemented");
       }
       default: {
         MI->print(errs());

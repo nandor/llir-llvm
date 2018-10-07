@@ -55,7 +55,7 @@ unsigned GenMInstrInfo::removeBranch(
     MachineBasicBlock &MBB,
     int *BytesRemoved) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned GenMInstrInfo::insertBranch(
@@ -66,13 +66,13 @@ unsigned GenMInstrInfo::insertBranch(
     const DebugLoc &DL,
     int *BytesAdded) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMInstrInfo::reverseBranchCondition(
     SmallVectorImpl<MachineOperand> &Cond) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMInstrInfo::copyPhysReg(
@@ -83,7 +83,7 @@ void GenMInstrInfo::copyPhysReg(
     unsigned SrcReg,
     bool KillSrc) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMInstrInfo::storeRegToStackSlot(
@@ -95,7 +95,7 @@ void GenMInstrInfo::storeRegToStackSlot(
     const TargetRegisterClass *RC,
     const TargetRegisterInfo *TRI) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMInstrInfo::loadRegFromStackSlot(
@@ -106,11 +106,11 @@ void GenMInstrInfo::loadRegFromStackSlot(
     const TargetRegisterClass *RC,
     const TargetRegisterInfo *TRI) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 // Lower pseudo instructions after register allocation.
 bool GenMInstrInfo::expandPostRAPseudo(MachineInstr &MI) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

@@ -9,10 +9,17 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cassert>
 #include <vector>
 using namespace llvm;
+
+static cl::opt<bool> EnableGenM(
+    "genm",
+    cl::desc("Generate GenM intermediate output"),
+    cl::init(true)
+);
 
 // Clients are responsible for avoid race conditions in registration.
 static Target *FirstTarget = nullptr;
@@ -29,8 +36,13 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
   // name, because it might be a backend that has no mapping to a target triple.
   const Target *TheTarget = nullptr;
   if (!ArchName.empty()) {
-    auto I = find_if(targets(),
-                     [&](const Target &T) { return ArchName == T.getName(); });
+    auto I = find_if(targets(), [&](const Target &T) {
+      if (EnableGenM) {
+        return T.ArchMatchFn(Triple::genm);
+      } else {
+        return T.getName() == ArchName;
+      }
+    });
 
     if (I == targets().end()) {
       Error = "error: invalid target '" + ArchName + "'.\n";
@@ -41,9 +53,14 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
 
     // Adjust the triple to match (if known), otherwise stick with the
     // given triple.
-    Triple::ArchType Type = Triple::getArchTypeForLLVMName(ArchName);
-    if (Type != Triple::UnknownArch)
-      TheTriple.setArch(Type);
+    if (EnableGenM) {
+      TheTriple.setArch(Triple::genm);
+    } else {
+      Triple::ArchType Type = Triple::getArchTypeForLLVMName(ArchName);
+      if (Type != Triple::UnknownArch) {
+        TheTriple.setArch(Type);
+      }
+    }
   } else {
     // Get the target specific parser.
     std::string TempError;
@@ -61,12 +78,18 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
 
 const Target *TargetRegistry::lookupTarget(const std::string &TT,
                                            std::string &Error) {
+
   // Provide special warning when no targets are initialized.
   if (targets().begin() == targets().end()) {
     Error = "Unable to find target for this triple (no targets are registered)";
     return nullptr;
   }
   Triple::ArchType Arch = Triple(TT).getArch();
+  // If GenM is enabled, replace the architecture.
+  if (EnableGenM) {
+    Arch = Triple::genm;
+  }
+
   auto ArchMatch = [&](const Target &T) { return T.ArchMatchFn(Arch); };
   auto I = find_if(targets(), ArchMatch);
 

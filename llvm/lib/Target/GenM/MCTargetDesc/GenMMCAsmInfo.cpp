@@ -28,7 +28,7 @@ const MCExpr* GenMELFMCAsmInfo::getExprForPersonalitySymbol(
     unsigned Encoding,
     MCStreamer &Streamer) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 const MCExpr* GenMELFMCAsmInfo::getExprForFDESymbol(
@@ -36,5 +36,5 @@ const MCExpr* GenMELFMCAsmInfo::getExprForFDESymbol(
     unsigned Encoding,
     MCStreamer &Streamer) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

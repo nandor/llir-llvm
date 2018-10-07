@@ -50,7 +50,7 @@ GenMFrameLowering::eliminateCallFramePseudoInstr(
     MachineBasicBlock &MBB,
     MachineBasicBlock::iterator I) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 
@@ -63,7 +63,7 @@ void GenMFrameLowering::emitEpilogue(
 
 bool GenMFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMFrameLowering::hasFP(const MachineFunction &MF) const
@@ -80,5 +80,5 @@ int GenMFrameLowering::getFrameIndexReference(
     int FI,
     unsigned &FrameReg) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

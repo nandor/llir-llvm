@@ -19,5 +19,5 @@
 type = Library
 name = GenMDesc
 parent = GenM
-required_libraries = MC Support
+required_libraries = MC Support GenMAsmPrinter GenMInfo
 add_to_library_groups = GenM

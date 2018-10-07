@@ -19,9 +19,32 @@
 #include <memory>
 
 namespace llvm {
+class MCAsmBackend;
+class MCCodeEmitter;
+class MCContext;
+class MCInstrInfo;
+class MCObjectTargetWriter;
+class MCRegisterInfo;
+class MCSubtargetInfo;
+class MCTargetOptions;
 class Target;
 
 Target &getTheGenMTarget();
+
+MCCodeEmitter *createGenMMCCodeEmitter(
+    const MCInstrInfo &MCII,
+    const MCRegisterInfo &MRI,
+    MCContext &Ctx
+);
+
+MCAsmBackend *createGenMAsmBackend(
+    const Target &T,
+    const MCSubtargetInfo &STI,
+    const MCRegisterInfo &MRI,
+    const MCTargetOptions &Options
+);
+
+std::unique_ptr<MCObjectTargetWriter> createGenMObjectWriter();
 
 namespace GenM {
   enum OperandType {
