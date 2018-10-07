@@ -57,12 +57,31 @@ void GenMRegisterInfo::eliminateFrameIndex(
     unsigned FIOperandNum,
     RegScavenger *RS) const
 {
-  llvm_unreachable("not implemented");
+  MachineInstr &MI = *II;
+  MachineBasicBlock &MBB = *MI.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetFrameLowering &TFL = *getFrameLowering(MF);
+
+  const int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+  unsigned FrameReg;
+  int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg);
+
+  if (!isInt<32>(Offset)) {
+    report_fatal_error("Not a 32-bit offset");
+  }
+
+  MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
+  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
 {
-  llvm_unreachable("not implemented");
+  if (getFrameLowering(MF)->hasFP(MF)) {
+    return GenM::FP;
+  } else {
+    return GenM::SP;
+  }
 }
 
 const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(

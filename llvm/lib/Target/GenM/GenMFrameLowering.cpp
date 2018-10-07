@@ -80,5 +80,10 @@ int GenMFrameLowering::getFrameIndexReference(
     int FI,
     unsigned &FrameReg) const
 {
-  llvm_unreachable("not implemented");
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetRegisterInfo *RI = MF.getSubtarget().getRegisterInfo();
+
+  int Offset = MFI.getObjectOffset(FI) + MF.getFrameInfo().getStackSize();
+  FrameReg = RI->getFrameRegister(MF);
+  return Offset;
 }

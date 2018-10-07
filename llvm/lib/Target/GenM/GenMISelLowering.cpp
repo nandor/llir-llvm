@@ -58,6 +58,8 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
 
+  setOperationAction(ISD::FrameIndex, MVT::i64, Custom);
+
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   // Expand conditional branches and selects.
@@ -70,7 +72,16 @@ GenMTargetLowering::GenMTargetLowering(
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
-  llvm_unreachable("not implemented");
+  switch (Op.getOpcode()) {
+    case ISD::FrameIndex: {
+      int FI = cast<FrameIndexSDNode>(Op)->getIndex();
+      return DAG.getTargetFrameIndex(FI, Op.getValueType());
+    }
+    default: {
+      llvm_unreachable("unimplemented operation lowering");
+      return SDValue();
+    }
+  }
 }
 
 bool GenMTargetLowering::useSoftFloat() const

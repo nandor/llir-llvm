@@ -53,7 +53,6 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
 void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
 {
   OutMI.setOpcode(MI->getOpcode());
-  const MCInstrDesc &Desc = MI->getDesc();
   for (unsigned i = 0, e = MI->getNumOperands(); i != e; ++i) {
     const MachineOperand &MO = MI->getOperand(i);
 
@@ -69,9 +68,14 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
           continue;
         }
 
-        const auto &MF = *MI->getParent()->getParent();
-        const auto &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
-        MCOp = MCOperand::createReg(MFI.getGMReg(MO.getReg()));
+        if (GenMRegisterInfo::isVirtualRegister(MO.getReg())) {
+          const auto &MF = *MI->getParent()->getParent();
+          const auto &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
+          MCOp = MCOperand::createReg(MFI.getGMReg(MO.getReg()));
+        } else {
+          MCOp = MCOperand::createReg(MO.getReg());
+        }
+
         break;
       }
       case MachineOperand::MO_Immediate: {

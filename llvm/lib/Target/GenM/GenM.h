@@ -21,13 +21,20 @@
 namespace llvm {
 class FunctionPass;
 class GenMTargetMachine;
+class MachineInstr;
 
 // GenM-Specific passes.
+FunctionPass *createGenMArgumentMove();
 FunctionPass *createGenMISelDag(GenMTargetMachine &TM);
 FunctionPass *createGenMRegisterNumbering();
 
 // PassRegistry initialization declarations.
+void initializeGenMArgumentMovePass(PassRegistry &);
 void initializeGenMRegisterNumberingPass(PassRegistry &);
+
+namespace GenM {
+bool isArgument(MachineInstr &MI);
+}
 
 } // end namespace llvm;
 

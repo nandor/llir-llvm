@@ -61,19 +61,6 @@ FunctionPass *llvm::createGenMRegisterNumbering() {
   return new GenMRegisterNumbering();
 }
 
-static bool isArgument(MachineInstr &MI)
-{
-  switch (MI.getOpcode()) {
-    case GenM::ARG_I32:
-    case GenM::ARG_I64: {
-      return true;
-    }
-    default: {
-      return false;
-    }
-  }
-}
-
 bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   LLVM_DEBUG(dbgs()
       << "********** Register Numbering **********\n"
@@ -87,7 +74,7 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   // variables. Assign the numbers for them first.
   MachineBasicBlock &EntryMBB = MF.front();
   for (MachineInstr &MI : EntryMBB) {
-    if (!isArgument(MI)) {
+    if (!GenM::isArgument(MI)) {
       break;
     }
     const unsigned Reg = MI.getOperand(0).getReg();

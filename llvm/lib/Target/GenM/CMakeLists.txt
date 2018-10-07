@@ -10,6 +10,8 @@ tablegen(LLVM GenMGenSubtargetInfo.inc -gen-subtarget)
 add_public_tablegen_target(GenMCommonTableGen)
 
 add_llvm_target(GenMCodeGen
+  GenM.cpp
+  GenMArgumentMove.cpp
   GenMAsmPrinter.cpp
   GenMFrameLowering.cpp
   GenMInstrInfo.cpp
