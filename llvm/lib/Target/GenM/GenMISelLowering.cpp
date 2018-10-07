@@ -233,8 +233,11 @@ SDValue GenMTargetLowering::LowerReturn(
     const SDLoc &DL,
     SelectionDAG &DAG) const
 {
-  if (CallConv != CallingConv::C || isVarArg || Outs.size() > 1) {
+  if (CallConv != CallingConv::C|| Outs.size() > 1) {
     Fail(DL, DAG, "calling convention not supported");
+  }
+  if (isVarArg) {
+    Fail(DL, DAG, "vararg calls not supported");
   }
 
   SmallVector<SDValue, 4> RetOps(1, Chain);
