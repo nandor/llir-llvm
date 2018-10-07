@@ -40,6 +40,8 @@ class GenMOperand<ValueType ty, string type> : Operand<ty>
 def bb_op : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
 def i32imm_op : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op : GenMOperand<i64, "OPERAND_I64IMM">;
+def i32off_op : GenMOperand<i32, "OPERAND_I32OFF">;
+
 
 //===----------------------------------------------------------------------===//
 // GenM Instruction Format Definitions.
@@ -89,5 +91,7 @@ let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
 // Additional sets of instructions.
 //===----------------------------------------------------------------------===//
 
+include "GenMInstrInfoMemory.td"
 include "GenMInstrControl.td"
 include "GenMInstrInteger.td"
+

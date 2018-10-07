@@ -54,6 +54,8 @@ namespace GenM {
     OPERAND_I32IMM,
     // 64-bit integer immediate.
     OPERAND_I64IMM,
+    // 32-bit integer offset.
+    OPERAND_I32OFF,
   };
 };
 
