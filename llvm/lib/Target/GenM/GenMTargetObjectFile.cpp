@@ -26,5 +26,5 @@ const MCExpr *GenMTargetObjectFile::getTTypeGlobalReference(
     MachineModuleInfo *MMI,
     MCStreamer &Streamer) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

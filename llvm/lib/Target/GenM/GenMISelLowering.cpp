@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "GenMTargetLowering.h"
+#include "GenMISelLowering.h"
 #include "GenMMachineFunctionInfo.h"
 #include "GenMRegisterInfo.h"
 #include "GenMTargetMachine.h"
@@ -70,7 +70,7 @@ GenMTargetLowering::GenMTargetLowering(
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetLowering::useSoftFloat() const
@@ -82,7 +82,7 @@ MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
     MachineInstr &MI,
     MachineBasicBlock *MBB) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
@@ -97,7 +97,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
 GenMTargetLowering::ConstraintType
 GenMTargetLowering::getConstraintType(StringRef Constraint) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 GenMTargetLowering::ConstraintWeight
@@ -105,7 +105,7 @@ GenMTargetLowering::getSingleConstraintMatchWeight(
     AsmOperandInfo &info,
     const char *constraint) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMTargetLowering::LowerAsmOperandForConstraint(
@@ -114,13 +114,13 @@ void GenMTargetLowering::LowerAsmOperandForConstraint(
     std::vector<SDValue> &Ops,
     SelectionDAG &DAG) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned
 GenMTargetLowering::getInlineAsmMemConstraint(StringRef ConstraintCode) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 std::pair<unsigned, const TargetRegisterClass *>
@@ -129,12 +129,12 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
     StringRef Constraint,
     MVT VT) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned GenMTargetLowering::getRegisterByName(
@@ -142,29 +142,29 @@ unsigned GenMTargetLowering::getRegisterByName(
     EVT VT,
     SelectionDAG &DAG) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned GenMTargetLowering::getExceptionPointerRegister(
     const Constant *PersonalityFn) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned GenMTargetLowering::getExceptionSelectorRegister(
     const Constant *PersonalityFn) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetLowering::useLoadStackGuardNode() const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMTargetLowering::insertSSPDeclarations(Module &M) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 EVT GenMTargetLowering::getSetCCResultType(
@@ -175,7 +175,7 @@ EVT GenMTargetLowering::getSetCCResultType(
   if (!VT.isVector()) {
     return MVT::i32;
   } else {
-    assert(!"not implemented");
+    llvm_unreachable("not implemented");
   }
 }
 
@@ -211,7 +211,7 @@ SDValue GenMTargetLowering::LowerCall(
     TargetLowering::CallLoweringInfo &CLI,
     SmallVectorImpl<SDValue> &InVals) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetLowering::CanLowerReturn(
@@ -245,18 +245,18 @@ SDValue GenMTargetLowering::LowerReturn(
 
 bool GenMTargetLowering::ShouldShrinkFPConstant(EVT VT) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetLowering::shouldInsertFencesForAtomic(const Instruction *I) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 GenMTargetLowering::AtomicExpansionKind
 GenMTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 void GenMTargetLowering::ReplaceNodeResults(
@@ -264,5 +264,5 @@ void GenMTargetLowering::ReplaceNodeResults(
     SmallVectorImpl<SDValue>& Results,
     SelectionDAG &DAG) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

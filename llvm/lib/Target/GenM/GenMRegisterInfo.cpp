@@ -57,17 +57,17 @@ void GenMRegisterInfo::eliminateFrameIndex(
     unsigned FIOperandNum,
     RegScavenger *RS) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(
     const MachineFunction &MF,
     unsigned Kind) const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }

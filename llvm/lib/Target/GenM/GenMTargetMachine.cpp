@@ -67,13 +67,25 @@ public:
 
 } // namespace
 
-extern "C" void LLVMInitializeGenMTarget() {
+extern "C" void LLVMInitializeGenMTarget()
+{
   // Register the target.
   RegisterTargetMachine<GenMTargetMachine> X(getTheGenMTarget());
 
   // Register backend passes.
   auto &PR = *PassRegistry::getPassRegistry();
   initializeGenMRegisterNumberingPass(PR);
+}
+
+static std::string computeDataLayout(
+    const Triple &TT,
+    StringRef CPU,
+    StringRef FS)
+{
+  // TODO(nand):
+  //  This should be computed based on the CPU, FS and triple.
+  //  This value is hardcoded for x86_64.
+  return "e-m:o-i64:64-f80:128-n8:16:32:64-S128";
 }
 
 GenMTargetMachine::GenMTargetMachine(
@@ -88,7 +100,7 @@ GenMTargetMachine::GenMTargetMachine(
     bool JIT)
   : LLVMTargetMachine(
         T,
-        "e-p:64:64",
+        computeDataLayout(TT, CPU, FS),
         TT,
         CPU,
         FS,
@@ -147,7 +159,7 @@ TargetLoweringObjectFile *GenMTargetMachine::getObjFileLowering() const
 
 bool GenMTargetMachine::isMachineVerifierClean() const
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 bool GenMTargetMachine::usesPhysRegsForPEI() const

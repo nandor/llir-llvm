@@ -55,8 +55,10 @@ extern "C" void LLVMInitializeGenMTargetMC()
   // Register the MC asm info.
   RegisterMCAsmInfoFn X(getTheGenMTarget(), createGenMMCAsmInfo);
 
+  // Register stuff for all targets and subtargets.
   for (Target *T : {&getTheGenMTarget()}) {
-    // Register the MCInstPrinter
     TargetRegistry::RegisterMCInstPrinter(*T, createGenMMCInstPrinter);
+    TargetRegistry::RegisterMCCodeEmitter(*T, createGenMMCCodeEmitter);
+    TargetRegistry::RegisterMCAsmBackend(*T, createGenMAsmBackend);
   }
 }

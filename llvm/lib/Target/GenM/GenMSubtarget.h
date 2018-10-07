@@ -16,7 +16,7 @@
 
 #include "GenMInstrInfo.h"
 #include "GenMFrameLowering.h"
-#include "GenMTargetLowering.h"
+#include "GenMISelLowering.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/CodeGen/TargetFrameLowering.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"

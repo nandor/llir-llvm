@@ -67,7 +67,7 @@ bool GenMDAGToDAGISel::SelectInlineAsmMemoryOperand(
     unsigned ConstraintID,
     std::vector<SDValue> &OutOps)
 {
-  assert(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 FunctionPass *llvm::createGenMISelDag(GenMTargetMachine &TM) {

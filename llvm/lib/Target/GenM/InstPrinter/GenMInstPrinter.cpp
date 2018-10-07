@@ -27,6 +27,14 @@ using namespace llvm;
 #define PRINT_ALIAS_INSTR
 #include "GenMGenAsmWriter.inc"
 
+GenMInstPrinter::GenMInstPrinter(
+    const MCAsmInfo &MAI,
+    const MCInstrInfo &MII,
+    const MCRegisterInfo &MRI)
+  : MCInstPrinter(MAI, MII, MRI)
+{
+}
+
 void GenMInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
 {
   OS << "$" << RegNo;

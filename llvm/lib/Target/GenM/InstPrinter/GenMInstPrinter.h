@@ -23,10 +23,8 @@ public:
   GenMInstPrinter(
       const MCAsmInfo &MAI,
       const MCInstrInfo &MII,
-      const MCRegisterInfo &MRI)
-    : MCInstPrinter(MAI, MII, MRI)
-  {
-  }
+      const MCRegisterInfo &MRI
+  );
 
   void printRegName(raw_ostream &OS, unsigned RegNo) const override;
 
