@@ -40,4 +40,6 @@ def ARGS : GenMReg<"%args">;
 
 def PC : GenMReg<"%pc">;
 def SP : GenMReg<"%sp">;
+def FP : GenMReg<"%sp">;
 def GPR : GenMRegClass<[i64], 64, (add PC, SP)>;
+

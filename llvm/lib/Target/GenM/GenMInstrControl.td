@@ -26,6 +26,7 @@ class Return<GenMRegClass vt>
 class ReturnVoid
   : TerminatorInst<(ins), [(GenMreturn)], "return", 0x70>
 {
+  let isReturn = 1;
 }
 
 def RETURN_I32: Return<I32>;

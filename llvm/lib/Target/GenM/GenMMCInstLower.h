@@ -31,7 +31,6 @@ class LLVM_LIBRARY_VISIBILITY GenMMCInstLower {
 public:
   GenMMCInstLower(MCContext &ctx, GenMAsmPrinter &printer)
       : Ctx(ctx)
-      , Printer(printer)
   {
   }
 
@@ -39,7 +38,6 @@ public:
 
 private:
   MCContext &Ctx;
-  GenMAsmPrinter &Printer;
 
   MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
 
