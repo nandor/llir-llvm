@@ -23,7 +23,8 @@ namespace GenMISD {
 enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
   ARGUMENT,
-  RETURN
+  RETURN,
+  CALL
 };
 } // end namespace GenMISD
 

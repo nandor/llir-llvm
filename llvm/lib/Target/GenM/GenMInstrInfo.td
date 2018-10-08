@@ -16,15 +16,28 @@
 // GenM-specific DAG Node Types.
 //===----------------------------------------------------------------------===//
 
-def SDT_GenMArgument : SDTypeProfile<1, 1, [SDTCisVT<1, i32>]>;
+def SDT_GenMArgument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
 def SDT_GenMReturn   : SDTypeProfile<0, -1, []>;
+def SDT_GenMCall     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
 
-def GenMargument : SDNode<"GenMISD::ARGUMENT", SDT_GenMArgument>;
-def GenMreturn   : SDNode<"GenMISD::RETURN",   SDT_GenMReturn, [SDNPHasChain]>;
+def GenMargument : SDNode
+  < "GenMISD::ARGUMENT"
+  , SDT_GenMArgument
+  >;
+def GenMreturn   : SDNode
+  < "GenMISD::RETURN"
+  , SDT_GenMReturn
+  , [SDNPHasChain]
+  >;
+def GenMCall     : SDNode
+  < "GenMISD::CALL"
+  , SDT_GenMCall
+  , [SDNPHasChain, SDNPVariadic]
+  >;
 
 //===----------------------------------------------------------------------===//
 // WebAssembly-specific Operands.
@@ -91,7 +104,8 @@ let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
 // Additional sets of instructions.
 //===----------------------------------------------------------------------===//
 
-include "GenMInstrInfoMemory.td"
+include "GenMInstrCall.td"
+include "GenMInstrMemory.td"
 include "GenMInstrControl.td"
 include "GenMInstrInteger.td"
 
