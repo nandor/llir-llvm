@@ -13,6 +13,7 @@
 
 #include "GenMInstPrinter.h"
 #include "GenM.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -46,7 +47,33 @@ void GenMInstPrinter::printInst(
     StringRef Annot,
     const MCSubtargetInfo &STI)
 {
-  printInstruction(MI, STI, OS);
+  switch (auto Op = MI->getOpcode()) {
+    case GenM::CALL_I32:
+    case GenM::CALL_I64: {
+      OS << '\t' << "call." << (Op == GenM::CALL_I32 ? "i32" : "i64");
+      OS << '\t';
+      printOperand(MI, 0, STI, OS); OS << ", ";
+      printOperand(MI, 1, STI, OS);
+      for (unsigned i = 2; i < MI->getNumOperands(); i += 1) {
+        OS << ", ";
+        printOperand(MI, i, STI, OS);
+      }
+      break;
+    }
+    case GenM::CALL_VOID: {
+      OS << '\t' << "call";
+      OS << '\t'; printOperand(MI, 0, STI, OS);
+      for (unsigned i = 1; i < MI->getNumOperands(); i += 1) {
+        OS << ", ";
+        printOperand(MI, i, STI, OS);
+      }
+      break;
+    }
+    default: {
+      printInstruction(MI, STI, OS);
+      break;
+    }
+  }
 }
 
 
@@ -56,7 +83,7 @@ void GenMInstPrinter::printOperand(
     const MCSubtargetInfo &STI,
     raw_ostream &OS)
 {
-  const MCOperand &MO = MI->getOperand (opNum);
+  const MCOperand &MO = MI->getOperand(opNum);
 
   if (MO.isReg()) {
     printRegName(OS, MO.getReg());
