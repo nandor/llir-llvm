@@ -102,6 +102,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::FIRST_NUMBER: return nullptr;
   case GenMISD::RETURN:       return "GenMISD::RETURN";
   case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
+  case GenMISD::CALL:         return "GenMISD::CALL";
   }
 }
 
@@ -222,7 +223,65 @@ SDValue GenMTargetLowering::LowerCall(
     TargetLowering::CallLoweringInfo &CLI,
     SmallVectorImpl<SDValue> &InVals) const
 {
-  llvm_unreachable("not implemented");
+  SelectionDAG &DAG = CLI.DAG;
+  SDLoc DL = CLI.DL;
+  MachineFunction &MF = DAG.getMachineFunction();
+
+  if (CLI.CallConv != CallingConv::C) {
+    Fail(DL, DAG, "calling convention not supported");
+  }
+  if (CLI.IsTailCall) {
+    Fail(DL, DAG, "tail call not supported");
+  }
+  if (CLI.Ins.size() > 1) {
+    Fail(DL, DAG, "more than 1 return value not supported");
+  }
+
+  // Collect all fixed arguments.
+  unsigned NumFixedArgs = 0;
+  for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
+    const ISD::OutputArg &Out = CLI.Outs[i];
+    NumFixedArgs += Out.IsFixed;
+  }
+
+  // Compute the operands and variable argument vector.
+  SmallVector<SDValue, 16> Ops;
+  Ops.push_back(CLI.Chain);
+  Ops.push_back(CLI.Callee);
+
+  // Collect all variable arguments.
+  if (CLI.IsVarArg) {
+    SDValue FINode;
+
+    SmallVector<CCValAssign, 16> ArgLocs;
+    CCState CCInfo(CLI.CallConv, true, MF, ArgLocs, *DAG.getContext());
+    auto FixedEnd = CLI.OutVals.begin() + NumFixedArgs;
+    for (SDValue Arg : make_range(FixedEnd, CLI.OutVals.end())) {
+      llvm_unreachable("Not implemented");
+    }
+
+    Ops.append(CLI.OutVals.begin(), FixedEnd);
+    Ops.push_back(FINode);
+  } else {
+    Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
+  }
+
+  // Collect the types of return values.
+  SmallVector<EVT, 8> InTys;
+  for (const auto &In : CLI.Ins) {
+    // TODO(nand): analyse argument types.
+    InTys.push_back(In.VT);
+  }
+  InTys.push_back(MVT::Other);
+
+  // Construct the call node.
+  SDValue Call = DAG.getNode(GenMISD::CALL, DL, DAG.getVTList(InTys), Ops);
+  if (CLI.Ins.empty()) {
+    return Call;
+  } else {
+    InVals.push_back(Call);
+    return Call.getValue(1);
+  }
 }
 
 bool GenMTargetLowering::CanLowerReturn(
@@ -244,7 +303,7 @@ SDValue GenMTargetLowering::LowerReturn(
     const SDLoc &DL,
     SelectionDAG &DAG) const
 {
-  if (CallConv != CallingConv::C|| Outs.size() > 1) {
+  if (CallConv != CallingConv::C || Outs.size() > 1) {
     Fail(DL, DAG, "calling convention not supported");
   }
   if (isVarArg) {
