@@ -70,8 +70,14 @@ void GenMRegisterInfo::eliminateFrameIndex(
     report_fatal_error("Not a 32-bit offset");
   }
 
-  MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
-  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
+  if (MI.mayLoad() || MI.mayStore()) {
+    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
+    MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
+  } else if (Offset == 0) {
+    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
+  } else {
+    report_fatal_error("not implemented");
+  }
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const

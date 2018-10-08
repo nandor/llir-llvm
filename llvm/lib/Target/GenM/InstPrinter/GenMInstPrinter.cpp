@@ -38,7 +38,15 @@ GenMInstPrinter::GenMInstPrinter(
 
 void GenMInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
 {
-  OS << "$" << RegNo;
+  switch (RegNo) {
+    case GenM::SP: OS << "$sp"; break;
+    case GenM::FP: OS << "$fp"; break;
+    default: {
+      assert(RegNo >= GenM::NUM_TARGET_REGS);
+      OS << "$" << (RegNo - GenM::NUM_TARGET_REGS);
+      break;
+    }
+  }
 }
 
 void GenMInstPrinter::printInst(
@@ -52,7 +60,8 @@ void GenMInstPrinter::printInst(
     case GenM::CALL_I64: {
       OS << '\t' << "call." << (Op == GenM::CALL_I32 ? "i32" : "i64");
       OS << '\t';
-      printOperand(MI, 0, STI, OS); OS << ", ";
+      printOperand(MI, 0, STI, OS);
+      OS << ", ";
       printOperand(MI, 1, STI, OS);
       for (unsigned i = 2; i < MI->getNumOperands(); i += 1) {
         OS << ", ";
@@ -62,7 +71,8 @@ void GenMInstPrinter::printInst(
     }
     case GenM::CALL_VOID: {
       OS << '\t' << "call";
-      OS << '\t'; printOperand(MI, 0, STI, OS);
+      OS << '\t';
+      printOperand(MI, 0, STI, OS);
       for (unsigned i = 1; i < MI->getNumOperands(); i += 1) {
         OS << ", ";
         printOperand(MI, i, STI, OS);

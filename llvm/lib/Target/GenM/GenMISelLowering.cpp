@@ -188,6 +188,10 @@ SDValue GenMTargetLowering::LowerCall(
   SelectionDAG &DAG = CLI.DAG;
   SDLoc DL = CLI.DL;
   MachineFunction &MF = DAG.getMachineFunction();
+  const DataLayout &Layout = MF.getDataLayout();
+  MVT PtrVT = getPointerTy(MF.getDataLayout());
+  SDValue Chain = CLI.Chain;
+  SDValue Callee = CLI.Callee;
 
   if (CLI.CallConv != CallingConv::C) {
     Fail(DL, DAG, "calling convention not supported");
@@ -200,6 +204,9 @@ SDValue GenMTargetLowering::LowerCall(
     Fail(DL, DAG, "more than 1 return value not supported");
   }
 
+  // Argument to the call node.
+  SmallVector<SDValue, 16> Ops;
+
   // Collect all fixed arguments.
   unsigned NumFixedArgs = 0;
   for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
@@ -207,25 +214,72 @@ SDValue GenMTargetLowering::LowerCall(
     NumFixedArgs += Out.IsFixed;
   }
 
-  // Compute the operands and variable argument vector.
-  SmallVector<SDValue, 16> Ops;
-  Ops.push_back(CLI.Chain);
-  Ops.push_back(CLI.Callee);
-
   // Collect all variable arguments.
   if (CLI.IsVarArg) {
-    SDValue FINode;
+    auto FixedEnd = CLI.OutVals.begin() + NumFixedArgs;
 
+    // Compute the number of bytes required on the stack to hold args.
     SmallVector<CCValAssign, 16> ArgLocs;
     CCState CCInfo(CLI.CallConv, true, MF, ArgLocs, *DAG.getContext());
-    auto FixedEnd = CLI.OutVals.begin() + NumFixedArgs;
     for (SDValue Arg : make_range(FixedEnd, CLI.OutVals.end())) {
-      llvm_unreachable("Not implemented");
+      EVT VT = Arg.getValueType();
+      Type *Ty = VT.getTypeForEVT(*DAG.getContext());
+      unsigned Offset = CCInfo.AllocateStack(
+          Layout.getTypeAllocSize(Ty),
+          Layout.getABITypeAlignment(Ty)
+      );
+      CCInfo.addLoc(CCValAssign::getMem(
+          ArgLocs.size(),
+          VT.getSimpleVT(),
+          Offset,
+          VT.getSimpleVT(),
+          CCValAssign::Full
+      ));
     }
 
+    // Allocate an object on the stack to hold args.
+    SDValue FINode;
+    SmallVector<SDValue, 8> Chains;
+    if (unsigned NumBytes = CCInfo.getAlignedCallFrameSize()) {
+      int FI = MF.getFrameInfo().CreateStackObject(
+          NumBytes,
+          Layout.getStackAlignment(),
+          false
+      );
+      unsigned I = 0;
+      for (SDValue Arg : make_range(FixedEnd, CLI.OutVals.end())) {
+        FINode = DAG.getFrameIndex(FI, getPointerTy(Layout));
+
+        unsigned Offset = ArgLocs[I++].getLocMemOffset();
+        SDValue Add = DAG.getNode(
+            ISD::ADD,
+            DL,
+            PtrVT,
+            FINode,
+            DAG.getConstant(Offset, DL, PtrVT)
+        );
+        Chains.push_back(DAG.getStore(
+            Chain,
+            DL,
+            Arg,
+            Add,
+            MachinePointerInfo::getFixedStack(MF, FI, Offset), 0
+        ));
+      }
+      if (!Chains.empty()) {
+        Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, Chains);
+      }
+    } else {
+      FINode = DAG.getIntPtrConstant(0, DL);
+    }
+
+    Ops.push_back(Chain);
+    Ops.push_back(Callee);
     Ops.append(CLI.OutVals.begin(), FixedEnd);
     Ops.push_back(FINode);
   } else {
+    Ops.push_back(Chain);
+    Ops.push_back(Callee);
     Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
   }
 

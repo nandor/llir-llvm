@@ -16,6 +16,7 @@
 #include "GenMMCInstLower.h"
 #include "GenMAsmPrinter.h"
 #include "GenMMachineFunctionInfo.h"
+#include "MCTargetDesc/GenMMCTargetDesc.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/IR/Constants.h"
@@ -79,7 +80,9 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         if (GenMRegisterInfo::isVirtualRegister(MO.getReg())) {
           const auto &MF = *MI->getParent()->getParent();
           const auto &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
-          MCOp = MCOperand::createReg(MFI.getGMReg(MO.getReg()));
+          MCOp = MCOperand::createReg(
+              GenM::NUM_TARGET_REGS + MFI.getGMReg(MO.getReg())
+          );
         } else {
           MCOp = MCOperand::createReg(MO.getReg());
         }

@@ -51,7 +51,7 @@ multiclass CommutativeInt
   >
 {
   let isCommutable = 1 in
-  defm : BinaryInt<node, name, i32Inst, i64Inst>;
+  defm "" : BinaryInt<node, name, i32Inst, i64Inst>;
 }
 
 multiclass TernaryInt
