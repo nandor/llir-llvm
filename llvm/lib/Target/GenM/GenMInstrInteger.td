@@ -91,11 +91,20 @@ defm AND : CommutativeInt<and, "and",  0x96, 0x97>;
 
 defm SELECT : TernaryInt<select, "select", 0xA0, 0xA1>;
 
-def : Pat<(select (i32 (setne I32:$cond, 0)), I32:$lhs, I32:$rhs),
-          (SELECT_I32 I32:$cond, I32:$lhs, I32:$rhs)>;
-def : Pat<(select (i32 (setne I32:$cond, 0)), I64:$lhs, I64:$rhs),
-          (SELECT_I64 I32:$cond, I64:$lhs, I64:$rhs)>;
-def : Pat<(select (i32 (seteq I32:$cond, 0)), I32:$lhs, I32:$rhs),
-          (SELECT_I32 I32:$cond, I32:$rhs, I32:$lhs)>;
-def : Pat<(select (i32 (seteq I32:$cond, 0)), I64:$lhs, I64:$rhs),
-          (SELECT_I64 I32:$cond, I64:$rhs, I64:$lhs)>;
+def : Pat
+  < (select (i32 (setne I32:$cond, 0)), I32:$lhs, I32:$rhs)
+  , (SELECT_I32 I32:$cond, I32:$lhs, I32:$rhs)
+  >;
+def : Pat
+  < (select (i32 (setne I32:$cond, 0)), I64:$lhs, I64:$rhs)
+  , (SELECT_I64 I32:$cond, I64:$lhs, I64:$rhs)
+  >;
+def : Pat
+  < (select (i32 (seteq I32:$cond, 0)), I32:$lhs, I32:$rhs)
+  , (SELECT_I32 I32:$cond, I32:$rhs, I32:$lhs)
+  >;
+def : Pat
+  < (select (i32 (seteq I32:$cond, 0)), I64:$lhs, I64:$rhs)
+  , (SELECT_I64 I32:$cond, I64:$rhs, I64:$lhs)
+  >;
+

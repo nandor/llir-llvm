@@ -60,7 +60,6 @@ void GenMRegisterInfo::eliminateFrameIndex(
   MachineInstr &MI = *II;
   MachineBasicBlock &MBB = *MI.getParent();
   MachineFunction &MF = *MBB.getParent();
-  const MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetFrameLowering &TFL = *getFrameLowering(MF);
 
   const int FrameIndex = MI.getOperand(FIOperandNum).getIndex();

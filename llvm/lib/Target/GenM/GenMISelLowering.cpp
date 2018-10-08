@@ -59,6 +59,8 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
 
   setOperationAction(ISD::FrameIndex, MVT::i64, Custom);
+  setOperationAction(ISD::GlobalAddress, MVT::i64, Custom);
+  setOperationAction(ISD::ExternalSymbol, MVT::i64, Custom);
 
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
@@ -72,10 +74,28 @@ GenMTargetLowering::GenMTargetLowering(
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
+  SDLoc DL(Op);
+
   switch (Op.getOpcode()) {
     case ISD::FrameIndex: {
-      int FI = cast<FrameIndexSDNode>(Op)->getIndex();
-      return DAG.getTargetFrameIndex(FI, Op.getValueType());
+      const auto *FI = cast<FrameIndexSDNode>(Op);
+      return DAG.getTargetFrameIndex(FI->getIndex(), Op.getValueType());
+    }
+    case ISD::GlobalAddress: {
+      const auto *GA = cast<GlobalAddressSDNode>(Op);
+      if (GA->getAddressSpace() != 0) {
+        Fail(DL, DAG, "GenM only expects the 0 address space");
+      }
+      if (GA->getTargetFlags() != 0) {
+        Fail(DL, DAG, "Unexpected target flags on generic GlobalAddressSDNode");
+      }
+
+      return  DAG.getTargetGlobalAddress(
+          GA->getGlobal(),
+          DL,
+          Op.getValueType(),
+          GA->getOffset()
+      );
     }
     default: {
       llvm_unreachable("unimplemented operation lowering");
@@ -103,36 +123,8 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::RETURN:       return "GenMISD::RETURN";
   case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
   case GenMISD::CALL:         return "GenMISD::CALL";
+  case GenMISD::VOID:         return "GenMISD::VOID";
   }
-}
-
-GenMTargetLowering::ConstraintType
-GenMTargetLowering::getConstraintType(StringRef Constraint) const
-{
-  llvm_unreachable("not implemented");
-}
-
-GenMTargetLowering::ConstraintWeight
-GenMTargetLowering::getSingleConstraintMatchWeight(
-    AsmOperandInfo &info,
-    const char *constraint) const
-{
-  llvm_unreachable("not implemented");
-}
-
-void GenMTargetLowering::LowerAsmOperandForConstraint(
-    SDValue Op,
-    std::string &Constraint,
-    std::vector<SDValue> &Ops,
-    SelectionDAG &DAG) const
-{
-  llvm_unreachable("not implemented");
-}
-
-unsigned
-GenMTargetLowering::getInlineAsmMemConstraint(StringRef ConstraintCode) const
-{
-  llvm_unreachable("not implemented");
 }
 
 std::pair<unsigned, const TargetRegisterClass *>
@@ -145,36 +137,6 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
 }
 
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
-{
-  llvm_unreachable("not implemented");
-}
-
-unsigned GenMTargetLowering::getRegisterByName(
-    const char* RegName,
-    EVT VT,
-    SelectionDAG &DAG) const
-{
-  llvm_unreachable("not implemented");
-}
-
-unsigned GenMTargetLowering::getExceptionPointerRegister(
-    const Constant *PersonalityFn) const
-{
-  llvm_unreachable("not implemented");
-}
-
-unsigned GenMTargetLowering::getExceptionSelectorRegister(
-    const Constant *PersonalityFn) const
-{
-  llvm_unreachable("not implemented");
-}
-
-bool GenMTargetLowering::useLoadStackGuardNode() const
-{
-  llvm_unreachable("not implemented");
-}
-
-void GenMTargetLowering::insertSSPDeclarations(Module &M) const
 {
   llvm_unreachable("not implemented");
 }
@@ -231,7 +193,8 @@ SDValue GenMTargetLowering::LowerCall(
     Fail(DL, DAG, "calling convention not supported");
   }
   if (CLI.IsTailCall) {
-    Fail(DL, DAG, "tail call not supported");
+    // TODO(nand): enable tail calls
+    CLI.IsTailCall = false;
   }
   if (CLI.Ins.size() > 1) {
     Fail(DL, DAG, "more than 1 return value not supported");
@@ -275,10 +238,15 @@ SDValue GenMTargetLowering::LowerCall(
   InTys.push_back(MVT::Other);
 
   // Construct the call node.
-  SDValue Call = DAG.getNode(GenMISD::CALL, DL, DAG.getVTList(InTys), Ops);
   if (CLI.Ins.empty()) {
-    return Call;
+    return DAG.getNode(GenMISD::VOID, DL, DAG.getVTList(InTys), Ops);
   } else {
+    SDValue Call = DAG.getNode(
+        GenMISD::CALL,
+        DL,
+        DAG.getVTList(InTys),
+        Ops
+    );
     InVals.push_back(Call);
     return Call.getValue(1);
   }
@@ -316,26 +284,9 @@ SDValue GenMTargetLowering::LowerReturn(
   return Chain;
 }
 
-bool GenMTargetLowering::ShouldShrinkFPConstant(EVT VT) const
-{
-  llvm_unreachable("not implemented");
-}
-
-bool GenMTargetLowering::shouldInsertFencesForAtomic(const Instruction *I) const
-{
-  llvm_unreachable("not implemented");
-}
-
 GenMTargetLowering::AtomicExpansionKind
 GenMTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const
 {
   llvm_unreachable("not implemented");
 }
 
-void GenMTargetLowering::ReplaceNodeResults(
-    SDNode *N,
-    SmallVectorImpl<SDValue>& Results,
-    SelectionDAG &DAG) const
-{
-  llvm_unreachable("not implemented");
-}

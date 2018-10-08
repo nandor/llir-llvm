@@ -87,10 +87,6 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   const unsigned NumVRegs = MF.getRegInfo().getNumVirtRegs();
   for (unsigned VRegIdx = 0; VRegIdx < NumVRegs; ++VRegIdx) {
     const unsigned VReg = TargetRegisterInfo::index2VirtReg(VRegIdx);
-    // Skip unused registers.
-    if (MRI.use_empty(VReg)) {
-      continue;
-    }
     // Map registers.
     if (!MFI.hasGMReg(VReg)) {
       MFI.setGMReg(VReg, CurReg++);

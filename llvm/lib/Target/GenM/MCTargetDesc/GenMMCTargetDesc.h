@@ -56,6 +56,8 @@ namespace GenM {
     OPERAND_I64IMM,
     // 32-bit integer offset.
     OPERAND_I32OFF,
+    // 32-bit function identifier.
+    OPERAND_I64FUNC,
   };
 };
 
