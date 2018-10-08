@@ -86,7 +86,13 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         llvm_unreachable("not implemented");
       }
       case MachineOperand::MO_GlobalAddress: {
-        llvm_unreachable("not implemented");
+        MCOp = LowerSymbolOperand(
+            GetGlobalAddressSymbol(MO),
+            MO.getOffset(),
+            MO.getGlobal()->getValueType()->isFunctionTy(),
+            false
+        );
+        break;
       }
       case MachineOperand::MO_ExternalSymbol: {
         llvm_unreachable("not implemented");

@@ -16,9 +16,11 @@
 // GenM-specific DAG Node Types.
 //===----------------------------------------------------------------------===//
 
-def SDT_GenMArgument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
-def SDT_GenMReturn   : SDTypeProfile<0, -1, []>;
-def SDT_GenMCall     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+def SDT_GenMargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
+def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
+def SDT_GenMcall     : SDTypeProfile<1, -1, [SDTCisPtrTy<0>]>;
+def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+
 
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
@@ -26,16 +28,21 @@ def SDT_GenMCall     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 
 def GenMargument : SDNode
   < "GenMISD::ARGUMENT"
-  , SDT_GenMArgument
+  , SDT_GenMargument
   >;
-def GenMreturn   : SDNode
+def GenMreturn : SDNode
   < "GenMISD::RETURN"
-  , SDT_GenMReturn
+  , SDT_GenMreturn
   , [SDNPHasChain]
   >;
-def GenMCall     : SDNode
+def GenMcall : SDNode
   < "GenMISD::CALL"
-  , SDT_GenMCall
+  , SDT_GenMcall
+  , [SDNPHasChain, SDNPVariadic]
+  >;
+def GenMvoid : SDNode
+  < "GenMISD::VOID"
+  , SDT_GenMvoid
   , [SDNPHasChain, SDNPVariadic]
   >;
 
@@ -50,11 +57,11 @@ class GenMOperand<ValueType ty, string type> : Operand<ty>
 }
 
 
-def bb_op : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
-def i32imm_op : GenMOperand<i32, "OPERAND_I32IMM">;
-def i64imm_op : GenMOperand<i64, "OPERAND_I64IMM">;
-def i32off_op : GenMOperand<i32, "OPERAND_I32OFF">;
-
+def bb_op      : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
+def i32imm_op  : GenMOperand<i32, "OPERAND_I32IMM">;
+def i64imm_op  : GenMOperand<i64, "OPERAND_I64IMM">;
+def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;
+def i64func_op : GenMOperand<i64, "OPERAND_I64FUNC">;
 
 //===----------------------------------------------------------------------===//
 // GenM Instruction Format Definitions.

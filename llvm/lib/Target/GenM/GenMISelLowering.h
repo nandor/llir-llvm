@@ -24,7 +24,8 @@ enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
   ARGUMENT,
   RETURN,
-  CALL
+  CALL,
+  VOID,
 };
 } // end namespace GenMISD
 
@@ -44,21 +45,6 @@ public:
 
   const char *getTargetNodeName(unsigned Opcode) const override;
 
-  ConstraintType getConstraintType(StringRef Constraint) const override;
-  ConstraintWeight getSingleConstraintMatchWeight(
-      AsmOperandInfo &info,
-      const char *constraint
-  ) const override;
-
-  void LowerAsmOperandForConstraint(
-      SDValue Op,
-      std::string &Constraint,
-      std::vector<SDValue> &Ops,
-      SelectionDAG &DAG
-  ) const override;
-
-  unsigned getInlineAsmMemConstraint(StringRef ConstraintCode) const override;
-
   std::pair<unsigned, const TargetRegisterClass *> getRegForInlineAsmConstraint(
       const TargetRegisterInfo *TRI,
       StringRef Constraint,
@@ -67,26 +53,10 @@ public:
 
   bool isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const override;
 
-  MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override {
+  MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override
+  {
     return MVT::i32;
   }
-
-  unsigned getRegisterByName(const char* RegName, EVT VT,
-                             SelectionDAG &DAG) const override;
-
-  /// If a physical register, this returns the register that receives the
-  /// exception address on entry to an EH pad.
-  unsigned
-  getExceptionPointerRegister(const Constant *PersonalityFn) const override;
-
-  /// If a physical register, this returns the register that receives the
-  /// exception typeid on entry to a landing pad.
-  unsigned
-  getExceptionSelectorRegister(const Constant *PersonalityFn) const override;
-
-  /// Override to support customized stack guard loading.
-  bool useLoadStackGuardNode() const override;
-  void insertSSPDeclarations(Module &M) const override;
 
   EVT getSetCCResultType(
       const DataLayout &DL,
@@ -126,18 +96,8 @@ public:
       const SDLoc &dl, SelectionDAG &DAG
   ) const override;
 
-  bool ShouldShrinkFPConstant(EVT VT) const override;
-
-  bool shouldInsertFencesForAtomic(const Instruction *I) const override;
-
   AtomicExpansionKind shouldExpandAtomicRMWInIR(
       AtomicRMWInst *AI
-  ) const override;
-
-  void ReplaceNodeResults(
-      SDNode *N,
-      SmallVectorImpl<SDValue>& Results,
-      SelectionDAG &DAG
   ) const override;
 
 private:

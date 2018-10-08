@@ -59,3 +59,16 @@ class BranchInst
   let isBranch = 1;
   let Defs = [ARGS];
 }
+
+class CallInst
+  < dag oops
+  , dag iops
+  , list<dag> pattern
+  , string asmstr
+  , bits<32> inst
+  >
+  : I<oops, iops, pattern, asmstr, inst>
+{
+  let isCall = 1;
+  let Defs = [ARGS];
+}
