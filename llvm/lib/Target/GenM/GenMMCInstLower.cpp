@@ -31,13 +31,13 @@ using namespace llvm;
 MCSymbol *
 GenMMCInstLower::GetGlobalAddressSymbol(const MachineOperand &MO) const
 {
-  llvm_unreachable("not implemented");
+  return Printer.getSymbol(MO.getGlobal());
 }
 
 MCSymbol *
 GenMMCInstLower::GetExternalSymbolSymbol(const MachineOperand &MO) const
 {
-  llvm_unreachable("not implemented");
+  return Printer.GetExternalSymbolSymbol(MO.getSymbolName());
 }
 
 MCOperand GenMMCInstLower::LowerSymbolOperand(
@@ -46,7 +46,15 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
     bool IsFunc,
     bool IsGlob) const
 {
-  llvm_unreachable("not implemented");
+  MCSymbolRefExpr::VariantKind VK =
+      IsFunc ? MCSymbolRefExpr::VK_WebAssembly_FUNCTION :
+      IsGlob ? MCSymbolRefExpr::VK_WebAssembly_GLOBAL :
+      MCSymbolRefExpr::VK_None;
+
+  if (Offset != 0) {
+    report_fatal_error("Not supported");
+  }
+  return MCOperand::createExpr(MCSymbolRefExpr::create(Sym, VK, Ctx));
 }
 
 
