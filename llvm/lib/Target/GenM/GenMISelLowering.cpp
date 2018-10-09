@@ -183,7 +183,6 @@ SDValue GenMTargetLowering::LowerFormalArguments(
 
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
-  MF.getRegInfo().addLiveIn(GenM::ARGS);
 
   for (const auto &In : Ins) {
     InVals.push_back(DAG.getNode(

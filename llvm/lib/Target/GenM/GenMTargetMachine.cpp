@@ -40,7 +40,6 @@ public:
   {
     TargetPassConfig::addInstSelector();
     addPass(createGenMISelDag(getGenMTargetMachine()));
-    addPass(createGenMArgumentMove());
     return false;
   }
 
@@ -76,7 +75,6 @@ extern "C" void LLVMInitializeGenMTarget()
 
   // Register backend passes.
   auto &PR = *PassRegistry::getPassRegistry();
-  initializeGenMArgumentMovePass(PR);
   initializeGenMRegisterNumberingPass(PR);
 }
 

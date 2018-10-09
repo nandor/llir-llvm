@@ -29,7 +29,6 @@ class GenMSt
     >
 {
   let mayStore = 1;
-  let Defs = [ARGS];
 }
 
 def ST_1_I32 : GenMSt<I32, truncstorei8,  "1.i32", 0x30>;
@@ -53,7 +52,6 @@ class GenMLd<GenMRegClass R, PatFrag node, string Name, int Opcode>
     >
 {
   let mayLoad = 1;
-  let Defs = [ARGS];
 }
 
 def LD_1_I32 : GenMLd<I32, sextloadi8,  "1.i32", 0x40>;

@@ -36,8 +36,6 @@ def I64 : GenMRegClass<[i64], 64, (add I64_0)>;
 // Special registers.
 //===----------------------------------------------------------------------===//
 
-def ARGS : GenMReg<"%args">;
-
 def PC : GenMReg<"%pc">;
 def SP : GenMReg<"%sp">;
 def FP : GenMReg<"%sp">;
