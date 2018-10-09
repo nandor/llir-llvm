@@ -57,12 +57,17 @@ GenMTargetLowering::GenMTargetLowering(
 
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
+  computeRegisterProperties(Subtarget->getRegisterInfo());
 
   setOperationAction(ISD::FrameIndex, MVT::i64, Custom);
   setOperationAction(ISD::GlobalAddress, MVT::i64, Custom);
   setOperationAction(ISD::ExternalSymbol, MVT::i64, Custom);
 
-  computeRegisterProperties(Subtarget->getRegisterInfo());
+  // Handle variable arguments.
+  setOperationAction(ISD::VASTART, MVT::Other, Custom);
+  setOperationAction(ISD::VAARG, MVT::Other, Expand);
+  setOperationAction(ISD::VACOPY, MVT::Other, Expand);
+  setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
   for (auto T : { MVT::i32, MVT::i64 }) {
@@ -70,43 +75,84 @@ GenMTargetLowering::GenMTargetLowering(
       setOperationAction(Op, T, Expand);
     }
   }
-
-  for (auto T : {MVT::i1, MVT::i8, MVT::i16, MVT::i32}) {
-    setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
-  }
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
-  SDLoc DL(Op);
-
   switch (Op.getOpcode()) {
-    case ISD::FrameIndex: {
-      const auto *FI = cast<FrameIndexSDNode>(Op);
-      return DAG.getTargetFrameIndex(FI->getIndex(), Op.getValueType());
-    }
-    case ISD::GlobalAddress: {
-      const auto *GA = cast<GlobalAddressSDNode>(Op);
-      if (GA->getAddressSpace() != 0) {
-        Fail(DL, DAG, "GenM only expects the 0 address space");
-      }
-      if (GA->getTargetFlags() != 0) {
-        Fail(DL, DAG, "Unexpected target flags on generic GlobalAddressSDNode");
-      }
-
-      return DAG.getTargetGlobalAddress(
-          GA->getGlobal(),
-          DL,
-          Op.getValueType(),
-          GA->getOffset()
-      );
-    }
+    case ISD::FrameIndex: return LowerFrameIndex(Op, DAG);
+    case ISD::GlobalAddress: return LowerGlobalAddress(Op, DAG);
+    case ISD::ExternalSymbol: return LowerExternalSymbol(Op, DAG);
+    case ISD::VASTART: return LowerVASTART(Op, DAG);
     default: {
+      Op.dump();
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
     }
   }
 }
+
+SDValue GenMTargetLowering::LowerFrameIndex(SDValue Op, SelectionDAG &DAG) const
+{
+  const auto *FI = cast<FrameIndexSDNode>(Op);
+  return DAG.getTargetFrameIndex(FI->getIndex(), Op.getValueType());
+}
+
+SDValue GenMTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+
+  const auto *GA = cast<GlobalAddressSDNode>(Op);
+  if (GA->getAddressSpace() != 0) {
+    Fail(DL, DAG, "GenM only expects the 0 address space");
+  }
+  if (GA->getTargetFlags() != 0) {
+    Fail(DL, DAG, "Unexpected target flags");
+  }
+
+  return DAG.getTargetGlobalAddress(
+      GA->getGlobal(),
+      DL,
+      Op.getValueType(),
+      GA->getOffset()
+  );
+}
+
+SDValue GenMTargetLowering::LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  const auto *ES = cast<ExternalSymbolSDNode>(Op);
+  EVT VT = Op.getValueType();
+  if (ES->getTargetFlags() != 0) {
+    Fail(DL, DAG, "Unexpected target flags");
+  }
+  return DAG.getTargetExternalSymbol(ES->getSymbol(), VT);
+}
+
+SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  EVT PtrVT = getPointerTy(DAG.getMachineFunction().getDataLayout());
+
+  auto *MFI = DAG.getMachineFunction().getInfo<GenMMachineFunctionInfo>();
+  const Value *SV = cast<SrcValueSDNode>(Op.getOperand(2))->getValue();
+
+  // Store the VAReg in the value.
+  return DAG.getStore(
+      Op.getOperand(0),
+      DL,
+      DAG.getCopyFromReg(
+          DAG.getEntryNode(),
+          DL,
+          MFI->getVAReg(),
+          PtrVT
+      ),
+      Op.getOperand(1),
+      MachinePointerInfo(SV),
+      0
+  );
+}
+
 
 bool GenMTargetLowering::useSoftFloat() const
 {
@@ -117,7 +163,7 @@ MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
     MachineInstr &MI,
     MachineBasicBlock *MBB) const
 {
-  llvm_unreachable("not implemented");
+  llvm_unreachable("EmitInstrWithCustomInserter");
 }
 
 const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
@@ -137,12 +183,12 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
     StringRef Constraint,
     MVT VT) const
 {
-  llvm_unreachable("not implemented");
+  llvm_unreachable("getRegForInlineAsmConstraint");
 }
 
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
 {
-  llvm_unreachable("not implemented");
+  llvm_unreachable("isOffsetFoldingLegal");
 }
 
 MVT GenMTargetLowering::getScalarShiftAmountTy(
@@ -164,20 +210,20 @@ EVT GenMTargetLowering::getSetCCResultType(
   if (!VT.isVector()) {
     return MVT::i32;
   } else {
-    llvm_unreachable("not implemented");
+    llvm_unreachable("getSetCCResultType");
   }
 }
 
 SDValue GenMTargetLowering::LowerFormalArguments(
     SDValue Chain,
     CallingConv::ID CallConv,
-    bool isVarArg,
+    bool IsVarArg,
     const SmallVectorImpl<ISD::InputArg> &Ins,
     const SDLoc &DL,
     SelectionDAG &DAG,
     SmallVectorImpl<SDValue> &InVals) const
 {
-  if (CallConv != CallingConv::C || isVarArg) {
+  if (CallConv != CallingConv::C) {
     Fail(DL, DAG, "calling convention not supported");
   }
 
@@ -185,11 +231,32 @@ SDValue GenMTargetLowering::LowerFormalArguments(
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
 
   for (const auto &In : Ins) {
+    // TODO(nand): check for argument types.
     InVals.push_back(DAG.getNode(
-        GenMISD::ARGUMENT, DL, In.VT,
+        GenMISD::ARGUMENT,
+        DL,
+        In.VT,
         DAG.getTargetConstant(InVals.size(), DL, MVT::i32)
     ));
     MFI->addParam(In.VT);
+  }
+
+  if (IsVarArg) {
+    MachineRegisterInfo &MRI = MF.getRegInfo();
+    MVT PtrVT = getPointerTy(MF.getDataLayout());
+    unsigned VAReg = MRI.createVirtualRegister(getRegClassFor(PtrVT));
+    MFI->setVAReg(VAReg);
+    Chain = DAG.getCopyToReg(
+      Chain,
+      DL,
+      VAReg,
+      DAG.getNode(
+          GenMISD::ARGUMENT,
+          DL,
+          PtrVT,
+          DAG.getTargetConstant(Ins.size(), DL, MVT::i32)
+      )
+    );
   }
 
   return Chain;
@@ -342,13 +409,11 @@ SDValue GenMTargetLowering::LowerReturn(
   if (CallConv != CallingConv::C || Outs.size() > 1) {
     Fail(DL, DAG, "calling convention not supported");
   }
-  if (isVarArg) {
-    Fail(DL, DAG, "vararg calls not supported");
-  }
 
   SmallVector<SDValue, 4> RetOps(1, Chain);
   RetOps.append(OutVals.begin(), OutVals.end());
   Chain = DAG.getNode(GenMISD::RETURN, DL, MVT::Other, RetOps);
+
   return Chain;
 }
 

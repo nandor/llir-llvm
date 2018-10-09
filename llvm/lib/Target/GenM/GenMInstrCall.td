@@ -39,8 +39,24 @@ def : Pat
   < (i32 (GenMcall tglobaladdr:$callee))
   , (CALL_I32 tglobaladdr:$callee)
   >;
-
+def : Pat
+  < (i64 (GenMcall tglobaladdr:$callee))
+  , (CALL_I64 tglobaladdr:$callee)
+  >;
 def : Pat
   < (GenMvoid tglobaladdr:$callee)
   , (CALL_VOID tglobaladdr:$callee)
+  >;
+
+def : Pat
+  < (i32 (GenMcall texternalsym:$callee))
+  , (CALL_I32 texternalsym:$callee)
+  >;
+def : Pat
+  < (i64 (GenMcall texternalsym:$callee))
+  , (CALL_I64 texternalsym:$callee)
+  >;
+def : Pat
+  < (GenMvoid texternalsym:$callee)
+  , (CALL_VOID texternalsym:$callee)
   >;

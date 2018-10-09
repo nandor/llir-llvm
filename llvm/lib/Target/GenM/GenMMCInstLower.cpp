@@ -53,7 +53,7 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
       MCSymbolRefExpr::VK_None;
 
   if (Offset != 0) {
-    report_fatal_error("Not supported");
+    llvm_unreachable("Not supported");
   }
   return MCOperand::createExpr(MCSymbolRefExpr::create(Sym, VK, Ctx));
 }
@@ -106,7 +106,14 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         break;
       }
       case MachineOperand::MO_ExternalSymbol: {
-        llvm_unreachable("not implemented");
+        // TODO(nand): remove hardcoded symbols.
+        MCOp = LowerSymbolOperand(
+            GetExternalSymbolSymbol(MO),
+            0,
+            true,
+            true
+        );
+        break;
       }
       default: {
         MI->print(errs());

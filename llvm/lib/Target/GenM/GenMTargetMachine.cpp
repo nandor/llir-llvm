@@ -160,7 +160,7 @@ TargetLoweringObjectFile *GenMTargetMachine::getObjFileLowering() const
 
 bool GenMTargetMachine::isMachineVerifierClean() const
 {
-  llvm_unreachable("not implemented");
+  llvm_unreachable("isMachineVerifierClean");
 }
 
 bool GenMTargetMachine::usesPhysRegsForPEI() const
