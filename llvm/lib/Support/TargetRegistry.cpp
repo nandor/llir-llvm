@@ -15,10 +15,11 @@
 #include <vector>
 using namespace llvm;
 
-static cl::opt<bool> EnableGenM(
+static cl::opt<bool>
+EnableGenM(
     "genm",
     cl::desc("Generate GenM intermediate output"),
-    cl::init(true)
+    cl::init(false)
 );
 
 // Clients are responsible for avoid race conditions in registration.
