@@ -69,18 +69,6 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
 
   GenMMachineFunctionInfo &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
 
-  // GenM argument registers are in the same index space as local
-  // variables. Assign the numbers for them first.
-  MachineBasicBlock &EntryMBB = MF.front();
-  for (MachineInstr &MI : EntryMBB) {
-    if (!GenM::isArgument(MI)) {
-      break;
-    }
-    const unsigned Reg = MI.getOperand(0).getReg();
-    const unsigned Arg = MI.getOperand(1).getImm();
-    MFI.setGMReg(Reg, Arg);
-  }
-
   // Start the numbering for locals after the arg regs
   unsigned CurReg = MFI.getParams().size();
   const unsigned NumVRegs = MF.getRegInfo().getNumVirtRegs();

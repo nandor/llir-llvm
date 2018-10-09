@@ -45,7 +45,6 @@ class TerminatorInst
   let isTerminator = 1;
   let hasCtrlDep = 1;
   let isBarrier = 1;
-  let Defs = [ARGS];
 }
 
 class BranchInst
@@ -57,7 +56,6 @@ class BranchInst
   : TerminatorInst<iops, pattern, asmstr, inst>
 {
   let isBranch = 1;
-  let Defs = [ARGS];
 }
 
 class CallInst
@@ -70,5 +68,4 @@ class CallInst
   : I<oops, iops, pattern, asmstr, inst>
 {
   let isCall = 1;
-  let Defs = [ARGS];
 }

@@ -40,17 +40,10 @@ void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 {
   LLVM_DEBUG(dbgs() << "EmitInstruction: " << *MI << '\n');
 
-  switch (MI->getOpcode()) {
-    case GenM::ARG_I32:
-    case GenM::ARG_I64:
-      break;
-    default: {
-      GenMMCInstLower MCInstLowering(OutContext, *this);
-      MCInst TmpInst;
-      MCInstLowering.Lower(MI, TmpInst);
-      EmitToStreamer(*OutStreamer, TmpInst);
-    }
-  }
+  GenMMCInstLower MCInstLowering(OutContext, *this);
+  MCInst TmpInst;
+  MCInstLowering.Lower(MI, TmpInst);
+  EmitToStreamer(*OutStreamer, TmpInst);
 }
 
 void GenMAsmPrinter::EmitFunctionBodyStart()

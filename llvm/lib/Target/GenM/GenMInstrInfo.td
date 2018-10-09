@@ -73,38 +73,42 @@ include "GenMInstrFormats.td"
 // Additional instructions.
 //===----------------------------------------------------------------------===//
 
-class ARGUMENT<GenMRegClass vt>
-  : I
-    < (outs vt:$res)
-    , (ins i32imm:$argno)
-    , [(set vt:$res, (GenMargument timm:$argno))]
-    >
+let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 {
-  let hasSideEffects = 1;
-  let Uses = [ARGS];
-  let isCodeGenOnly = 1;
-}
+  def ARG_I32 : I
+      < (outs I32:$res)
+      , (ins i32imm:$argno)
+      , [(set I32:$res, (GenMargument timm:$argno))]
+      , "arg.i32 \t$res, $argno"
+      , 0x01
+      >;
 
-def ARG_I32 : ARGUMENT<I32>;
-def ARG_I64 : ARGUMENT<I64>;
+  def ARG_I64 : I
+      < (outs I64:$res)
+      , (ins i32imm:$argno)
+      , [(set I64:$res, (GenMargument timm:$argno))]
+      , "arg.i64 \t$res, $argno"
+      , 0x02
+      >;
 
-let isMoveImm = 1, isAsCheapAsAMove = 1, isReMaterializable = 1 in
-{
-  def CONST_I32 : I
-    < (outs I32:$res)
-    , (ins i32imm_op:$imm)
-    , [(set I32:$res, imm:$imm)]
-    , "imm.i32 \t$res, $imm"
-    , 0x00
-    >;
+  let isMoveImm = 1 in
+  {
+    def CONST_I32 : I
+      < (outs I32:$res)
+      , (ins i32imm_op:$imm)
+      , [(set I32:$res, imm:$imm)]
+      , "imm.i32 \t$res, $imm"
+      , 0x03
+      >;
 
-  def CONST_I64 : I
-    < (outs I64:$res)
-    , (ins i64imm_op:$imm)
-    , [(set I64:$res, imm:$imm)]
-    , "imm.i64 \t$res, $imm"
-    , 0x01
-    >;
+    def CONST_I64 : I
+      < (outs I64:$res)
+      , (ins i64imm_op:$imm)
+      , [(set I64:$res, imm:$imm)]
+      , "imm.i64 \t$res, $imm"
+      , 0x04
+      >;
+  }
 }
 
 //===----------------------------------------------------------------------===//

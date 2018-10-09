@@ -26,10 +26,7 @@ multiclass BinaryInt
     , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
     , !strconcat(!strconcat(name, ".i32"), " \t$dst, $lhs, $rhs")
     , i32Inst
-    >
-  {
-    let Defs = [ARGS];
-  }
+    >;
 
   def _I64 : I
     < (outs I64:$dst)
@@ -37,10 +34,7 @@ multiclass BinaryInt
     , [(set I64:$dst, (node I64:$lhs, I64:$rhs))]
     , !strconcat(!strconcat(name, ".i64"), " \t$dst, $lhs, $rhs")
     , i64Inst
-    >
-  {
-    let Defs = [ARGS];
-  }
+    >;
 }
 
 multiclass CommutativeInt
@@ -67,10 +61,7 @@ multiclass TernaryInt
     , [(set I32:$dst, (node I32:$op, I32:$lhs, I32:$rhs))]
     , !strconcat(!strconcat(name, ".i32"), " \t$dst, $op, $lhs, $rhs")
     , i32Inst
-    >
-  {
-    let Defs = [ARGS];
-  }
+    >;
 
   def _I64 : I
     < (outs I64:$dst)
@@ -78,10 +69,7 @@ multiclass TernaryInt
     , [(set I64:$dst, (node I32:$op, I64:$lhs, I64:$rhs))]
     , !strconcat(!strconcat(name, ".i64"), " \t$dst, $op, $lhs, $rhs")
     , i64Inst
-    >
-  {
-    let Defs = [ARGS];
-  }
+    >;
 }
 
 
