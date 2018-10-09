@@ -53,10 +53,7 @@ public:
 
   bool isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const override;
 
-  MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override
-  {
-    return MVT::i32;
-  }
+  MVT getScalarShiftAmountTy(const DataLayout &, EVT) const override;
 
   EVT getSetCCResultType(
       const DataLayout &DL,
