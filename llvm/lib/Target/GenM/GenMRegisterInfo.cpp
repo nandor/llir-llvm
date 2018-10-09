@@ -66,10 +66,23 @@ void GenMRegisterInfo::eliminateFrameIndex(
 
   unsigned FrameReg;
   if (int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg)) {
-    report_fatal_error("not implemented");
-  } else {
-    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
+    MachineRegisterInfo &MRI = MF.getRegInfo();
+    const GenMInstrInfo *TII = MF.getSubtarget<GenMSubtarget>().getInstrInfo();
+    DebugLoc DL = MI.getDebugLoc();
+
+    unsigned ConstReg = MRI.createVirtualRegister(&GenM::I64RegClass);
+    BuildMI(MBB, II, DL, TII->get(GenM::CONST_I32), ConstReg)
+        .addImm(Offset);
+
+    unsigned AddrReg = MRI.createVirtualRegister(&GenM::I64RegClass);
+    BuildMI(MBB, II, DL, TII->get(GenM::ADD_I32), ConstReg)
+        .addReg(FrameReg)
+        .addReg(ConstReg);
+
+    FrameReg = AddrReg;
   }
+
+  MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
@@ -85,5 +98,5 @@ const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(
     const MachineFunction &MF,
     unsigned Kind) const
 {
-  llvm_unreachable("not implemented");
+  llvm_unreachable("getPointerRegClass");
 }

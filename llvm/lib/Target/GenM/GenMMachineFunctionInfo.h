@@ -29,11 +29,16 @@ public:
   unsigned getGMReg(unsigned VReg) const;
   bool hasGMReg(unsigned VReg) const;
 
+  void setVAReg(unsigned Reg) { VAReg = Reg; }
+  unsigned getVAReg() const { return VAReg; }
+
 private:
   /// Reference to the machine function.
   const MachineFunction &MF;
   /// List of parameters to a function.
   std::vector<MVT> Params;
+  /// Reference to the array storing varargs.
+  unsigned VAReg;
   /// A mapping from CodeGen vreg index to WebAssembly register number.
   mutable std::vector<unsigned> GMRegs;
 };

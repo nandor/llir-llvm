@@ -116,6 +116,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 //===----------------------------------------------------------------------===//
 
 include "GenMInstrCall.td"
+include "GenMInstrConv.td"
 include "GenMInstrMemory.td"
 include "GenMInstrControl.td"
 include "GenMInstrInteger.td"

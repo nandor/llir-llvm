@@ -43,6 +43,11 @@ def : Pat
   >;
 
 def : Pat
+  < (brcond i32:$cond, bb:$dst)
+  , (JT bb_op:$dst, I32:$cond)
+  >;
+
+def : Pat
   < (brcond (i32 (seteq I32:$cond, 0)), bb:$dst)
   , (JF bb_op:$dst, I32:$cond)
   >;
