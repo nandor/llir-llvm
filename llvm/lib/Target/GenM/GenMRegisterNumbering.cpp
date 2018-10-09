@@ -68,7 +68,6 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   );
 
   GenMMachineFunctionInfo &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
-  MachineRegisterInfo &MRI = MF.getRegInfo();
 
   // GenM argument registers are in the same index space as local
   // variables. Assign the numbers for them first.

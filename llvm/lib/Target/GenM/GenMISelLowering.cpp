@@ -70,6 +70,10 @@ GenMTargetLowering::GenMTargetLowering(
       setOperationAction(Op, T, Expand);
     }
   }
+
+  for (auto T : {MVT::i1, MVT::i8, MVT::i16, MVT::i32}) {
+    setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
+  }
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
@@ -90,7 +94,7 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
         Fail(DL, DAG, "Unexpected target flags on generic GlobalAddressSDNode");
       }
 
-      return  DAG.getTargetGlobalAddress(
+      return DAG.getTargetGlobalAddress(
           GA->getGlobal(),
           DL,
           Op.getValueType(),
@@ -139,6 +143,17 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
 {
   llvm_unreachable("not implemented");
+}
+
+MVT GenMTargetLowering::getScalarShiftAmountTy(
+    const DataLayout &DL,
+    EVT VT) const
+{
+  switch (VT.getSizeInBits()) {
+    case 32: return MVT::i32;
+    case 64: return MVT::i64;
+    default: llvm_unreachable("unable to represent shift amount");
+  }
 }
 
 EVT GenMTargetLowering::getSetCCResultType(

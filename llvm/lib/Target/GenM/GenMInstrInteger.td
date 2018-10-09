@@ -84,12 +84,18 @@ multiclass TernaryInt
   }
 }
 
+
 defm ADD : CommutativeInt<add, "add",  0x90, 0x91>;
 defm XOR : CommutativeInt<xor, "xor",  0x92, 0x93>;
 defm OR  : CommutativeInt<or,  "or",   0x94, 0x95>;
 defm AND : CommutativeInt<and, "and",  0x96, 0x97>;
 
-defm SELECT : TernaryInt<select, "select", 0xA0, 0xA1>;
+defm SUB : BinaryInt<sub, "sub", 0xA0, 0xA1>;
+
+defm SRL : BinaryInt<srl, "srl", 0xA2, 0xA3>;
+defm SHL : BinaryInt<shl, "shl", 0xA4, 0xA5>;
+
+defm SELECT : TernaryInt<select, "select", 0xB0, 0xB1>;
 
 def : Pat
   < (select (i32 (setne I32:$cond, 0)), I32:$lhs, I32:$rhs)

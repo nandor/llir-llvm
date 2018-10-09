@@ -60,23 +60,15 @@ void GenMRegisterInfo::eliminateFrameIndex(
   MachineInstr &MI = *II;
   MachineBasicBlock &MBB = *MI.getParent();
   MachineFunction &MF = *MBB.getParent();
+
   const TargetFrameLowering &TFL = *getFrameLowering(MF);
-
   const int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+
   unsigned FrameReg;
-  int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg);
-
-  if (!isInt<32>(Offset)) {
-    report_fatal_error("Not a 32-bit offset");
-  }
-
-  if (MI.mayLoad() || MI.mayStore()) {
-    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
-    MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
-  } else if (Offset == 0) {
-    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
-  } else {
+  if (int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg)) {
     report_fatal_error("not implemented");
+  } else {
+    MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
   }
 }
 
