@@ -12,11 +12,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-class Return<GenMRegClass vt>
+class Return<GenMRegClass vt, string name>
   : TerminatorInst
     < (ins vt:$val)
     , [(GenMreturn vt:$val)]
-    , "return \t$val"
+    , !strconcat("ret.", !strconcat(name, "\t$val"))
     , 0x70
     >
 {
@@ -24,13 +24,13 @@ class Return<GenMRegClass vt>
 }
 
 class ReturnVoid
-  : TerminatorInst<(ins), [(GenMreturn)], "return", 0x70>
+  : TerminatorInst<(ins), [(GenMreturn)], "ret.void", 0x70>
 {
   let isReturn = 1;
 }
 
-def RETURN_I32: Return<I32>;
-def RETURN_I64: Return<I64>;
+def RETURN_I32: Return<I32, "i32">;
+def RETURN_I64: Return<I64, "i64">;
 def RETURN_VOID: ReturnVoid;
 
 def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>;

@@ -118,11 +118,17 @@ SDValue GenMTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) co
     Fail(DL, DAG, "Unexpected target flags");
   }
 
-  return DAG.getTargetGlobalAddress(
-      GA->getGlobal(),
+  EVT VT = Op.getValueType();
+  return DAG.getNode(
+      GenMISD::SYMBOL,
       DL,
-      Op.getValueType(),
-      GA->getOffset()
+      VT,
+      DAG.getTargetGlobalAddress(
+          GA->getGlobal(),
+          DL,
+          VT,
+          GA->getOffset()
+      )
   );
 }
 
@@ -134,7 +140,12 @@ SDValue GenMTargetLowering::LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) c
   if (ES->getTargetFlags() != 0) {
     Fail(DL, DAG, "Unexpected target flags");
   }
-  return DAG.getTargetExternalSymbol(ES->getSymbol(), VT);
+  return DAG.getNode(
+      GenMISD::SYMBOL,
+      DL,
+      VT,
+      DAG.getTargetExternalSymbol(ES->getSymbol(), VT)
+  );
 }
 
 SDValue GenMTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const
@@ -188,7 +199,6 @@ SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
   );
 }
 
-
 bool GenMTargetLowering::useSoftFloat() const
 {
   return false;
@@ -209,6 +219,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
   case GenMISD::CALL:         return "GenMISD::CALL";
   case GenMISD::VOID:         return "GenMISD::VOID";
+  case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::BR_JT:        return "GenMISD::BR_JT";
   }
 }

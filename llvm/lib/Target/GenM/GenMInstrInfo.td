@@ -21,6 +21,7 @@ def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMcall     : SDTypeProfile<1, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMbrjt     : SDTypeProfile<0,  2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
+def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
@@ -50,6 +51,10 @@ def GenMbrjt : SDNode
   , SDT_GenMbrjt
   , [SDNPHasChain]
   >;
+def GenMsymbol : SDNode
+  < "GenMISD::SYMBOL"
+  , SDT_GenMsymbol
+  >;
 
 //===----------------------------------------------------------------------===//
 // WebAssembly-specific Operands.
@@ -66,7 +71,7 @@ def bb_op      : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
 def i32imm_op  : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op  : GenMOperand<i64, "OPERAND_I64IMM">;
 def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;
-def i64func_op : GenMOperand<i64, "OPERAND_I64FUNC">;
+def i64addr_op : GenMOperand<i64, "OPERAND_I64FUNC">;
 
 //===----------------------------------------------------------------------===//
 // GenM Instruction Format Definitions.
@@ -129,6 +134,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , []
     , "mov.i64\t$dst, $src"
     , 0x06
+    >;
+
+  def ADDR : I
+    < (outs I64:$dst)
+    , (ins i64addr_op:$addr)
+    , [(set I64:$dst, (GenMsymbol tglobaladdr:$addr))]
+    , "addr.i64\t$dst, $addr"
+    , 0x70
     >;
 }
 
