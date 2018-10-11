@@ -139,11 +139,21 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
   def ADDR : I
     < (outs I64:$dst)
     , (ins i64addr_op:$addr)
-    , [(set I64:$dst, (GenMsymbol tglobaladdr:$addr))]
+    , []
     , "addr.i64\t$dst, $addr"
     , 0x70
     >;
 }
+
+def : Pat
+  < (GenMsymbol tglobaladdr:$addr)
+  , (ADDR i64addr_op:$addr)
+  >;
+
+def : Pat
+  < (GenMsymbol texternalsym:$addr)
+  , (ADDR i64addr_op:$addr)
+  >;
 
 //===----------------------------------------------------------------------===//
 // Additional sets of instructions.
