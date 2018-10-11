@@ -70,7 +70,7 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   GenMMachineFunctionInfo &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
 
   // Start the numbering for locals after the arg regs
-  unsigned CurReg = MFI.getParams().size();
+  unsigned CurReg = 0;
   const unsigned NumVRegs = MF.getRegInfo().getNumVirtRegs();
   for (unsigned VRegIdx = 0; VRegIdx < NumVRegs; ++VRegIdx) {
     const unsigned VReg = TargetRegisterInfo::index2VirtReg(VRegIdx);

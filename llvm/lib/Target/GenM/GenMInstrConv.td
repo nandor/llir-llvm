@@ -27,5 +27,13 @@ def SEXT_I32_I64 : I
   , (ins I32:$src)
   , [(set I64:$dst, (sext I32:$src))]
   , "sext.i32.i64\t$dst, $src"
-  , 0xE0
+  , 0xE1
+  >;
+
+def ZEXT_I32_I64 : I
+  < (outs I64:$dst)
+  , (ins I32:$src)
+  , [(set I64:$dst, (zext I32:$src))]
+  , "zext.i32.i64\t$dst, $src"
+  , 0xE2
   >;
