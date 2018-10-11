@@ -82,6 +82,25 @@ GenMTargetLowering::GenMTargetLowering(
     }
   }
 
+  // Disable some integer operations.
+  for (auto T : {MVT::i32, MVT::i64}) {
+    // Expand unavailable integer operations.
+    SmallVector<unsigned, 64> Ops{
+        ISD::BSWAP, ISD::SMUL_LOHI, ISD::UMUL_LOHI, ISD::MULHS, ISD::MULHU,
+        ISD::SDIVREM, ISD::UDIVREM, ISD::SHL_PARTS, ISD::SRA_PARTS,
+        ISD::SRL_PARTS, ISD::ADDC, ISD::ADDE, ISD::SUBC, ISD::SUBE
+    };
+
+    for (auto Op : Ops) {
+      setOperationAction(Op, T, Expand);
+    }
+  }
+
+  // Disable in-register sign extension.
+  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
+    setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
+  }
+
   // Expand i1 extending loads.
   for (auto T : MVT::integer_valuetypes()) {
     for (auto Ext : {ISD::EXTLOAD, ISD::ZEXTLOAD, ISD::SEXTLOAD}) {
@@ -277,10 +296,6 @@ SDValue GenMTargetLowering::LowerFormalArguments(
     SelectionDAG &DAG,
     SmallVectorImpl<SDValue> &InVals) const
 {
-  if (CallConv != CallingConv::C) {
-    Fail(DL, DAG, "calling convention not supported");
-  }
-
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
 
@@ -328,9 +343,6 @@ SDValue GenMTargetLowering::LowerCall(
   SDValue Chain = CLI.Chain;
   SDValue Callee = CLI.Callee;
 
-  if (CLI.CallConv != CallingConv::C) {
-    Fail(DL, DAG, "calling convention not supported");
-  }
   if (CLI.IsTailCall) {
     // TODO(nand): enable tail calls
     CLI.IsTailCall = false;
@@ -460,7 +472,7 @@ SDValue GenMTargetLowering::LowerReturn(
     const SDLoc &DL,
     SelectionDAG &DAG) const
 {
-  if (CallConv != CallingConv::C || Outs.size() > 1) {
+  if (Outs.size() > 1) {
     Fail(DL, DAG, "calling convention not supported");
   }
 
