@@ -81,6 +81,13 @@ GenMTargetLowering::GenMTargetLowering(
       setOperationAction(Op, T, Expand);
     }
   }
+
+  // Expand i1 extending loads.
+  for (auto T : MVT::integer_valuetypes()) {
+    for (auto Ext : {ISD::EXTLOAD, ISD::ZEXTLOAD, ISD::SEXTLOAD}) {
+      setLoadExtAction(Ext, T, MVT::i1, Promote);
+    }
+  }
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
