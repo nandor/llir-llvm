@@ -26,6 +26,7 @@ enum NodeType : unsigned {
   RETURN,
   CALL,
   VOID,
+  BR_JT,
 };
 } // end namespace GenMISD
 
@@ -39,6 +40,8 @@ public:
   SDValue LowerFrameIndex(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBR_JT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVASTART(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override;

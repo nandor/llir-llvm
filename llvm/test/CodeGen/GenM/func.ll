@@ -5,42 +5,42 @@
 target datalayout = "e-m:e-p:32:32-i64:64-n32:64-S128"
 target triple = "wasm32-unknown-unknown"
 
-; DIS-LABEL: f0:
+; DIS-LABEL: _f0:
 ; CHECK: return
-; CHECK: .size f0,
+; CHECK: .size _f0,
 define void @f0() {
   ret void
 }
 
-; CHECK-LABEL: f1:
+; CHECK-LABEL: _f1:
 ; CHECK: imm.i32   $0, 0
 ; CHECK-NEXT: return  $0
-; CHECK: .size f1,
+; CHECK: .size _f1,
  define i32 @f1() {
   ret i32 0
 }
 
-; CHECK-LABEL: f2:
-; CHECK: imm.i32   $2, 0
-; CHECK-NEXT: return  $2
-; CHECK: .size f2,
+; CHECK-LABEL: _f2:
+; CHECK: imm.i32   $0, 0
+; CHECK-NEXT: return  $0
+; CHECK: .size _f2,
 define i32 @f2(i32 %p1, float %p2) {
   ret i32 0
 }
 
-; CHECK-LABEL: f3:
+; CHECK-LABEL: _f3:
 ; CHECK: return
-; CHECK: .size f3,
+; CHECK: .size _f3,
 define void @f3(i32 %p1, float %p2) {
   ret void
 }
 
-; CHECK-LABEL: f4:
+; CHECK-LABEL: _f4:
 ; CHECK: jf
 ; CHECK: jmp
 ; CHECK: return
 ; CHECK: return
-; CHECK: .size f4,
+; CHECK: .size _f4,
 define i32 @f4(i32 %x) {
 entry:
    %c = trunc i32 %x to i1

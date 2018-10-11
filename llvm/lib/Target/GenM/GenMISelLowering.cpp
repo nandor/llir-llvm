@@ -50,6 +50,8 @@ GenMTargetLowering::GenMTargetLowering(
   : TargetLowering(TM)
   , Subtarget(&STI)
 {
+  auto MVTPtr = MVT::i64;
+
   setBooleanContents(ZeroOrOneBooleanContent);
   setHasFloatingPointExceptions(false);
   setSchedulingPreference(Sched::RegPressure);
@@ -59,9 +61,13 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
-  setOperationAction(ISD::FrameIndex, MVT::i64, Custom);
-  setOperationAction(ISD::GlobalAddress, MVT::i64, Custom);
-  setOperationAction(ISD::ExternalSymbol, MVT::i64, Custom);
+  setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
+  setOperationAction(ISD::GlobalAddress, MVTPtr, Custom);
+  setOperationAction(ISD::ExternalSymbol, MVTPtr, Custom);
+  setOperationAction(ISD::JumpTable, MVTPtr, Custom);
+  setOperationAction(ISD::BlockAddress, MVTPtr, Custom);
+  setOperationAction(ISD::BRIND, MVT::Other, Custom);
+  setOperationAction(ISD::BR_JT, MVT::Other, Custom);
 
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
@@ -80,10 +86,12 @@ GenMTargetLowering::GenMTargetLowering(
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
   switch (Op.getOpcode()) {
-    case ISD::FrameIndex: return LowerFrameIndex(Op, DAG);
-    case ISD::GlobalAddress: return LowerGlobalAddress(Op, DAG);
+    case ISD::FrameIndex:     return LowerFrameIndex(Op, DAG);
+    case ISD::GlobalAddress:  return LowerGlobalAddress(Op, DAG);
     case ISD::ExternalSymbol: return LowerExternalSymbol(Op, DAG);
-    case ISD::VASTART: return LowerVASTART(Op, DAG);
+    case ISD::JumpTable:      return LowerJumpTable(Op, DAG);
+    case ISD::BR_JT:          return LowerBR_JT(Op, DAG);
+    case ISD::VASTART:        return LowerVASTART(Op, DAG);
     default: {
       Op.dump();
       llvm_unreachable("unimplemented operation lowering");
@@ -127,6 +135,33 @@ SDValue GenMTargetLowering::LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) c
     Fail(DL, DAG, "Unexpected target flags");
   }
   return DAG.getTargetExternalSymbol(ES->getSymbol(), VT);
+}
+
+SDValue GenMTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  SDValue Chain = Op.getOperand(0);
+  SDValue JT = Op.getOperand(1);
+  SDValue Index = Op.getOperand(2);
+
+  return DAG.getNode(
+      GenMISD::BR_JT,
+      DL,
+      MVT::Other,
+      Chain,
+      Index,
+      JT
+  );
+}
+
+SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
+{
+  const JumpTableSDNode *JT = cast<JumpTableSDNode>(Op);
+  return DAG.getTargetJumpTable(
+      JT->getIndex(),
+      Op.getValueType(),
+      JT->getTargetFlags()
+  );
 }
 
 SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
@@ -174,6 +209,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
   case GenMISD::CALL:         return "GenMISD::CALL";
   case GenMISD::VOID:         return "GenMISD::VOID";
+  case GenMISD::BR_JT:        return "GenMISD::BR_JT";
   }
 }
 
@@ -188,7 +224,7 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
 
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
 {
-  llvm_unreachable("isOffsetFoldingLegal");
+  return true;
 }
 
 MVT GenMTargetLowering::getScalarShiftAmountTy(

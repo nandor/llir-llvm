@@ -52,10 +52,15 @@ MCOperand GenMMCInstLower::LowerSymbolOperand(
       IsGlob ? MCSymbolRefExpr::VK_WebAssembly_GLOBAL :
       MCSymbolRefExpr::VK_None;
 
+  const MCExpr *Expr = MCSymbolRefExpr::create(Sym, VK, Ctx);
   if (Offset != 0) {
-    llvm_unreachable("Not supported");
+    Expr = MCBinaryExpr::createAdd(
+        Expr,
+        MCConstantExpr::create(Offset, Ctx),
+        Ctx
+    );
   }
-  return MCOperand::createExpr(MCSymbolRefExpr::create(Sym, VK, Ctx));
+  return MCOperand::createExpr(Expr);
 }
 
 

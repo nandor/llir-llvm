@@ -41,14 +41,7 @@ bool GenMInstrInfo::analyzeBranch(
     SmallVectorImpl<MachineOperand> &Cond,
     bool AllowModify) const
 {
-  for (MachineInstr &MI : MBB.terminators()) {
-    switch (MI.getOpcode()) {
-      default: {
-        return true;
-      }
-    }
-  }
-  return false;
+  return true;
 }
 
 unsigned GenMInstrInfo::removeBranch(
@@ -81,7 +74,22 @@ unsigned GenMInstrInfo::insertBranch(
     const DebugLoc &DL,
     int *BytesAdded) const
 {
-  llvm_unreachable("not implemented");
+  switch (Cond.size()) {
+    case 0: {
+      if (TBB) {
+        BuildMI(&MBB, DL, get(GenM::JMP)).addMBB(TBB);
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    case 2: {
+      llvm_unreachable("not implemented");
+    }
+    default: {
+      llvm_unreachable("invalid condition");
+    }
+  }
 }
 
 bool GenMInstrInfo::reverseBranchCondition(
@@ -92,13 +100,30 @@ bool GenMInstrInfo::reverseBranchCondition(
 
 void GenMInstrInfo::copyPhysReg(
     MachineBasicBlock &MBB,
-    MachineBasicBlock::iterator I,
+    MachineBasicBlock::iterator MBBI,
     const DebugLoc &DL,
-    unsigned DestReg,
+    unsigned DstReg,
     unsigned SrcReg,
     bool KillSrc) const
 {
-  llvm_unreachable("not implemented");
+  auto &MRI = MBB.getParent()->getRegInfo();
+  const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
+  const TargetRegisterClass *SrcCls = MRI.getRegClass(SrcReg);
+  if (SrcCls != DstCls) {
+    llvm_unreachable("cannot copy registers");
+  }
+
+  unsigned Op;
+  if (&GenM::I32RegClass == DstCls) {
+    Op = GenM::COPY_32;
+  } else if (&GenM::I64RegClass == SrcCls) {
+    Op = GenM::COPY_64;
+  } else {
+    llvm_unreachable("cannot copy physical registers");
+  }
+
+  BuildMI(MBB, MBBI, DL, get(Op), DstReg)
+      .addReg(SrcReg, getKillRegState(KillSrc));
 }
 
 void GenMInstrInfo::storeRegToStackSlot(
@@ -120,12 +145,6 @@ void GenMInstrInfo::loadRegFromStackSlot(
     int FrameIndex,
     const TargetRegisterClass *RC,
     const TargetRegisterInfo *TRI) const
-{
-  llvm_unreachable("not implemented");
-}
-
-// Lower pseudo instructions after register allocation.
-bool GenMInstrInfo::expandPostRAPseudo(MachineInstr &MI) const
 {
   llvm_unreachable("not implemented");
 }

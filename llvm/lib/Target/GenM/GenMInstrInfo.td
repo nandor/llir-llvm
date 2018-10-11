@@ -20,7 +20,7 @@ def SDT_GenMargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
 def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMcall     : SDTypeProfile<1, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
-
+def SDT_GenMbrjt     : SDTypeProfile<0,  2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
@@ -44,6 +44,11 @@ def GenMvoid : SDNode
   < "GenMISD::VOID"
   , SDT_GenMvoid
   , [SDNPHasChain, SDNPVariadic]
+  >;
+def GenMbrjt : SDNode
+  < "GenMISD::BR_JT"
+  , SDT_GenMbrjt
+  , [SDNPHasChain]
   >;
 
 //===----------------------------------------------------------------------===//
@@ -79,7 +84,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I32:$res)
       , (ins i32imm:$argno)
       , [(set I32:$res, (GenMargument timm:$argno))]
-      , "arg.i32 \t$res, $argno"
+      , "arg.i32\t$res, $argno"
       , 0x01
       >;
 
@@ -87,7 +92,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I64:$res)
       , (ins i32imm:$argno)
       , [(set I64:$res, (GenMargument timm:$argno))]
-      , "arg.i64 \t$res, $argno"
+      , "arg.i64\t$res, $argno"
       , 0x02
       >;
 
@@ -97,7 +102,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I32:$res)
       , (ins i32imm_op:$imm)
       , [(set I32:$res, imm:$imm)]
-      , "imm.i32 \t$res, $imm"
+      , "imm.i32\t$res, $imm"
       , 0x03
       >;
 
@@ -105,10 +110,26 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I64:$res)
       , (ins i64imm_op:$imm)
       , [(set I64:$res, imm:$imm)]
-      , "imm.i64 \t$res, $imm"
+      , "imm.i64\t$res, $imm"
       , 0x04
       >;
   }
+
+  def COPY_32 : I
+    < (outs I32:$dst)
+    , (ins I32:$src)
+    , []
+    , "mov.i32\t$dst, $src"
+    , 0x05
+    >;
+
+  def COPY_64 : I
+    < (outs I64:$dst)
+    , (ins I64:$src)
+    , []
+    , "mov.i64\t$dst, $src"
+    , 0x06
+    >;
 }
 
 //===----------------------------------------------------------------------===//
