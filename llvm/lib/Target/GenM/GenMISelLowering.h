@@ -26,6 +26,7 @@ enum NodeType : unsigned {
   RETURN,
   CALL,
   VOID,
+  SYMBOL,
   BR_JT,
 };
 } // end namespace GenMISD
