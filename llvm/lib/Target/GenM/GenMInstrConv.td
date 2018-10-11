@@ -21,7 +21,6 @@ def TRUNC_I64_I32 : I
   , 0xE0
   >;
 
-
 def SEXT_I32_I64 : I
   < (outs I64:$dst)
   , (ins I32:$src)
