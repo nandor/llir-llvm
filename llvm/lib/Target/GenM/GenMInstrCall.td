@@ -13,50 +13,23 @@
 //===----------------------------------------------------------------------===//
 
 
-class CALL<GenMRegClass vt, string suffix>
-  : CallInst
-    < (outs vt:$dst)
-    , (ins i64addr_op:$callee, variable_ops)
-    , [(set vt:$dst, (GenMcall (i64 imm:$callee)))]
-    , !strconcat("call.", !strconcat(suffix, "\t$dst, $callee"))
-    , 0x50
-    >
+class CALL<GenMRegClass vt, string suffix> : CallInst
+  < (outs vt:$dst)
+  , (ins I64:$callee, variable_ops)
+  , [(set vt:$dst, (GenMcall I64:$callee))]
+  , !strconcat("call.", !strconcat(suffix, "\t$dst, $callee"))
+  , 0x50
+  >
 {
 }
 
-def CALL_I32 : CALL<I32, "i32">;
-def CALL_I64 : CALL<I64, "i64">;
+def CALL_I32: CALL<I32, "i32">;
+def CALL_I64: CALL<I64, "i64">;
 
 def CALL_VOID : CallInst
   < (outs)
-  , (ins i64addr_op:$callee, variable_ops)
-  , [(GenMvoid (i64 imm:$callee))]
+  , (ins I64:$callee, variable_ops)
+  , [(GenMvoid I64:$callee)]
   , "call.void\t$callee"
-  , 0x50
-  >;
-
-def : Pat
-  < (i32 (GenMcall (GenMsymbol tglobaladdr:$callee)))
-  , (CALL_I32 tglobaladdr:$callee)
-  >;
-def : Pat
-  < (i64 (GenMcall (GenMsymbol tglobaladdr:$callee)))
-  , (CALL_I64 tglobaladdr:$callee)
-  >;
-def : Pat
-  < (GenMvoid (GenMsymbol tglobaladdr:$callee))
-  , (CALL_VOID tglobaladdr:$callee)
-  >;
-
-def : Pat
-  < (i32 (GenMcall (GenMsymbol texternalsym:$callee)))
-  , (CALL_I32 texternalsym:$callee)
-  >;
-def : Pat
-  < (i64 (GenMcall (GenMsymbol texternalsym:$callee)))
-  , (CALL_I64 texternalsym:$callee)
-  >;
-def : Pat
-  < (GenMvoid (GenMsymbol texternalsym:$callee))
-  , (CALL_VOID texternalsym:$callee)
+  , 0x52
   >;

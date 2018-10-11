@@ -89,14 +89,19 @@ multiclass TernaryInt
 
 
 defm ADD : CommBinaryInt<add, "add",  0x90, 0x91>;
-defm XOR : CommBinaryInt<xor, "xor",  0x92, 0x93>;
-defm OR  : CommBinaryInt<or,  "or",   0x94, 0x95>;
-defm AND : CommBinaryInt<and, "and",  0x96, 0x97>;
+defm XOR : CommBinaryInt<xor, "xor",  0x90, 0x93>;
+defm OR  : CommBinaryInt<or,  "or",   0x90, 0x95>;
+defm AND : CommBinaryInt<and, "and",  0x90, 0x97>;
+defm MUL : CommBinaryInt<mul, "mul",  0x90, 0x90>;
 
-defm SUB : BinaryInt<sub, "sub", 0xA0, 0xA1>;
-defm SRL : BinaryInt<srl, "srl", 0xA2, 0xA3>;
-defm SHL : BinaryInt<shl, "shl", 0xA4, 0xA5>;
-defm SRA : BinaryInt<sra, "sra", 0xA6, 0xA7>;
+defm SUB  : BinaryInt<sub,  "sub",  0xA0, 0xA1>;
+defm SDIV : BinaryInt<sdiv, "sdiv", 0xA1, 0xA2>;
+defm UDIV : BinaryInt<udiv, "udiv", 0xA2, 0xA4>;
+defm SREM : BinaryInt<srem, "srem", 0xA3, 0xA2>;
+defm UREM : BinaryInt<urem, "urem", 0xA4, 0xA4>;
+defm SRL  : BinaryInt<srl,  "srl",  0xA5, 0xA6>;
+defm SHL  : BinaryInt<shl,  "shl",  0xA6, 0xA8>;
+defm SRA  : BinaryInt<sra,  "sra",  0xA7, 0xAA>;
 
 defm EQ : CommCmpInt<SETEQ, "eq", 0x46, 0x51>;
 defm NE : CommCmpInt<SETNE, "ne", 0x47, 0x52>;
