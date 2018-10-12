@@ -120,7 +120,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       >;
   }
 
-  def COPY_32 : I
+  def COPY_I32 : I
     < (outs I32:$dst)
     , (ins I32:$src)
     , []
@@ -128,7 +128,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x05
     >;
 
-  def COPY_64 : I
+  def COPY_I64 : I
     < (outs I64:$dst)
     , (ins I64:$src)
     , []
@@ -144,6 +144,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x70
     >;
 }
+
 
 def : Pat
   < (GenMsymbol tglobaladdr:$addr)

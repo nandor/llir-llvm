@@ -44,6 +44,7 @@ public:
   SDValue LowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerBR_JT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVASTART(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override;
 

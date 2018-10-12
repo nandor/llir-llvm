@@ -21,12 +21,20 @@ def TRUNC_I64_I32 : I
   , 0xE0
   >;
 
+def XEXT_I32_I64 : I
+  < (outs I64:$dst)
+  , (ins I32:$src)
+  , [(set I64:$dst, (anyext I32:$src))]
+  , "xext.i32.i64\t$dst, $src"
+  , 0xE1
+  >;
+
 def SEXT_I32_I64 : I
   < (outs I64:$dst)
   , (ins I32:$src)
   , [(set I64:$dst, (sext I32:$src))]
   , "sext.i32.i64\t$dst, $src"
-  , 0xE1
+  , 0xE2
   >;
 
 def ZEXT_I32_I64 : I
@@ -34,5 +42,5 @@ def ZEXT_I32_I64 : I
   , (ins I32:$src)
   , [(set I64:$dst, (zext I32:$src))]
   , "zext.i32.i64\t$dst, $src"
-  , 0xE2
+  , 0xE3
   >;

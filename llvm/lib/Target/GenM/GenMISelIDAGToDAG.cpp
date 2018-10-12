@@ -59,6 +59,11 @@ private:
 
 void GenMDAGToDAGISel::Select(SDNode *N)
 {
+  if (N->isMachineOpcode()) {
+    N->setNodeId(-1);
+    return;
+  }
+
   SelectCode(N);
 }
 
