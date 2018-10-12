@@ -159,6 +159,7 @@ def : Pat
 // Additional sets of instructions.
 //===----------------------------------------------------------------------===//
 
+include "GenMInstrAtomic.td"
 include "GenMInstrCall.td"
 include "GenMInstrConv.td"
 include "GenMInstrMemory.td"

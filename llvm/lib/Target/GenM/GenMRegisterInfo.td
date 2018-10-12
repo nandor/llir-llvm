@@ -26,18 +26,13 @@ class GenMRegClass<list<ValueType> regTypes, int alignment, dag regList>
 // Basic register types.
 //===----------------------------------------------------------------------===//
 
+def PC : GenMReg<"%pc">;
+def SP : GenMReg<"%sp">;
+def FP : GenMReg<"%sp">;
+
 def I32_0 : GenMReg<"%i32.0">;
 def I64_0 : GenMReg<"%i64.0">;
 
 def I32 : GenMRegClass<[i32], 32, (add I32_0)>;
-def I64 : GenMRegClass<[i64], 64, (add I64_0)>;
-
-//===----------------------------------------------------------------------===//
-// Special registers.
-//===----------------------------------------------------------------------===//
-
-def PC : GenMReg<"%pc">;
-def SP : GenMReg<"%sp">;
-def FP : GenMReg<"%sp">;
-def GPR : GenMRegClass<[i64], 64, (add PC, SP)>;
+def I64 : GenMRegClass<[i64], 64, (add I64_0, SP, FP)>;
 

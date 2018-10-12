@@ -14,6 +14,7 @@
 #include "GenMMCTargetDesc.h"
 #include "GenMMCAsmInfo.h"
 #include "InstPrinter/GenMInstPrinter.h"
+#include "MCTargetDesc/GenMMCTargetStreamer.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
@@ -49,6 +50,21 @@ static MCInstPrinter *createGenMMCInstPrinter(
   return new GenMInstPrinter(MAI, MII, MRI);
 }
 
+static MCTargetStreamer *createObjectTargetStreamer(
+    MCStreamer &S,
+    const MCSubtargetInfo &STI)
+{
+  return new GenMMCTargetELFStreamer(S);
+}
+
+static MCTargetStreamer *createAsmTargetStreamer(
+    MCStreamer &S,
+    formatted_raw_ostream &OS,
+    MCInstPrinter *InstPrinter,
+    bool isVerboseAsm)
+{
+  return new GenMMCTargetAsmStreamer(S, OS);
+}
 
 extern "C" void LLVMInitializeGenMTargetMC()
 {
@@ -60,5 +76,7 @@ extern "C" void LLVMInitializeGenMTargetMC()
     TargetRegistry::RegisterMCInstPrinter(*T, createGenMMCInstPrinter);
     TargetRegistry::RegisterMCCodeEmitter(*T, createGenMMCCodeEmitter);
     TargetRegistry::RegisterMCAsmBackend(*T, createGenMAsmBackend);
+    TargetRegistry::RegisterObjectTargetStreamer(*T, createObjectTargetStreamer);
+    TargetRegistry::RegisterAsmTargetStreamer(*T, createAsmTargetStreamer);
   }
 }

@@ -71,18 +71,18 @@ void GenMRegisterInfo::eliminateFrameIndex(
     DebugLoc DL = MI.getDebugLoc();
 
     unsigned ConstReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::CONST_I32), ConstReg)
+    BuildMI(MBB, II, DL, TII->get(GenM::CONST_I64), ConstReg)
         .addImm(Offset);
 
     unsigned AddrReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::ADD_I32), ConstReg)
+    BuildMI(MBB, II, DL, TII->get(GenM::ADD_I64), AddrReg)
         .addReg(FrameReg)
         .addReg(ConstReg);
 
     FrameReg = AddrReg;
   }
 
-  MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false, false, false);
+  MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
