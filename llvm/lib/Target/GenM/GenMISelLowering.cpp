@@ -68,6 +68,7 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::BlockAddress, MVTPtr, Custom);
   setOperationAction(ISD::BRIND, MVT::Other, Custom);
   setOperationAction(ISD::BR_JT, MVT::Other, Custom);
+  setOperationAction(ISD::CopyToReg, MVT::Other, Custom);
 
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
@@ -121,6 +122,7 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::JumpTable:      return LowerJumpTable(Op, DAG);
     case ISD::BR_JT:          return LowerBR_JT(Op, DAG);
     case ISD::VASTART:        return LowerVASTART(Op, DAG);
+    case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
     default: {
       Op.dump();
       llvm_unreachable("unimplemented operation lowering");
@@ -228,6 +230,37 @@ SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
   );
 }
 
+SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
+{
+  SDValue Src = Op.getOperand(2);
+  if (isa<FrameIndexSDNode>(Src.getNode())) {
+    SDValue Chain = Op.getOperand(0);
+    SDLoc DL(Op);
+
+    EVT VT = Src.getValueType();
+    SDValue Copy(DAG.getMachineNode(
+        VT == MVT::i32 ? GenM::COPY_I32 : GenM::COPY_I64,
+        DL,
+        VT,
+        Src
+    ), 0);
+
+    unsigned Reg = cast<RegisterSDNode>(Op.getOperand(1))->getReg();
+    if (Op.getNode()->getNumValues() == 1) {
+      return DAG.getCopyToReg(Chain, DL, Reg, Copy);
+    } else {
+      return DAG.getCopyToReg(
+          Chain,
+          DL,
+          Reg,
+          Copy,
+          Op.getNumOperands() == 4 ? Op.getOperand(3) : SDValue()
+      );
+    }
+  }
+  return SDValue();
+}
+
 bool GenMTargetLowering::useSoftFloat() const
 {
   return false;
@@ -271,11 +304,7 @@ MVT GenMTargetLowering::getScalarShiftAmountTy(
     const DataLayout &DL,
     EVT VT) const
 {
-  switch (VT.getSizeInBits()) {
-    case 32: return MVT::i32;
-    case 64: return MVT::i64;
-    default: llvm_unreachable("unable to represent shift amount");
-  }
+  return VT.getSizeInBits() <= 32 ? MVT::i32 : MVT::i64;
 }
 
 EVT GenMTargetLowering::getSetCCResultType(
