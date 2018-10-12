@@ -107,6 +107,9 @@ GenMTargetLowering::GenMTargetLowering(
       setLoadExtAction(Ext, T, MVT::i1, Promote);
     }
   }
+
+  // Disable jump tables.
+  setMinimumJumpTableEntries(INT_MAX);
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const

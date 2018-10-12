@@ -17,20 +17,29 @@ namespace llvm {
 class GenMMCTargetStreamer : public MCTargetStreamer {
 public:
   GenMMCTargetStreamer(MCStreamer &S);
+
+  /// .stack
+  virtual void emitStackSize(int Size) = 0;
 };
 
 // This part is for ascii assembly output
 class GenMMCTargetAsmStreamer : public GenMMCTargetStreamer {
-  formatted_raw_ostream &OS;
-
 public:
   GenMMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
+
+  virtual void emitStackSize(int Size) override;
+
+private:
+  formatted_raw_ostream &OS;
 };
 
 // This part is for ELF object output
 class GenMMCTargetELFStreamer : public GenMMCTargetStreamer {
 public:
   GenMMCTargetELFStreamer(MCStreamer &S);
+
+  virtual void emitStackSize(int Size) override;
+
   MCELFStreamer &getStreamer();
 };
 } // end namespace llvm

@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineModuleInfoImpls.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
+#include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/IR/Mangler.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -48,6 +49,11 @@ void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 
 void GenMAsmPrinter::EmitFunctionBodyStart()
 {
+  MachineFrameInfo &MFI = MF->getFrameInfo();
+  if (auto StackSize = MFI.getStackSize()) {
+    getTargetStreamer().emitStackSize(StackSize);
+  }
+
   AsmPrinter::EmitFunctionBodyStart();
 }
 

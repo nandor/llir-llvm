@@ -44,6 +44,13 @@ void GenMFrameLowering::emitPrologue(
   // TODO
 }
 
+void GenMFrameLowering::emitEpilogue(
+    MachineFunction &MF,
+    MachineBasicBlock &MBB) const
+{
+  // TODO
+}
+
 MachineBasicBlock::iterator
 GenMFrameLowering::eliminateCallFramePseudoInstr(
     MachineFunction &MF,
@@ -53,14 +60,6 @@ GenMFrameLowering::eliminateCallFramePseudoInstr(
   llvm_unreachable("not implemented");
 }
 
-
-void GenMFrameLowering::emitEpilogue(
-    MachineFunction &MF,
-    MachineBasicBlock &MBB) const
-{
-  // TODO
-}
-
 bool GenMFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const
 {
   llvm_unreachable("not implemented");
@@ -68,11 +67,14 @@ bool GenMFrameLowering::hasReservedCallFrame(const MachineFunction &MF) const
 
 bool GenMFrameLowering::hasFP(const MachineFunction &MF) const
 {
+  // If frame pointer elimination is disabled, emit frame pointer.
+  if (MF.getTarget().Options.DisableFramePointerElim(MF)) {
+    return true;
+  }
+
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   return MFI.isFrameAddressTaken()
-      || MFI.hasVarSizedObjects()
-      || MFI.hasStackMap()
-      || MFI.hasPatchPoint();
+      || MFI.hasVarSizedObjects();
 }
 
 int GenMFrameLowering::getFrameIndexReference(
