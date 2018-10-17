@@ -6,7 +6,7 @@ target datalayout = "e-m:e-p:32:32-i64:64-n32:64-S128"
 target triple = "wasm32-unknown-unknown"
 
 ; CHECK-LABEL: _f0:
-; CHECK: ret.void
+; CHECK: ret
 ; CHECK: .size _f0,
 define void @f0() {
   ret void
@@ -29,7 +29,7 @@ define i32 @f2(i32 %p1, float %p2) {
 }
 
 ; CHECK-LABEL: _f3:
-; CHECK: ret.void
+; CHECK: ret
 ; CHECK: .size _f3,
 define void @f3(i32 %p1, float %p2) {
   ret void
