@@ -24,7 +24,7 @@ class Return<GenMRegClass vt, string name>
 }
 
 class ReturnVoid
-  : TerminatorInst<(ins), [(GenMreturn)], "ret.void", 0x70>
+  : TerminatorInst<(ins), [(GenMreturn)], "ret", 0x70>
 {
   let isReturn = 1;
 }

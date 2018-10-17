@@ -2,8 +2,6 @@
 
 declare void @ext_func(i64* %ptr)
 declare void @ext_func_i32(i32* %ptr)
-declare void @use_i8_star(i8*)
-declare i8* @llvm.frameaddress(i32)
 
 
 ; CHECK-LABEL: _alloca32:
@@ -12,7 +10,7 @@ declare i8* @llvm.frameaddress(i32)
 define void @alloca32() noredzone {
   ; CHECK-NEXT: imm.i32 $0, 0
   ; CHECK-NEXT: st.4.i32 [$sp], $0
-  ; CHECK-NEXT: ret.void
+  ; CHECK-NEXT: ret
   %retval = alloca i32
   store i32 0, i32* %retval
   ret void

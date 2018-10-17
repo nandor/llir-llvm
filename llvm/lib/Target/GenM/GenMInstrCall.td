@@ -30,6 +30,6 @@ def CALL_VOID : CallInst
   < (outs)
   , (ins I64:$callee, variable_ops)
   , [(GenMvoid I64:$callee)]
-  , "call.void\t$callee"
+  , "call\t$callee"
   , 0x52
   >;

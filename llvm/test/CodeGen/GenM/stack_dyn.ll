@@ -1,4 +1,10 @@
 ; RUN: llc -mtriple=genm -verify-machineinstrs < %s | FileCheck %s
+; XFAIL: *
+
+declare void @ext_func(i64* %ptr)
+declare void @ext_func_i32(i32* %ptr)
+declare void @use_i8_star(i8*)
+declare i8* @llvm.frameaddress(i32)
 
 ; CHECK-LABEL: _dynamic_alloca:
 ; CHECK-NEXT: # %bb.0:

@@ -19,7 +19,7 @@ define i32 @call_i32_i32_i32(i32 %a) {
 ; CHECK-NEXT:  # %bb.0:
 ; CHECK-NEXT:  addr.i64 $0, _fn_void@FUNCTION
 ; CHECK-NEXT:  call $0
-; CHECK-NEXT:  ret.void
+; CHECK-NEXT:  ret
 define void @call_void(i32 %a) {
   call void @fn_void()
   ret void
