@@ -13,13 +13,22 @@
 //===----------------------------------------------------------------------===//
 
 
-multiclass BinaryInt<SDNode node, string name, bits<32> b32, bits<32> b64>
+multiclass BinaryInt
+  < SDNode node
+  , string name
+  , string type
+  , bits<32> b32
+  , bits<32> b64
+  >
 {
   def _I32 : I
     < (outs I32:$dst)
     , (ins I32:$lhs, I32:$rhs)
     , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
-    , !strconcat(name, ".i32 \t$dst, $lhs, $rhs")
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "32\t$dst, $lhs, $rhs")
+      )
     , b32
     >;
 
@@ -27,15 +36,24 @@ multiclass BinaryInt<SDNode node, string name, bits<32> b32, bits<32> b64>
     < (outs I64:$dst)
     , (ins I64:$lhs, I64:$rhs)
     , [(set I64:$dst, (node I64:$lhs, I64:$rhs))]
-    , !strconcat(name, ".i64 \t$dst, $lhs, $rhs")
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "64\t$dst, $lhs, $rhs")
+      )
     , b64
     >;
 }
 
-multiclass CommBinaryInt<SDNode node, string name, bits<32> b32, bits<32> b64>
+multiclass CommBinaryInt
+  < SDNode node
+  , string name
+  , string type
+  , bits<32> b32
+  , bits<32> b64
+  >
 {
   let isCommutable = 1 in
-  defm "" : BinaryInt<node, name, b32, b64>;
+  defm "" : BinaryInt<node, name, type, b32, b64>;
 }
 
 multiclass CmpInt
@@ -52,7 +70,7 @@ multiclass CmpInt
     , [(set I32:$dst, (setcc I32:$lhs, I32:$rhs, cond))]
     , !strconcat(
         !strconcat("cmp.", !strconcat(name, ".")),
-        !strconcat(type, "32 \t$dst, $lhs, $rhs")
+        !strconcat(type, "32\t$dst, $lhs, $rhs")
       )
     , b32
     >;
@@ -63,7 +81,7 @@ multiclass CmpInt
     , [(set I32:$dst, (setcc I64:$lhs, I64:$rhs, cond))]
     , !strconcat(
         !strconcat("cmp.", !strconcat(name, ".")),
-        !strconcat(type, "64 \t$dst, $lhs, $rhs")
+        !strconcat(type, "64\t$dst, $lhs, $rhs")
       )
     , b64
     >;
@@ -84,6 +102,7 @@ multiclass CommCmpInt
 multiclass TernaryInt
   < SDNode node
   , string name
+  , string type
   , bits<32> b32
   , bits<32> b64
   >
@@ -92,7 +111,10 @@ multiclass TernaryInt
     < (outs I32:$dst)
     , (ins I32:$op, I32:$lhs, I32:$rhs)
     , [(set I32:$dst, (node I32:$op, I32:$lhs, I32:$rhs))]
-    , !strconcat(name, ".i32 \t$dst, $op, $lhs, $rhs")
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "32\t$dst, $op, $lhs, $rhs")
+      )
     , b32
     >;
 
@@ -100,27 +122,30 @@ multiclass TernaryInt
     < (outs I64:$dst)
     , (ins I32:$op, I64:$lhs, I64:$rhs)
     , [(set I64:$dst, (node I32:$op, I64:$lhs, I64:$rhs))]
-    , !strconcat(name, ".i64 \t$dst, $op, $lhs, $rhs")
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "64\t$dst, $op, $lhs, $rhs")
+      )
     , b64
     >;
 }
 
 
-defm ADD : CommBinaryInt<add, "add",  0x90, 0x91>;
-defm XOR : CommBinaryInt<xor, "xor",  0x90, 0x93>;
-defm OR  : CommBinaryInt<or,  "or",   0x90, 0x95>;
-defm AND : CommBinaryInt<and, "and",  0x90, 0x97>;
-defm MUL : CommBinaryInt<mul, "mul",  0x90, 0x90>;
+defm ADD : CommBinaryInt<add, "add",  "i", 0x90, 0x91>;
+defm XOR : CommBinaryInt<xor, "xor",  "i", 0x90, 0x93>;
+defm OR  : CommBinaryInt<or,  "or",   "i", 0x90, 0x95>;
+defm AND : CommBinaryInt<and, "and",  "i", 0x90, 0x97>;
+defm MUL : CommBinaryInt<mul, "mul",  "i", 0x90, 0x90>;
 
-defm SUB  : BinaryInt<sub,  "sub",  0xA0, 0xA1>;
-defm SDIV : BinaryInt<sdiv, "sdiv", 0xA1, 0xA2>;
-defm UDIV : BinaryInt<udiv, "udiv", 0xA2, 0xA4>;
-defm SREM : BinaryInt<srem, "srem", 0xA3, 0xA2>;
-defm UREM : BinaryInt<urem, "urem", 0xA4, 0xA4>;
-defm SRL  : BinaryInt<srl,  "srl",  0xA5, 0xA6>;
-defm SHL  : BinaryInt<shl,  "shl",  0xA6, 0xA8>;
-defm SRA  : BinaryInt<sra,  "sra",  0xA7, 0xAA>;
-defm ROTL : BinaryInt<rotl, "rotl", 0xA8, 0xAB>;
+defm SUB  : BinaryInt<sub,  "sub",  "i", 0xA0, 0xA1>;
+defm SDIV : BinaryInt<sdiv, "div",  "i", 0xA1, 0xA2>;
+defm UDIV : BinaryInt<udiv, "div",  "u", 0xA2, 0xA4>;
+defm SREM : BinaryInt<srem, "rem",  "i", 0xA3, 0xA2>;
+defm UREM : BinaryInt<urem, "rem",  "u", 0xA4, 0xA4>;
+defm SRL  : BinaryInt<srl,  "srl",  "i", 0xA5, 0xA6>;
+defm SHL  : BinaryInt<shl,  "shl",  "i", 0xA6, 0xA8>;
+defm SRA  : BinaryInt<sra,  "sra",  "i", 0xA7, 0xAA>;
+defm ROTL : BinaryInt<rotl, "rotl", "i", 0xA8, 0xAB>;
 
 defm EQ : CommCmpInt<SETEQ, "eq", "i", 0x46, 0x51>;
 defm NE : CommCmpInt<SETNE, "neq", "i", 0x47, 0x52>;
@@ -134,7 +159,7 @@ defm LE_U : CmpInt<SETULE, "le", "u", 0x4d, 0x58>;
 defm GE_S : CmpInt<SETGE,  "ge", "i", 0x4e, 0x59>;
 defm GE_U : CmpInt<SETUGE, "ge", "u", 0x4f, 0x5a>;
 
-defm SELECT : TernaryInt<select, "select", 0xB0, 0xB1>;
+defm SELECT : TernaryInt<select, "select", "i", 0xB0, 0xB1>;
 
 def : Pat
   < (select (i32 (setne I32:$cond, 0)), I32:$lhs, I32:$rhs)

@@ -54,21 +54,21 @@ class GenMLd<GenMRegClass R, PatFrag node, string Name, int Opcode>
   let mayLoad = 1;
 }
 
-def LD_1_X32 : GenMLd<I32, extloadi8,   "1.x32", 0x42>;
+def LD_1_X32 : GenMLd<I32, extloadi8,   "1.u32", 0x42>;
 def LD_1_I32 : GenMLd<I32, sextloadi8,  "1.i32", 0x40>;
 def LD_1_U32 : GenMLd<I32, zextloadi8,  "1.u32", 0x41>;
-def LD_2_X32 : GenMLd<I32, extloadi16,  "2.x32", 0x43>;
+def LD_2_X32 : GenMLd<I32, extloadi16,  "2.u32", 0x43>;
 def LD_2_I32 : GenMLd<I32, sextloadi16, "2.i32", 0x43>;
 def LD_2_U32 : GenMLd<I32, zextloadi16, "2.u32", 0x44>;
 def LD_4_I32 : GenMLd<I32, load,        "4.i32", 0x45>;
 def LD_4_U32 : GenMLd<I32, load,        "4.u32", 0x45>;
-def LD_1_X64 : GenMLd<I64, extloadi8,   "1.x64", 0x46>;
+def LD_1_X64 : GenMLd<I64, extloadi8,   "1.u64", 0x46>;
 def LD_1_I64 : GenMLd<I64, sextloadi8,  "1.i64", 0x46>;
 def LD_1_U64 : GenMLd<I64, zextloadi8,  "1.u64", 0x4A>;
-def LD_2_X64 : GenMLd<I64, extloadi16,  "2.x64", 0x47>;
+def LD_2_X64 : GenMLd<I64, extloadi16,  "2.u64", 0x47>;
 def LD_2_I64 : GenMLd<I64, sextloadi16, "2.i64", 0x47>;
 def LD_2_U64 : GenMLd<I64, zextloadi16, "2.u64", 0x4B>;
-def LD_4_X64 : GenMLd<I64, extloadi32,  "4.x64", 0x48>;
+def LD_4_X64 : GenMLd<I64, extloadi32,  "4.u64", 0x48>;
 def LD_4_I64 : GenMLd<I64, sextloadi32, "4.i64", 0x48>;
 def LD_4_U64 : GenMLd<I64, zextloadi32, "4.u64", 0x4C>;
 def LD_8_I64 : GenMLd<I64, load,        "8.i64", 0x49>;
