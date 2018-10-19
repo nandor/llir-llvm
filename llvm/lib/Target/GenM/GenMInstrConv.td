@@ -25,7 +25,7 @@ def XEXT_I32_I64 : I
   < (outs I64:$dst)
   , (ins I32:$src)
   , [(set I64:$dst, (anyext I32:$src))]
-  , "xext.i64.i32\t$dst, $src"
+  , "zext.i64.i32\t$dst, $src"
   , 0xE1
   >;
 
