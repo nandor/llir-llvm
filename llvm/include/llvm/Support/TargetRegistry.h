@@ -59,6 +59,8 @@ class raw_pwrite_stream;
 class TargetMachine;
 class TargetOptions;
 
+extern bool IsGenM;
+
 MCStreamer *createNullStreamer(MCContext &Ctx);
 // Takes ownership of \p TAB and \p CE.
 

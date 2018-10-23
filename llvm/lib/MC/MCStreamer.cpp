@@ -34,6 +34,7 @@
 #include "llvm/Support/LEB128.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/TargetRegistry.h"
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -1229,6 +1230,11 @@ getMachoBuildVersionPlatformType(const Triple &Target) {
 
 void MCStreamer::emitVersionForTarget(const Triple &Target,
                                       const VersionTuple &SDKVersion) {
+  // Do not emit version for GenM.
+  if (IsGenM) {
+    return;
+  }
+  // Only emit version for MachO on darwin.
   if (!Target.isOSBinFormatMachO() || !Target.isOSDarwin())
     return;
   // Do we even know the version?

@@ -21,6 +21,11 @@
 using namespace llvm;
 
 GenMELFMCAsmInfo::GenMELFMCAsmInfo(const Triple &TheTriple) {
+  CommentString = "#";
+  ZeroDirective = "\t.zero\t";
+  Data64bitsDirective = "\t.quad\t";
+  HasFunctionAlignment = false;
+  HasDotTypeDotSizeDirective = false;
 }
 
 const MCExpr* GenMELFMCAsmInfo::getExprForPersonalitySymbol(

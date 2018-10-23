@@ -414,6 +414,9 @@ public:
   /// Note that this tests for 16-bit pointer width, and nothing else.
   bool isArch16Bit() const;
 
+  /// Test whether the architecture is GenM.
+  bool isArchGenM() const { return getArch() == genm; }
+
   /// isOSVersionLT - Helper function for doing comparisons against version
   /// numbers included in the target triple.
   bool isOSVersionLT(unsigned Major, unsigned Minor = 0,
