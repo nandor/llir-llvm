@@ -109,14 +109,11 @@ void GenMInstrInfo::copyPhysReg(
   auto &MRI = MBB.getParent()->getRegInfo();
   const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
   const TargetRegisterClass *SrcCls = MRI.getRegClass(SrcReg);
-  if (SrcCls != DstCls) {
-    llvm_unreachable("cannot copy registers");
-  }
 
   unsigned Op;
   if (&GenM::I32RegClass == DstCls) {
     Op = GenM::COPY_I32;
-  } else if (&GenM::I64RegClass == SrcCls) {
+  } else if (&GenM::I64RegClass == DstCls) {
     Op = GenM::COPY_I64;
   } else {
     llvm_unreachable("cannot copy physical registers");

@@ -7,7 +7,6 @@ target triple = "wasm32-unknown-unknown"
 
 ; CHECK-LABEL: _f0:
 ; CHECK: ret
-; CHECK: .size _f0,
 define void @f0() {
   ret void
 }
@@ -15,7 +14,6 @@ define void @f0() {
 ; CHECK-LABEL: _f1:
 ; CHECK: imm.i32   $0, 0
 ; CHECK-NEXT: ret.i32  $0
-; CHECK: .size _f1,
  define i32 @f1() {
   ret i32 0
 }
@@ -23,14 +21,12 @@ define void @f0() {
 ; CHECK-LABEL: _f2:
 ; CHECK: imm.i32   $0, 0
 ; CHECK-NEXT: ret.i32  $0
-; CHECK: .size _f2,
 define i32 @f2(i32 %p1, float %p2) {
   ret i32 0
 }
 
 ; CHECK-LABEL: _f3:
 ; CHECK: ret
-; CHECK: .size _f3,
 define void @f3(i32 %p1, float %p2) {
   ret void
 }
@@ -40,7 +36,6 @@ define void @f3(i32 %p1, float %p2) {
 ; CHECK: jmp
 ; CHECK: ret.i32
 ; CHECK: ret.i32
-; CHECK: .size _f4,
 define i32 @f4(i32 %x) {
 entry:
    %c = trunc i32 %x to i1

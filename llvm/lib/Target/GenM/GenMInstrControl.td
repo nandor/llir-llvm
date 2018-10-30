@@ -29,33 +29,25 @@ class ReturnVoid
   let isReturn = 1;
 }
 
-def RETURN_I32: Return<I32, "i32">;
-def RETURN_I64: Return<I64, "i64">;
+def RETURN_I32: Return<G32, "i32">;
+def RETURN_I64: Return<G64, "i64">;
 def RETURN_VOID: ReturnVoid;
 
 def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>;
-def JT : BranchInst<(ins bb_op:$dst, I32:$cond), [], "jt \t$cond, $dst", 0x72>;
-def JF : BranchInst<(ins bb_op:$dst, I32:$cond), [], "jf \t$cond, $dst", 0x73>;
+def JT : BranchInst<(ins bb_op:$dst, G32:$cond), [], "jt \t$cond, $dst", 0x72>;
+def JF : BranchInst<(ins bb_op:$dst, G32:$cond), [], "jf \t$cond, $dst", 0x73>;
 
 def : Pat
-  < (brcond (i32 (setne I32:$cond, 0)), bb:$dst)
-  , (JT bb_op:$dst, I32:$cond)
+  < (brcond (i32 (setne G32:$cond, 0)), bb:$dst)
+  , (JT bb_op:$dst, G32:$cond)
   >;
 
 def : Pat
   < (brcond i32:$cond, bb:$dst)
-  , (JT bb_op:$dst, I32:$cond)
+  , (JT bb_op:$dst, G32:$cond)
   >;
 
 def : Pat
-  < (brcond (i32 (seteq I32:$cond, 0)), bb:$dst)
-  , (JF bb_op:$dst, I32:$cond)
-  >;
-
-def JTABLE : I
-  < (outs)
-  , (ins I64:$idx, I32:$table)
-  , [(GenMbrjt I64:$idx, tjumptable:$table)]
-  , "jtable.i64\t$idx, $table"
-  , 0x74
+  < (brcond (i32 (seteq G32:$cond, 0)), bb:$dst)
+  , (JF bb_op:$dst, G32:$cond)
   >;
