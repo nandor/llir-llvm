@@ -69,6 +69,16 @@ void GenMInstPrinter::printInst(
       }
       break;
     }
+    case GenM::TCALL: {
+      OS << '\t' << "tcall";
+      OS << ", ";
+      printOperand(MI, 0, STI, OS);
+      for (unsigned i = 1; i < MI->getNumOperands(); i += 1) {
+        OS << ", ";
+        printOperand(MI, i, STI, OS);
+      }
+      break;
+    }
     case GenM::CALL_VOID: {
       OS << '\t' << "call";
       OS << '\t';

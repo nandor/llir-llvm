@@ -33,3 +33,11 @@ def CALL_VOID : CallInst
   , "call\t$callee"
   , 0x52
   >;
+
+def TCALL : CallInst
+  < (outs)
+  , (ins I64:$callee, variable_ops)
+  , [(GenMtcall I64:$callee)]
+  , "tcall\t$callee"
+  , 0x53
+  >;

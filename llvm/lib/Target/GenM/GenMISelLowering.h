@@ -25,6 +25,7 @@ enum NodeType : unsigned {
   ARGUMENT,
   RETURN,
   CALL,
+  TCALL,
   VOID,
   SYMBOL,
   BR_JT,
