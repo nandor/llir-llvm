@@ -20,6 +20,7 @@ def SDT_GenMargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
 def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMcall     : SDTypeProfile<1, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+def SDT_GenMtcall    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMbrjt     : SDTypeProfile<0,  2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 
@@ -39,6 +40,11 @@ def GenMreturn : SDNode
 def GenMcall : SDNode
   < "GenMISD::CALL"
   , SDT_GenMcall
+  , [SDNPHasChain, SDNPVariadic]
+  >;
+def GenMtcall : SDNode
+  < "GenMISD::TCALL"
+  , SDT_GenMtcall
   , [SDNPHasChain, SDNPVariadic]
   >;
 def GenMvoid : SDNode

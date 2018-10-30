@@ -281,6 +281,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::RETURN:       return "GenMISD::RETURN";
   case GenMISD::ARGUMENT:     return "GenMISD::ARGUMENT";
   case GenMISD::CALL:         return "GenMISD::CALL";
+  case GenMISD::TCALL:        return "GenMISD::TCALL";
   case GenMISD::VOID:         return "GenMISD::VOID";
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::BR_JT:        return "GenMISD::BR_JT";
@@ -376,10 +377,6 @@ SDValue GenMTargetLowering::LowerCall(
   SDValue Chain = CLI.Chain;
   SDValue Callee = CLI.Callee;
 
-  if (CLI.IsTailCall) {
-    // TODO(nand): enable tail calls
-    CLI.IsTailCall = false;
-  }
   if (CLI.Ins.size() > 1) {
     Fail(DL, DAG, "more than 1 return value not supported");
   }
@@ -463,26 +460,31 @@ SDValue GenMTargetLowering::LowerCall(
     Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
   }
 
-  // Collect the types of return values.
-  SmallVector<EVT, 8> InTys;
-  for (const auto &In : CLI.Ins) {
-    // TODO(nand): analyse argument types.
-    InTys.push_back(In.VT);
-  }
-  InTys.push_back(MVT::Other);
-
-  // Construct the call node.
-  if (CLI.Ins.empty()) {
-    return DAG.getNode(GenMISD::VOID, DL, DAG.getVTList(InTys), Ops);
+  if (CLI.IsTailCall) {
+    SmallVector<EVT, 8> InTys = { MVT::Other };
+    return DAG.getNode(GenMISD::TCALL, DL, DAG.getVTList(InTys), Ops);
   } else {
-    SDValue Call = DAG.getNode(
-        GenMISD::CALL,
-        DL,
-        DAG.getVTList(InTys),
-        Ops
-    );
-    InVals.push_back(Call);
-    return Call.getValue(1);
+    // Collect the types of return values.
+    SmallVector<EVT, 8> InTys;
+    for (const auto &In : CLI.Ins) {
+      // TODO(nand): analyse argument types.
+      InTys.push_back(In.VT);
+    }
+    InTys.push_back(MVT::Other);
+
+    // Construct the call node.
+    if (CLI.Ins.empty()) {
+      return DAG.getNode(GenMISD::VOID, DL, DAG.getVTList(InTys), Ops);
+    } else {
+      SDValue Call = DAG.getNode(
+          GenMISD::CALL,
+          DL,
+          DAG.getVTList(InTys),
+          Ops
+      );
+      InVals.push_back(Call);
+      return Call.getValue(1);
+    }
   }
 }
 
