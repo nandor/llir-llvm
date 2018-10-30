@@ -45,7 +45,7 @@ GenMRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
 BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
   BitVector Reserved(getNumRegs());
-  for (auto Reg : { GenM::PC, GenM::SP }) {
+  for (auto Reg : { GenM::FP, GenM::SP }) {
     Reserved.set(Reg);
   }
   return Reserved;

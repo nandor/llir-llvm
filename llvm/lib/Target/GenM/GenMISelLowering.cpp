@@ -58,7 +58,9 @@ GenMTargetLowering::GenMTargetLowering(
   setMaxAtomicSizeInBitsSupported(64);
 
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
+  addRegisterClass(MVT::i32, &GenM::G32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
+  addRegisterClass(MVT::i64, &GenM::G64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
@@ -124,7 +126,6 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::VASTART:        return LowerVASTART(Op, DAG);
     case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
     default: {
-      Op.dump();
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
     }

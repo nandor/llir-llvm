@@ -14,8 +14,8 @@
 
 def ATOMIC_XCHG_64 : I
   < (outs I64:$dst)
-  , (ins i64addr_op:$addr, I64:$src)
-  , [(set I64:$dst, (atomic_swap_64 (GenMsymbol tglobaladdr:$addr), I64:$src))]
-  , "atomic.xchg.i64\t$dst, $addr, $src"
+  , (ins G64:$addr, G64:$src)
+  , [(set I64:$dst, (atomic_swap_64 G64:$addr, G64:$src))]
+  , "xchg.i64\t$dst, $addr, $src"
   , 0xE1
   >;

@@ -130,7 +130,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
   def COPY_I64 : I
     < (outs I64:$dst)
-    , (ins I64:$src)
+    , (ins G64:$src)
     , []
     , "mov.i64\t$dst, $src"
     , 0x06

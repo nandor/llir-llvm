@@ -15,7 +15,6 @@ define void @alloca32() noredzone {
   store i32 0, i32* %retval
   ret void
 }
-; CHECK: .size _alloca32
 
 ; CHECK-LABEL: _alloca3264:
 ; CHECK-NEXT: .stack 16
@@ -27,7 +26,6 @@ define void @alloca3264() {
   store double 0.0, double* %r2
   ret void
 }
-; CHECK: .size _alloca3264
 
 ; CHECK-LABEL: _allocarray:
 ; CHECK-NEXT: .stack 132
@@ -40,7 +38,6 @@ define void @allocarray() {
   store i32 1, i32* %p2
   ret void
 }
-; CHECK: .size _allocarray
 
 ; CHECK-LABEL: _non_mem_use:
 ; CHECK-NEXT: .stack 48
@@ -55,7 +52,6 @@ define void @non_mem_use(i8** %addr) {
   store i8* %gep, i8** %addr
   ret void
 }
-; CHECK: .size _non_mem_use
 
 ; CHECK-LABEL: _allocarray_inbounds:
 ; CHECK-NEXT: .stack 20
@@ -69,4 +65,4 @@ define void @allocarray_inbounds() {
   call void @ext_func(i64* null)
   ret void
 }
-; CHECK: .size _allocarray_inbounds
+

@@ -22,8 +22,8 @@ class GenMSt
   >
   : I
     < (outs)
-    , (ins I64:$addr, R:$val)
-    , [(node R:$val, I64:$addr)]
+    , (ins G64:$addr, R:$val)
+    , [(node R:$val, G64:$addr)]
     , !strconcat("st.", !strconcat(Name, "\t[${addr}], $val"))
     , Opcode
     >
@@ -31,13 +31,13 @@ class GenMSt
   let mayStore = 1;
 }
 
-def ST_1_I32 : GenMSt<I32, truncstorei8,  "1.i32", 0x30>;
-def ST_2_I32 : GenMSt<I32, truncstorei16, "2.i32", 0x31>;
-def ST_4_I32 : GenMSt<I32, store,         "4.i32", 0x32>;
-def ST_1_I64 : GenMSt<I64, truncstorei8,  "1.i64", 0x33>;
-def ST_2_I64 : GenMSt<I64, truncstorei16, "2.i64", 0x34>;
-def ST_4_I64 : GenMSt<I64, truncstorei32, "4.i64", 0x35>;
-def ST_8_I64 : GenMSt<I64, store,         "8.i64", 0x36>;
+def ST_1_I32 : GenMSt<G32, truncstorei8,  "1.i32", 0x30>;
+def ST_2_I32 : GenMSt<G32, truncstorei16, "2.i32", 0x31>;
+def ST_4_I32 : GenMSt<G32, store,         "4.i32", 0x32>;
+def ST_1_I64 : GenMSt<G64, truncstorei8,  "1.i64", 0x33>;
+def ST_2_I64 : GenMSt<G64, truncstorei16, "2.i64", 0x34>;
+def ST_4_I64 : GenMSt<G64, truncstorei32, "4.i64", 0x35>;
+def ST_8_I64 : GenMSt<G64, store,         "8.i64", 0x36>;
 
 
 
@@ -45,8 +45,8 @@ def ST_8_I64 : GenMSt<I64, store,         "8.i64", 0x36>;
 class GenMLd<GenMRegClass R, PatFrag node, string Name, int Opcode>
   : I
     < (outs R:$dst)
-    , (ins I64:$addr)
-    , [(set R:$dst, (node I64:$addr))]
+    , (ins G64:$addr)
+    , [(set R:$dst, (node G64:$addr))]
     , !strconcat("ld.", !strconcat(Name, "\t$dst, [${addr}]"))
     , Opcode
     >
