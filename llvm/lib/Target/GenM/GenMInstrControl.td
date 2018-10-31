@@ -21,33 +21,35 @@ class Return<GenMRegClass vt, string name>
     >
 {
   let isReturn = 1;
-}
-
-class ReturnVoid
-  : TerminatorInst<(ins), [(GenMreturn)], "ret", 0x70>
-{
-  let isReturn = 1;
+  let isBarrier = 1;
 }
 
 def RETURN_I32: Return<G32, "i32">;
 def RETURN_I64: Return<G64, "i64">;
-def RETURN_VOID: ReturnVoid;
+def RETURN_VOID: TerminatorInst<(ins), [(GenMreturn)], "ret", 0x70>
+{
+  let isReturn = 1;
+  let isBarrier = 1;
+}
 
-def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>;
-def JT : BranchInst<(ins bb_op:$dst, G32:$cond), [], "jt \t$cond, $dst", 0x72>;
-def JF : BranchInst<(ins bb_op:$dst, G32:$cond), [], "jf \t$cond, $dst", 0x73>;
+def JT : BranchInst<(ins G32:$cond, bb_op:$dst), [], "jt \t$cond, $dst", 0x72>;
+def JF : BranchInst<(ins G32:$cond, bb_op:$dst), [], "jf \t$cond, $dst", 0x73>;
+def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>
+{
+  let isBarrier = 1;
+}
 
 def : Pat
   < (brcond (i32 (setne G32:$cond, 0)), bb:$dst)
-  , (JT bb_op:$dst, G32:$cond)
+  , (JT G32:$cond, bb_op:$dst)
   >;
 
 def : Pat
   < (brcond i32:$cond, bb:$dst)
-  , (JT bb_op:$dst, G32:$cond)
+  , (JT G32:$cond, bb_op:$dst)
   >;
 
 def : Pat
   < (brcond (i32 (seteq G32:$cond, 0)), bb:$dst)
-  , (JF bb_op:$dst, G32:$cond)
+  , (JF G32:$cond, bb_op:$dst)
   >;

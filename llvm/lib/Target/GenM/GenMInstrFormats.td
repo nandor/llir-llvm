@@ -44,7 +44,6 @@ class TerminatorInst
 {
   let isTerminator = 1;
   let hasCtrlDep = 1;
-  let isBarrier = 1;
 }
 
 class BranchInst
