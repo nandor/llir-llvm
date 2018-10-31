@@ -41,7 +41,41 @@ bool GenMInstrInfo::analyzeBranch(
     SmallVectorImpl<MachineOperand> &Cond,
     bool AllowModify) const
 {
-  return true;
+  // Optimise only when there a single condition, followed by jumps.
+  bool HaveCond = false;
+  for (MachineInstr &MI : MBB.terminators()) {
+    switch (MI.getOpcode()) {
+    default:
+      return true;
+    case GenM::JT:
+      if (HaveCond) {
+        return true;
+      }
+      Cond.push_back(MachineOperand::CreateImm(true));
+      Cond.push_back(MI.getOperand(0));
+      TBB = MI.getOperand(1).getMBB();
+      HaveCond = true;
+      break;
+    case GenM::JF:
+      if (HaveCond) {
+        return true;
+      }
+      Cond.push_back(MachineOperand::CreateImm(false));
+      Cond.push_back(MI.getOperand(0));
+      TBB = MI.getOperand(1).getMBB();
+      HaveCond = true;
+      break;
+    case GenM::JMP:
+      if (!HaveCond) {
+        TBB = MI.getOperand(0).getMBB();
+      } else {
+        FBB = MI.getOperand(0).getMBB();
+      }
+      break;
+    }
+  }
+
+  return false;
 }
 
 unsigned GenMInstrInfo::removeBranch(
@@ -57,6 +91,7 @@ unsigned GenMInstrInfo::removeBranch(
       continue;
     if (!I->isTerminator())
       break;
+    llvm::errs() << *I;
     // Remove the branch.
     I->eraseFromParent();
     I = MBB.instr_end();
@@ -84,7 +119,17 @@ unsigned GenMInstrInfo::insertBranch(
       }
     }
     case 2: {
-      llvm_unreachable("not implemented");
+      if (Cond[0].getImm()) {
+        BuildMI(&MBB, DL, get(GenM::JT)).add(Cond[1]).addMBB(TBB);
+      } else {
+        BuildMI(&MBB, DL, get(GenM::JF)).add(Cond[1]).addMBB(TBB);
+      }
+      if (FBB) {
+        BuildMI(&MBB, DL, get(GenM::JMP)).addMBB(FBB);
+        return 2;
+      } else {
+        return 1;
+      }
     }
     default: {
       llvm_unreachable("invalid condition");
@@ -95,7 +140,9 @@ unsigned GenMInstrInfo::insertBranch(
 bool GenMInstrInfo::reverseBranchCondition(
     SmallVectorImpl<MachineOperand> &Cond) const
 {
-  llvm_unreachable("not implemented");
+  assert(Cond.size() == 2 && "Expected a flag and succesor.");
+  Cond.front() = MachineOperand::CreateImm(!Cond.front().getImm());
+  return false;
 }
 
 void GenMInstrInfo::copyPhysReg(

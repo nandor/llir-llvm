@@ -19,9 +19,7 @@ class CALL<GenMRegClass vt, string suffix> : CallInst
   , [(set vt:$dst, (GenMcall I64:$callee))]
   , !strconcat("call.", !strconcat(suffix, "\t$dst, $callee"))
   , 0x50
-  >
-{
-}
+  >;
 
 def CALL_I32: CALL<I32, "i32">;
 def CALL_I64: CALL<I64, "i64">;
@@ -40,4 +38,7 @@ def TCALL : CallInst
   , [(GenMtcall I64:$callee)]
   , "tcall\t$callee"
   , 0x53
-  >;
+  >
+{
+  let isBarrier = 1;
+}

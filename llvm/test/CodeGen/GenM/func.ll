@@ -33,7 +33,6 @@ define void @f3(i32 %p1, float %p2) {
 
 ; CHECK-LABEL: _f4:
 ; CHECK: jf
-; CHECK: jmp
 ; CHECK: ret.i32
 ; CHECK: ret.i32
 define i32 @f4(i32 %x) {
