@@ -34,41 +34,16 @@ class SwiftErrorValueTracking;
 class GCFunctionInfo;
 class ScheduleDAGSDNodes;
 
-/// SelectionDAGISel - This is the common base class used for SelectionDAG-based
-/// pattern-matching instruction selectors.
-class SelectionDAGISel : public MachineFunctionPass {
+/// Pattern matching based DAG matcher.
+class DAGMatcher {
 public:
   TargetMachine &TM;
-  const TargetLibraryInfo *LibInfo;
-  std::unique_ptr<FunctionLoweringInfo> FuncInfo;
-  SwiftErrorValueTracking *SwiftError;
-  MachineFunction *MF;
-  MachineRegisterInfo *RegInfo;
   SelectionDAG *CurDAG;
-  std::unique_ptr<SelectionDAGBuilder> SDB;
-  AAResults *AA;
-  GCFunctionInfo *GFI;
   CodeGenOpt::Level OptLevel;
-  const TargetInstrInfo *TII;
+
+  MachineFunction *MF;
   const TargetLowering *TLI;
-  bool FastISelFailed;
-  SmallPtrSet<const Instruction *, 4> ElidedArgCopyInstrs;
-
-  /// Current optimization remark emitter.
-  /// Used to report things like combines and FastISel failures.
-  std::unique_ptr<OptimizationRemarkEmitter> ORE;
-
-  static char ID;
-
-  explicit SelectionDAGISel(TargetMachine &tm,
-                            CodeGenOpt::Level OL = CodeGenOpt::Default);
-  ~SelectionDAGISel() override;
-
-  const TargetLowering *getTargetLowering() const { return TLI; }
-
-  void getAnalysisUsage(AnalysisUsage &AU) const override;
-
-  bool runOnMachineFunction(MachineFunction &MF) override;
+  const TargetInstrInfo *TII;
 
   virtual void emitFunctionEntryCode() {}
 
@@ -79,9 +54,6 @@ public:
   /// PostprocessISelDAG() - This hook allows the target to hack on the graph
   /// right after selection.
   virtual void PostprocessISelDAG() {}
-
-  /// Main hook for targets to transform nodes into machine nodes.
-  virtual void Select(SDNode *N) = 0;
 
   /// SelectInlineAsmMemoryOperand - Select the specified address as a target
   /// addressing mode, according to the specified constraint.  If this does
@@ -194,12 +166,25 @@ public:
     return ((Flags&OPFL_VariadicInfo) >> 4)-1;
   }
 
+  DAGMatcher(
+      TargetMachine &tm,
+      SelectionDAG *dag,
+      CodeGenOpt::Level OptLevel,
+      const TargetLowering *TLI = nullptr,
+      const TargetInstrInfo *TII = nullptr)
+    : TM(tm)
+    , CurDAG(dag)
+    , OptLevel(OptLevel)
+    , TLI(TLI)
+    , TII(TII)
+  {
+  }
+
+  virtual ~DAGMatcher()
+  {
+  }
 
 protected:
-  /// DAGSize - Size of DAG being instruction selected.
-  ///
-  unsigned DAGSize;
-
   /// ReplaceUses - replace all uses of the old node F with the use
   /// of the new node T.
   void ReplaceUses(SDValue F, SDValue T) {
@@ -318,10 +303,58 @@ private:
 
   void Select_FREEZE(SDNode *N);
 
-private:
-  void DoInstructionSelection();
   SDNode *MorphNode(SDNode *Node, unsigned TargetOpc, SDVTList VTList,
                     ArrayRef<SDValue> Ops, unsigned EmitNodeInfo);
+
+  /// OpcodeOffset - This is a cache used to dispatch efficiently into isel
+  /// state machines that start with a OPC_SwitchOpcode node.
+  std::vector<unsigned> OpcodeOffset;
+
+  void UpdateChains(SDNode *NodeToMatch, SDValue InputChain,
+                    SmallVectorImpl<SDNode *> &ChainNodesMatched,
+                    bool isMorphNodeTo);
+};
+
+/// SelectionDAGISel - This is the common base class used for SelectionDAG-based
+/// pattern-matching instruction selectors.
+class SelectionDAGISel : virtual public DAGMatcher, public MachineFunctionPass {
+public:
+  const TargetLibraryInfo *LibInfo;
+  std::unique_ptr<FunctionLoweringInfo> FuncInfo;
+  SwiftErrorValueTracking *SwiftError;
+  MachineRegisterInfo *RegInfo;
+  std::unique_ptr<SelectionDAGBuilder> SDB;
+  AAResults *AA;
+  GCFunctionInfo *GFI;
+  bool FastISelFailed;
+  SmallPtrSet<const Instruction *, 4> ElidedArgCopyInstrs;
+
+  /// Current optimization remark emitter.
+  /// Used to report things like combines and FastISel failures.
+  std::unique_ptr<OptimizationRemarkEmitter> ORE;
+
+  static char ID;
+
+  explicit SelectionDAGISel(TargetMachine &tm,
+                            CodeGenOpt::Level OL = CodeGenOpt::Default);
+  ~SelectionDAGISel() override;
+
+  const TargetLowering *getTargetLowering() const { return TLI; }
+
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
+
+  bool runOnMachineFunction(MachineFunction &MF) override;
+
+  /// Main hook for targets to transform nodes into machine nodes.
+  virtual void Select(SDNode *N) = 0;
+
+protected:
+  /// DAGSize - Size of DAG being instruction selected.
+  ///
+  unsigned DAGSize;
+
+private:
+  void DoInstructionSelection();
 
   SDNode *MutateStrictFPToFP(SDNode *Node, unsigned NewOpc);
 
@@ -354,14 +387,6 @@ private:
   /// one preferred by the target.
   ///
   ScheduleDAGSDNodes *CreateScheduler();
-
-  /// OpcodeOffset - This is a cache used to dispatch efficiently into isel
-  /// state machines that start with a OPC_SwitchOpcode node.
-  std::vector<unsigned> OpcodeOffset;
-
-  void UpdateChains(SDNode *NodeToMatch, SDValue InputChain,
-                    SmallVectorImpl<SDNode *> &ChainNodesMatched,
-                    bool isMorphNodeTo);
 };
 
 }

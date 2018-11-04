@@ -108,7 +108,7 @@ void RegisterClassInfo::compute(const TargetRegisterClass *RC) const {
   // allocation order, we can simply use begin/end here.
   ArrayRef<MCPhysReg> RawOrder = RC->getRawAllocationOrder(*MF);
   for (unsigned i = 0; i != RawOrder.size(); ++i) {
-    unsigned PhysReg = RawOrder[i];
+    unsigned PhysReg = RawOrder[i];\
     // Remove reserved registers from the allocation order.
     if (Reserved.test(PhysReg))
       continue;

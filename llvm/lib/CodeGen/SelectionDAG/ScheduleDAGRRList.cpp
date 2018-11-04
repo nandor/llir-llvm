@@ -3189,3 +3189,24 @@ llvm::createILPListDAGScheduler(SelectionDAGISel *IS,
   PQ->setScheduleDAG(SD);
   return SD;
 }
+
+ScheduleDAGSDNodes *
+llvm::createILPListDAGScheduler(
+    MachineFunction *MF,
+    const TargetInstrInfo *TII,
+    const TargetRegisterInfo *TRI,
+    const TargetLowering *TLI,
+    CodeGenOpt::Level OptLevel)
+{
+  ILPBURRPriorityQueue *PQ = new ILPBURRPriorityQueue(
+      *MF,
+      true,
+      false,
+      TII,
+      TRI,
+      TLI
+  );
+  ScheduleDAGRRList *SD = new ScheduleDAGRRList(*MF, true, PQ, OptLevel);
+  PQ->setScheduleDAG(SD);
+  return SD;
+}

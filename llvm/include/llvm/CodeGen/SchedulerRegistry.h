@@ -27,6 +27,9 @@ namespace llvm {
 
 class ScheduleDAGSDNodes;
 class SelectionDAGISel;
+class TargetInstrInfo;
+class TargetLowering;
+class TargetRegisterInfo;
 
 class RegisterScheduler
     : public MachinePassRegistryNode<
@@ -101,6 +104,14 @@ ScheduleDAGSDNodes *createDefaultScheduler(SelectionDAGISel *IS,
 /// linearize the DAG using topological order.
 ScheduleDAGSDNodes *createDAGLinearizer(SelectionDAGISel *IS,
                                         CodeGenOpt::Level OptLevel);
+
+ScheduleDAGSDNodes *createILPListDAGScheduler(
+    MachineFunction *MF,
+    const TargetInstrInfo *TII,
+    const TargetRegisterInfo *TRI,
+    const TargetLowering *TLI,
+    CodeGenOpt::Level OptLevel
+);
 
 } // end namespace llvm
 
