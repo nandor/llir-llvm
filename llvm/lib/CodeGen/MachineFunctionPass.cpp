@@ -69,7 +69,6 @@ bool MachineFunctionPass::runOnFunction(Function &F) {
   // MachineFunction before the pass runs.
   if (ShouldEmitSizeRemarks)
     CountBefore = MF.getInstructionCount();
-
   bool RV = runOnMachineFunction(MF);
 
   if (ShouldEmitSizeRemarks) {

@@ -309,12 +309,12 @@ void TargetLowering::AdjustInstrPostInstrSelection(MachineInstr &MI,
 //===----------------------------------------------------------------------===//
 
 SelectionDAGISel::SelectionDAGISel(TargetMachine &tm, CodeGenOpt::Level OL)
-    : MachineFunctionPass(ID), TM(tm), FuncInfo(new FunctionLoweringInfo()),
+    : DAGMatcher(tm, new SelectionDAG(tm, OL), OL),
+      MachineFunctionPass(ID), FuncInfo(new FunctionLoweringInfo()),
       SwiftError(new SwiftErrorValueTracking()),
-      CurDAG(new SelectionDAG(tm, OL)),
       SDB(std::make_unique<SelectionDAGBuilder>(*CurDAG, *FuncInfo, *SwiftError,
                                                 OL)),
-      AA(), GFI(), OptLevel(OL), DAGSize(0) {
+      AA(), GFI(), DAGSize(0) {
   initializeGCModuleInfoPass(*PassRegistry::getPassRegistry());
   initializeBranchProbabilityInfoWrapperPassPass(
       *PassRegistry::getPassRegistry());
@@ -1047,7 +1047,7 @@ public:
 // achieved by selected nodes). As the conversion is reversable the original Id,
 // topological pruning can still be leveraged when looking for unselected nodes.
 // This method is call internally in all ISel replacement calls.
-void SelectionDAGISel::EnforceNodeIdInvariant(SDNode *Node) {
+void DAGMatcher::EnforceNodeIdInvariant(SDNode *Node) {
   SmallVector<SDNode *, 4> Nodes;
   Nodes.push_back(Node);
 
@@ -1066,13 +1066,13 @@ void SelectionDAGISel::EnforceNodeIdInvariant(SDNode *Node) {
 // InvalidateNodeId - As discusses in EnforceNodeIdInvariant, mark a
 // NodeId with the equivalent node id which is invalid for topological
 // pruning.
-void SelectionDAGISel::InvalidateNodeId(SDNode *N) {
+void DAGMatcher::InvalidateNodeId(SDNode *N) {
   int InvalidId = -(N->getNodeId() + 1);
   N->setNodeId(InvalidId);
 }
 
 // getUninvalidatedNodeId - get original uninvalidated node id.
-int SelectionDAGISel::getUninvalidatedNodeId(SDNode *N) {
+int DAGMatcher::getUninvalidatedNodeId(SDNode *N) {
   int Id = N->getNodeId();
   if (Id < -1)
     return -(Id + 1);
@@ -1987,7 +1987,7 @@ ScheduleDAGSDNodes *SelectionDAGISel::CreateScheduler() {
 /// the dag combiner simplified the 255, we still want to match.  RHS is the
 /// actual value in the DAG on the RHS of an AND, and DesiredMaskS is the value
 /// specified in the .td file (e.g. 255).
-bool SelectionDAGISel::CheckAndMask(SDValue LHS, ConstantSDNode *RHS,
+bool DAGMatcher::CheckAndMask(SDValue LHS, ConstantSDNode *RHS,
                                     int64_t DesiredMaskS) const {
   const APInt &ActualMask = RHS->getAPIntValue();
   const APInt &DesiredMask = APInt(LHS.getValueSizeInBits(), DesiredMaskS);
@@ -2016,7 +2016,7 @@ bool SelectionDAGISel::CheckAndMask(SDValue LHS, ConstantSDNode *RHS,
 /// the dag combiner simplified the 255, we still want to match.  RHS is the
 /// actual value in the DAG on the RHS of an OR, and DesiredMaskS is the value
 /// specified in the .td file (e.g. 255).
-bool SelectionDAGISel::CheckOrMask(SDValue LHS, ConstantSDNode *RHS,
+bool DAGMatcher::CheckOrMask(SDValue LHS, ConstantSDNode *RHS,
                                    int64_t DesiredMaskS) const {
   const APInt &ActualMask = RHS->getAPIntValue();
   const APInt &DesiredMask = APInt(LHS.getValueSizeInBits(), DesiredMaskS);
@@ -2046,7 +2046,7 @@ bool SelectionDAGISel::CheckOrMask(SDValue LHS, ConstantSDNode *RHS,
 
 /// SelectInlineAsmMemoryOperands - Calls to this are automatically generated
 /// by tblgen.  Others should not call it.
-void SelectionDAGISel::SelectInlineAsmMemoryOperands(std::vector<SDValue> &Ops,
+void DAGMatcher::SelectInlineAsmMemoryOperands(std::vector<SDValue> &Ops,
                                                      const SDLoc &DL) {
   std::vector<SDValue> InOps;
   std::swap(InOps, Ops);
@@ -2159,7 +2159,7 @@ static bool findNonImmUse(SDNode *Root, SDNode *Def, SDNode *ImmedUse,
 
 /// IsProfitableToFold - Returns true if it's profitable to fold the specific
 /// operand node N of U during instruction selection that starts at Root.
-bool SelectionDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
+bool DAGMatcher::IsProfitableToFold(SDValue N, SDNode *U,
                                           SDNode *Root) const {
   if (OptLevel == CodeGenOpt::None) return false;
   return N.hasOneUse();
@@ -2167,7 +2167,7 @@ bool SelectionDAGISel::IsProfitableToFold(SDValue N, SDNode *U,
 
 /// IsLegalToFold - Returns true if the specific operand node N of
 /// U can be folded during instruction selection that starts at Root.
-bool SelectionDAGISel::IsLegalToFold(SDValue N, SDNode *U, SDNode *Root,
+bool DAGMatcher::IsLegalToFold(SDValue N, SDNode *U, SDNode *Root,
                                      CodeGenOpt::Level OptLevel,
                                      bool IgnoreChains) {
   if (OptLevel == CodeGenOpt::None) return false;
@@ -2234,7 +2234,7 @@ bool SelectionDAGISel::IsLegalToFold(SDValue N, SDNode *U, SDNode *Root,
   return !findNonImmUse(Root, N.getNode(), U, IgnoreChains);
 }
 
-void SelectionDAGISel::Select_INLINEASM(SDNode *N) {
+void DAGMatcher::Select_INLINEASM(SDNode *N) {
   SDLoc DL(N);
 
   std::vector<SDValue> Ops(N->op_begin(), N->op_end());
@@ -2247,7 +2247,7 @@ void SelectionDAGISel::Select_INLINEASM(SDNode *N) {
   CurDAG->RemoveDeadNode(N);
 }
 
-void SelectionDAGISel::Select_READ_REGISTER(SDNode *Op) {
+void DAGMatcher::Select_READ_REGISTER(SDNode *Op) {
   SDLoc dl(Op);
   MDNodeSDNode *MD = cast<MDNodeSDNode>(Op->getOperand(1));
   const MDString *RegStr = cast<MDString>(MD->getMD()->getOperand(0));
@@ -2264,7 +2264,7 @@ void SelectionDAGISel::Select_READ_REGISTER(SDNode *Op) {
   CurDAG->RemoveDeadNode(Op);
 }
 
-void SelectionDAGISel::Select_WRITE_REGISTER(SDNode *Op) {
+void DAGMatcher::Select_WRITE_REGISTER(SDNode *Op) {
   SDLoc dl(Op);
   MDNodeSDNode *MD = cast<MDNodeSDNode>(Op->getOperand(1));
   const MDString *RegStr = cast<MDString>(MD->getMD()->getOperand(0));
@@ -2281,11 +2281,11 @@ void SelectionDAGISel::Select_WRITE_REGISTER(SDNode *Op) {
   CurDAG->RemoveDeadNode(Op);
 }
 
-void SelectionDAGISel::Select_UNDEF(SDNode *N) {
+void DAGMatcher::Select_UNDEF(SDNode *N) {
   CurDAG->SelectNodeTo(N, TargetOpcode::IMPLICIT_DEF, N->getValueType(0));
 }
 
-void SelectionDAGISel::Select_FREEZE(SDNode *N) {
+void DAGMatcher::Select_FREEZE(SDNode *N) {
   // TODO: We don't have FREEZE pseudo-instruction in MachineInstr-level now.
   // If FREEZE instruction is added later, the code below must be changed as
   // well.
@@ -2312,7 +2312,7 @@ GetVBR(uint64_t Val, const unsigned char *MatcherTable, unsigned &Idx) {
 
 /// When a match is complete, this method updates uses of interior chain results
 /// to use the new results.
-void SelectionDAGISel::UpdateChains(
+void DAGMatcher::UpdateChains(
     SDNode *NodeToMatch, SDValue InputChain,
     SmallVectorImpl<SDNode *> &ChainNodesMatched, bool isMorphNodeTo) {
   SmallVector<SDNode*, 4> NowDeadNodes;
@@ -2430,7 +2430,7 @@ HandleMergeInputChains(SmallVectorImpl<SDNode*> &ChainNodesMatched,
 }
 
 /// MorphNode - Handle morphing a node in place for the selector.
-SDNode *SelectionDAGISel::
+SDNode *DAGMatcher::
 MorphNode(SDNode *Node, unsigned TargetOpc, SDVTList VTList,
           ArrayRef<SDValue> Ops, unsigned EmitNodeInfo) {
   // It is possible we're using MorphNodeTo to replace a node with no
@@ -2516,14 +2516,14 @@ CheckChildSame(const unsigned char *MatcherTable, unsigned &MatcherIndex,
 /// CheckPatternPredicate - Implements OP_CheckPatternPredicate.
 LLVM_ATTRIBUTE_ALWAYS_INLINE static inline bool
 CheckPatternPredicate(const unsigned char *MatcherTable, unsigned &MatcherIndex,
-                      const SelectionDAGISel &SDISel) {
+                      const DAGMatcher &SDISel) {
   return SDISel.CheckPatternPredicate(MatcherTable[MatcherIndex++]);
 }
 
 /// CheckNodePredicate - Implements OP_CheckNodePredicate.
 LLVM_ATTRIBUTE_ALWAYS_INLINE static inline bool
 CheckNodePredicate(const unsigned char *MatcherTable, unsigned &MatcherIndex,
-                   const SelectionDAGISel &SDISel, SDNode *N) {
+                   const DAGMatcher &SDISel, SDNode *N) {
   return SDISel.CheckNodePredicate(N, MatcherTable[MatcherIndex++]);
 }
 
@@ -2602,7 +2602,7 @@ CheckChildInteger(const unsigned char *MatcherTable, unsigned &MatcherIndex,
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static inline bool
 CheckAndImm(const unsigned char *MatcherTable, unsigned &MatcherIndex,
-            SDValue N, const SelectionDAGISel &SDISel) {
+            SDValue N, const DAGMatcher &SDISel) {
   int64_t Val = MatcherTable[MatcherIndex++];
   if (Val & 128)
     Val = GetVBR(Val, MatcherTable, MatcherIndex);
@@ -2615,7 +2615,7 @@ CheckAndImm(const unsigned char *MatcherTable, unsigned &MatcherIndex,
 
 LLVM_ATTRIBUTE_ALWAYS_INLINE static inline bool
 CheckOrImm(const unsigned char *MatcherTable, unsigned &MatcherIndex,
-           SDValue N, const SelectionDAGISel &SDISel) {
+           SDValue N, const DAGMatcher &SDISel) {
   int64_t Val = MatcherTable[MatcherIndex++];
   if (Val & 128)
     Val = GetVBR(Val, MatcherTable, MatcherIndex);
@@ -2635,78 +2635,78 @@ CheckOrImm(const unsigned char *MatcherTable, unsigned &MatcherIndex,
 static unsigned IsPredicateKnownToFail(const unsigned char *Table,
                                        unsigned Index, SDValue N,
                                        bool &Result,
-                                       const SelectionDAGISel &SDISel,
+                                       const DAGMatcher &SDISel,
                   SmallVectorImpl<std::pair<SDValue, SDNode*>> &RecordedNodes) {
   switch (Table[Index++]) {
   default:
     Result = false;
     return Index-1;  // Could not evaluate this predicate.
-  case SelectionDAGISel::OPC_CheckSame:
+  case DAGMatcher::OPC_CheckSame:
     Result = !::CheckSame(Table, Index, N, RecordedNodes);
     return Index;
-  case SelectionDAGISel::OPC_CheckChild0Same:
-  case SelectionDAGISel::OPC_CheckChild1Same:
-  case SelectionDAGISel::OPC_CheckChild2Same:
-  case SelectionDAGISel::OPC_CheckChild3Same:
+  case DAGMatcher::OPC_CheckChild0Same:
+  case DAGMatcher::OPC_CheckChild1Same:
+  case DAGMatcher::OPC_CheckChild2Same:
+  case DAGMatcher::OPC_CheckChild3Same:
     Result = !::CheckChildSame(Table, Index, N, RecordedNodes,
-                        Table[Index-1] - SelectionDAGISel::OPC_CheckChild0Same);
+                        Table[Index-1] - DAGMatcher::OPC_CheckChild0Same);
     return Index;
-  case SelectionDAGISel::OPC_CheckPatternPredicate:
+  case DAGMatcher::OPC_CheckPatternPredicate:
     Result = !::CheckPatternPredicate(Table, Index, SDISel);
     return Index;
-  case SelectionDAGISel::OPC_CheckPredicate:
+  case DAGMatcher::OPC_CheckPredicate:
     Result = !::CheckNodePredicate(Table, Index, SDISel, N.getNode());
     return Index;
-  case SelectionDAGISel::OPC_CheckOpcode:
+  case DAGMatcher::OPC_CheckOpcode:
     Result = !::CheckOpcode(Table, Index, N.getNode());
     return Index;
-  case SelectionDAGISel::OPC_CheckType:
+  case DAGMatcher::OPC_CheckType:
     Result = !::CheckType(Table, Index, N, SDISel.TLI,
                           SDISel.CurDAG->getDataLayout());
     return Index;
-  case SelectionDAGISel::OPC_CheckTypeRes: {
+  case DAGMatcher::OPC_CheckTypeRes: {
     unsigned Res = Table[Index++];
     Result = !::CheckType(Table, Index, N.getValue(Res), SDISel.TLI,
                           SDISel.CurDAG->getDataLayout());
     return Index;
   }
-  case SelectionDAGISel::OPC_CheckChild0Type:
-  case SelectionDAGISel::OPC_CheckChild1Type:
-  case SelectionDAGISel::OPC_CheckChild2Type:
-  case SelectionDAGISel::OPC_CheckChild3Type:
-  case SelectionDAGISel::OPC_CheckChild4Type:
-  case SelectionDAGISel::OPC_CheckChild5Type:
-  case SelectionDAGISel::OPC_CheckChild6Type:
-  case SelectionDAGISel::OPC_CheckChild7Type:
+  case DAGMatcher::OPC_CheckChild0Type:
+  case DAGMatcher::OPC_CheckChild1Type:
+  case DAGMatcher::OPC_CheckChild2Type:
+  case DAGMatcher::OPC_CheckChild3Type:
+  case DAGMatcher::OPC_CheckChild4Type:
+  case DAGMatcher::OPC_CheckChild5Type:
+  case DAGMatcher::OPC_CheckChild6Type:
+  case DAGMatcher::OPC_CheckChild7Type:
     Result = !::CheckChildType(
                  Table, Index, N, SDISel.TLI, SDISel.CurDAG->getDataLayout(),
-                 Table[Index - 1] - SelectionDAGISel::OPC_CheckChild0Type);
+                 Table[Index - 1] - DAGMatcher::OPC_CheckChild0Type);
     return Index;
-  case SelectionDAGISel::OPC_CheckCondCode:
+  case DAGMatcher::OPC_CheckCondCode:
     Result = !::CheckCondCode(Table, Index, N);
     return Index;
-  case SelectionDAGISel::OPC_CheckChild2CondCode:
+  case DAGMatcher::OPC_CheckChild2CondCode:
     Result = !::CheckChild2CondCode(Table, Index, N);
     return Index;
-  case SelectionDAGISel::OPC_CheckValueType:
+  case DAGMatcher::OPC_CheckValueType:
     Result = !::CheckValueType(Table, Index, N, SDISel.TLI,
                                SDISel.CurDAG->getDataLayout());
     return Index;
-  case SelectionDAGISel::OPC_CheckInteger:
+  case DAGMatcher::OPC_CheckInteger:
     Result = !::CheckInteger(Table, Index, N);
     return Index;
-  case SelectionDAGISel::OPC_CheckChild0Integer:
-  case SelectionDAGISel::OPC_CheckChild1Integer:
-  case SelectionDAGISel::OPC_CheckChild2Integer:
-  case SelectionDAGISel::OPC_CheckChild3Integer:
-  case SelectionDAGISel::OPC_CheckChild4Integer:
+  case DAGMatcher::OPC_CheckChild0Integer:
+  case DAGMatcher::OPC_CheckChild1Integer:
+  case DAGMatcher::OPC_CheckChild2Integer:
+  case DAGMatcher::OPC_CheckChild3Integer:
+  case DAGMatcher::OPC_CheckChild4Integer:
     Result = !::CheckChildInteger(Table, Index, N,
-                     Table[Index-1] - SelectionDAGISel::OPC_CheckChild0Integer);
+                     Table[Index-1] - DAGMatcher::OPC_CheckChild0Integer);
     return Index;
-  case SelectionDAGISel::OPC_CheckAndImm:
+  case DAGMatcher::OPC_CheckAndImm:
     Result = !::CheckAndImm(Table, Index, N, SDISel);
     return Index;
-  case SelectionDAGISel::OPC_CheckOrImm:
+  case DAGMatcher::OPC_CheckOrImm:
     Result = !::CheckOrImm(Table, Index, N, SDISel);
     return Index;
   }
@@ -2778,7 +2778,7 @@ public:
 
 } // end anonymous namespace
 
-void SelectionDAGISel::SelectCodeCommon(SDNode *NodeToMatch,
+void DAGMatcher::SelectCodeCommon(SDNode *NodeToMatch,
                                         const unsigned char *MatcherTable,
                                         unsigned TableSize) {
   // FIXME: Should these even be selected?  Handle these cases in the caller?
@@ -3681,7 +3681,7 @@ void SelectionDAGISel::SelectCodeCommon(SDNode *NodeToMatch,
 }
 
 /// Return whether the node may raise an FP exception.
-bool SelectionDAGISel::mayRaiseFPException(SDNode *N) const {
+bool DAGMatcher::mayRaiseFPException(SDNode *N) const {
   // For machine opcodes, consult the MCID flag.
   if (N->isMachineOpcode()) {
     const MCInstrDesc &MCID = TII->get(N->getMachineOpcode());
@@ -3695,7 +3695,7 @@ bool SelectionDAGISel::mayRaiseFPException(SDNode *N) const {
   return N->isStrictFPOpcode();
 }
 
-bool SelectionDAGISel::isOrEquivalentToAdd(const SDNode *N) const {
+bool DAGMatcher::isOrEquivalentToAdd(const SDNode *N) const {
   assert(N->getOpcode() == ISD::OR && "Unexpected opcode");
   auto *C = dyn_cast<ConstantSDNode>(N->getOperand(1));
   if (!C)
@@ -3713,7 +3713,7 @@ bool SelectionDAGISel::isOrEquivalentToAdd(const SDNode *N) const {
   return false;
 }
 
-void SelectionDAGISel::CannotYetSelect(SDNode *N) {
+void DAGMatcher::CannotYetSelect(SDNode *N) {
   std::string msg;
   raw_string_ostream Msg(msg);
   Msg << "Cannot select: ";

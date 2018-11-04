@@ -332,6 +332,13 @@ public:
   /// when GlobalISel failed and isGlobalISelAbortEnabled is false.
   virtual bool reportDiagnosticWhenGlobalISelFallback() const;
 
+  /// Add a pass to the PassManager if that pass is supposed to be run, as
+  /// determined by the StartAfter and StopAfter options. Takes ownership of the
+  /// pass.
+  /// @p verifyAfter   if true and adding a machine function pass add an extra
+  ///                  machine verification pass afterwards.
+  void addPass(Pass *P, bool verifyAfter = true);
+
   /// Check whether continuous CSE should be enabled in GISel passes.
   /// By default, it's enabled for non O0 levels.
   virtual bool isGISelCSEEnabled() const;
@@ -444,13 +451,6 @@ protected:
   /// @p verifyAfter   if true and adding a machine function pass add an extra
   ///                  machine verification pass afterwards.
   AnalysisID addPass(AnalysisID PassID, bool verifyAfter = true);
-
-  /// Add a pass to the PassManager if that pass is supposed to be run, as
-  /// determined by the StartAfter and StopAfter options. Takes ownership of the
-  /// pass.
-  /// @p verifyAfter   if true and adding a machine function pass add an extra
-  ///                  machine verification pass afterwards.
-  void addPass(Pass *P, bool verifyAfter = true);
 
   /// addMachinePasses helper to create the target-selected or overriden
   /// regalloc pass.

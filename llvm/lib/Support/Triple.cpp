@@ -1337,6 +1337,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::ppc64le:
   case Triple::systemz:
   case Triple::ve:
+  case Triple::genm:
     T.setArch(UnknownArch);
     break;
 
@@ -1408,7 +1409,6 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::tce:
   case Triple::tcele:
   case Triple::xcore:
-  case Triple::genm:
     T.setArch(UnknownArch);
     break;
 
