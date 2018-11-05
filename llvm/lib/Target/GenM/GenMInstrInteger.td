@@ -143,7 +143,7 @@ defm UDIV : BinaryInt<udiv, "div",  "u", 0xA2, 0xA4>;
 defm SREM : BinaryInt<srem, "rem",  "i", 0xA3, 0xA2>;
 defm UREM : BinaryInt<urem, "rem",  "u", 0xA4, 0xA4>;
 defm SRL  : BinaryInt<srl,  "srl",  "i", 0xA5, 0xA6>;
-defm SHL  : BinaryInt<shl,  "shl",  "i", 0xA6, 0xA8>;
+defm SHL  : BinaryInt<shl,  "sll",  "i", 0xA6, 0xA8>;
 defm SRA  : BinaryInt<sra,  "sra",  "i", 0xA7, 0xAA>;
 defm ROTL : BinaryInt<rotl, "rotl", "i", 0xA8, 0xAB>;
 
