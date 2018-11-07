@@ -53,3 +53,5 @@ def : Pat
   < (brcond (i32 (seteq G32:$cond, 0)), bb:$dst)
   , (JF G32:$cond, bb_op:$dst)
   >;
+
+def TRAP: TerminatorInst<(ins), [(trap)], "trap", 0x75>;
