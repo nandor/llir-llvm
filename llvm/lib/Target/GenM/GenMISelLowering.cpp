@@ -110,6 +110,8 @@ GenMTargetLowering::GenMTargetLowering(
       setLoadExtAction(Ext, T, MVT::i1, Promote);
     }
   }
+  // Preserve traps since they terminate basic blocks.
+  setOperationAction(ISD::TRAP, MVT::Other, Legal);
 
   // Disable jump tables.
   setMinimumJumpTableEntries(INT_MAX);

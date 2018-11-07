@@ -112,6 +112,8 @@ GenMTargetMachine::GenMTargetMachine(
     ),
     TLOF(make_unique<GenMTargetObjectFile>())
 {
+  this->Options.TrapUnreachable = true;
+  this->Options.NoTrapAfterNoreturn = false;
   initAsmInfo();
 }
 
