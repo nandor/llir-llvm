@@ -59,44 +59,34 @@ multiclass CommBinaryInt
 multiclass CmpInt
   < CondCode cond
   , string name
-  , string type
-  , bits<32> b32
-  , bits<32> b64
+  , bits<32> enc
   >
 {
   def _I32 : I
     < (outs I32:$dst)
     , (ins G32:$lhs, G32:$rhs)
     , [(set I32:$dst, (setcc G32:$lhs, G32:$rhs, cond))]
-    , !strconcat(
-        !strconcat("cmp.", !strconcat(name, ".")),
-        !strconcat(type, "32\t$dst, $lhs, $rhs")
-      )
-    , b32
+    , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
+    , enc
     >;
 
   def _I64 : I
     < (outs I32:$dst)
     , (ins G64:$lhs, G64:$rhs)
     , [(set I32:$dst, (setcc G64:$lhs, G64:$rhs, cond))]
-    , !strconcat(
-        !strconcat("cmp.", !strconcat(name, ".")),
-        !strconcat(type, "64\t$dst, $lhs, $rhs")
-      )
-    , b64
+    , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
+    , enc
     >;
 }
 
 multiclass CommCmpInt
   < SDNode node
   , string name
-  , string type
-  , bits<32> b32
-  , bits<32> b64
+  , bits<32> enc
   >
 {
   let isCommutable = 1 in
-  defm "" : CmpInt<node, name, type, b32, b64>;
+  defm "" : CmpInt<node, name, enc>;
 }
 
 multiclass TernaryInt
@@ -147,17 +137,17 @@ defm SHL  : BinaryInt<shl,  "sll",  "i", 0xA6, 0xA8>;
 defm SRA  : BinaryInt<sra,  "sra",  "i", 0xA7, 0xAA>;
 defm ROTL : BinaryInt<rotl, "rotl", "i", 0xA8, 0xAB>;
 
-defm EQ : CommCmpInt<SETEQ, "eq", "i", 0x46, 0x51>;
-defm NE : CommCmpInt<SETNE, "neq", "i", 0x47, 0x52>;
+defm EQ : CommCmpInt<SETEQ, "eq",  0x46>;
+defm NE : CommCmpInt<SETNE, "neq", 0x47>;
 
-defm LT_S : CmpInt<SETLT,  "lt", "i", 0x48, 0x53>;
-defm LT_U : CmpInt<SETULT, "lt", "u", 0x49, 0x54>;
-defm GT_S : CmpInt<SETGT,  "gt", "i", 0x4a, 0x55>;
-defm GT_U : CmpInt<SETUGT, "gt", "u", 0x4b, 0x56>;
-defm LE_S : CmpInt<SETLE,  "le", "i", 0x4c, 0x57>;
-defm LE_U : CmpInt<SETULE, "le", "u", 0x4d, 0x58>;
-defm GE_S : CmpInt<SETGE,  "ge", "i", 0x4e, 0x59>;
-defm GE_U : CmpInt<SETUGE, "ge", "u", 0x4f, 0x5a>;
+defm LT_S : CmpInt<SETLT,  "lt",  0x48>;
+defm LT_U : CmpInt<SETULT, "ult", 0x49>;
+defm GT_S : CmpInt<SETGT,  "gt",  0x4a>;
+defm GT_U : CmpInt<SETUGT, "ugt", 0x4b>;
+defm LE_S : CmpInt<SETLE,  "le",  0x4c>;
+defm LE_U : CmpInt<SETULE, "ule", 0x4d>;
+defm GE_S : CmpInt<SETGE,  "ge",  0x4e>;
+defm GE_U : CmpInt<SETUGE, "uge", 0x4f>;
 
 defm SELECT : TernaryInt<select, "select", "i", 0xB0, 0xB1>;
 
