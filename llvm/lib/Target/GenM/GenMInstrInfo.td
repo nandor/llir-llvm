@@ -149,6 +149,22 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , "addr.i64\t$dst, $addr"
     , 0x70
     >;
+
+  def UNDEF_32 : I
+    < (outs I32:$dst)
+    , (ins)
+    , []
+    , "undef.i32\t$dst"
+    , 0x07
+    >;
+
+  def UNDEF_64 : I
+    < (outs I64:$dst)
+    , (ins)
+    , []
+    , "undef.i64\t$dst"
+    , 0x08
+    >;
 }
 
 
