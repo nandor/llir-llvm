@@ -85,6 +85,11 @@ GenMTargetLowering::GenMTargetLowering(
     }
   }
 
+  // Preserve undefined values.
+  for (auto T : { MVT::i32, MVT::i64 }) {
+    setOperationAction(ISD::UNDEF, T, Legal);
+  }
+
   // Disable some integer operations.
   for (auto T : {MVT::i32, MVT::i64}) {
     // Expand unavailable integer operations.

@@ -64,7 +64,12 @@ void GenMDAGToDAGISel::Select(SDNode *N)
     return;
   }
 
-  SelectCode(N);
+  switch (N->getOpcode()) {
+    default: {
+      SelectCode(N);
+      break;
+    }
+  }
 }
 
 bool GenMDAGToDAGISel::SelectInlineAsmMemoryOperand(

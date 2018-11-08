@@ -68,14 +68,18 @@ bool GenMRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   );
 
   GenMMachineFunctionInfo &MFI = *MF.getInfo<GenMMachineFunctionInfo>();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
 
   // Start the numbering for locals after the arg regs
-  unsigned CurReg = 0;
+  unsigned CurReg = 1;
   const unsigned NumVRegs = MF.getRegInfo().getNumVirtRegs();
   for (unsigned VRegIdx = 0; VRegIdx < NumVRegs; ++VRegIdx) {
     const unsigned VReg = TargetRegisterInfo::index2VirtReg(VRegIdx);
-    // Map registers.
-    if (!MFI.hasGMReg(VReg)) {
+    if (MRI.def_begin(VReg) == MRI.def_end()) {
+      /// Value not defined - map to undefined reg.
+      MFI.setGMReg(VReg, 0);
+    } else if (!MFI.hasGMReg(VReg)) {
+      /// Assign a new number.
       MFI.setGMReg(VReg, CurReg++);
       continue;
     }
