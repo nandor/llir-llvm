@@ -23,6 +23,8 @@ class CALL<GenMRegClass vt, string suffix> : CallInst
 
 def CALL_I32: CALL<I32, "i32">;
 def CALL_I64: CALL<I64, "i64">;
+def CALL_F32: CALL<F32, "f32">;
+def CALL_F64: CALL<F64, "f64">;
 
 def CALL_VOID : CallInst
   < (outs)

@@ -39,6 +39,9 @@ def ST_2_I64 : GenMSt<G64, truncstorei16, "2", 0x34>;
 def ST_4_I64 : GenMSt<G64, truncstorei32, "4", 0x35>;
 def ST_8_I64 : GenMSt<G64, store,         "8", 0x36>;
 
+def ST_4_F32 : GenMSt<F32, store,         "4", 0x37>;
+def ST_8_F64 : GenMSt<F64, store,         "8", 0x38>;
+
 
 
 // Defines a load instruction.
@@ -73,3 +76,6 @@ def LD_4_I64 : GenMLd<I64, sextloadi32, "4.i64", 0x48>;
 def LD_4_U64 : GenMLd<I64, zextloadi32, "4.u64", 0x4C>;
 def LD_8_I64 : GenMLd<I64, load,        "8.i64", 0x49>;
 def LD_8_U64 : GenMLd<I64, load,        "8.u64", 0x4D>;
+
+def LD_4_F32 : GenMLd<F32, load,        "4.f32", 0x4E>;
+def LD_8_F64 : GenMLd<F64, load,        "8.f64", 0x4F>;
