@@ -54,6 +54,10 @@ namespace GenM {
     OPERAND_I32IMM,
     // 64-bit integer immediate.
     OPERAND_I64IMM,
+    // 32-bit float immediate.
+    OPERAND_F32IMM,
+    // 64-bit float immediate.
+    OPERAND_F64IMM,
     // 32-bit integer offset.
     OPERAND_I32OFF,
     // 32-bit function identifier.

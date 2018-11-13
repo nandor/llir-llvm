@@ -78,6 +78,8 @@ def i32imm_op  : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op  : GenMOperand<i64, "OPERAND_I64IMM">;
 def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;
 def i64addr_op : GenMOperand<i64, "OPERAND_I64FUNC">;
+def f32imm_op  : GenMOperand<f32, "OPERAND_F32IMM">;
+def f64imm_op  : GenMOperand<f64, "OPERAND_F64IMM">;
 
 //===----------------------------------------------------------------------===//
 // GenM Instruction Format Definitions.
@@ -107,6 +109,23 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , 0x02
       >;
 
+  def ARG_F32 : I
+      < (outs F32:$res)
+      , (ins i32imm:$argno)
+      , [(set F32:$res, (GenMargument timm:$argno))]
+      , "arg.f32\t$res, $argno"
+      , 0x03
+      >;
+
+  def ARG_F64 : I
+      < (outs F64:$res)
+      , (ins i32imm:$argno)
+      , [(set F64:$res, (GenMargument timm:$argno))]
+      , "arg.f64\t$res, $argno"
+      , 0x04
+      >;
+
+
   let isMoveImm = 1 in
   {
     def CONST_I32 : I
@@ -114,7 +133,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , (ins i32imm_op:$imm)
       , [(set I32:$res, imm:$imm)]
       , "imm.i32\t$res, $imm"
-      , 0x03
+      , 0x05
       >;
 
     def CONST_I64 : I
@@ -122,16 +141,32 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , (ins i64imm_op:$imm)
       , [(set I64:$res, imm:$imm)]
       , "imm.i64\t$res, $imm"
-      , 0x04
+      , 0x06
+      >;
+
+    def CONST_F32 : I
+      < (outs F32:$res)
+      , (ins f32imm_op:$imm)
+      , [(set F32:$res, fpimm:$imm)]
+      , "imm.f32\t$res, $imm"
+      , 0x07
+      >;
+
+    def CONST_F64 : I
+      < (outs F64:$res)
+      , (ins f64imm_op:$imm)
+      , [(set F64:$res, fpimm:$imm)]
+      , "imm.f64\t$res, $imm"
+      , 0x08
       >;
   }
 
   def COPY_I32 : I
     < (outs I32:$dst)
-    , (ins I32:$src)
+    , (ins G32:$src)
     , []
     , "mov.i32\t$dst, $src"
-    , 0x05
+    , 0x09
     >;
 
   def COPY_I64 : I
@@ -139,7 +174,23 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , (ins G64:$src)
     , []
     , "mov.i64\t$dst, $src"
-    , 0x06
+    , 0x0A
+    >;
+
+  def COPY_F32 : I
+    < (outs F32:$dst)
+    , (ins F32:$src)
+    , []
+    , "mov.f32\t$dst, $src"
+    , 0x0B
+    >;
+
+  def COPY_F64 : I
+    < (outs F64:$dst)
+    , (ins F64:$src)
+    , []
+    , "mov.f64\t$dst, $src"
+    , 0x0C
     >;
 
   def ADDR : I
@@ -147,23 +198,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , (ins i64addr_op:$addr)
     , []
     , "addr.i64\t$dst, $addr"
-    , 0x70
-    >;
-
-  def UNDEF_32 : I
-    < (outs I32:$dst)
-    , (ins)
-    , []
-    , "undef.i32\t$dst"
-    , 0x07
-    >;
-
-  def UNDEF_64 : I
-    < (outs I64:$dst)
-    , (ins)
-    , []
-    , "undef.i64\t$dst"
-    , 0x08
+    , 0x0D
     >;
 }
 
@@ -188,4 +223,5 @@ include "GenMInstrConv.td"
 include "GenMInstrMemory.td"
 include "GenMInstrControl.td"
 include "GenMInstrInteger.td"
+include "GenMInstrFloat.td"
 

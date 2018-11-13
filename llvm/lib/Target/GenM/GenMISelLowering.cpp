@@ -58,8 +58,10 @@ GenMTargetLowering::GenMTargetLowering(
   setMaxAtomicSizeInBitsSupported(64);
 
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
-  addRegisterClass(MVT::i32, &GenM::G32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
+  addRegisterClass(MVT::f32, &GenM::F32RegClass);
+  addRegisterClass(MVT::f64, &GenM::F64RegClass);
+  addRegisterClass(MVT::i32, &GenM::G32RegClass);
   addRegisterClass(MVT::i64, &GenM::G64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
@@ -79,15 +81,25 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
-  for (auto T : { MVT::i32, MVT::i64 }) {
+  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64 }) {
     for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
       setOperationAction(Op, T, Expand);
     }
   }
 
   // Preserve undefined values.
-  for (auto T : { MVT::i32, MVT::i64 }) {
+  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64 }) {
     setOperationAction(ISD::UNDEF, T, Legal);
+  }
+
+  // Deal with floating point operations.
+  for (auto T : { MVT::f32, MVT::f64 }) {
+    setOperationAction(ISD::ConstantFP, T, Legal);
+
+    // Expand floating-point comparisons.
+    for (auto CC : { ISD::SETO, ISD::SETUO }) {
+      setCondCodeAction(CC, T, Expand);
+    }
   }
 
   // Disable some integer operations.
@@ -109,7 +121,9 @@ GenMTargetLowering::GenMTargetLowering(
     setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
   }
 
-  // Expand i1 extending loads.
+  // Expand extending loads and stores.
+  setLoadExtAction(ISD::EXTLOAD, MVT::f64, MVT::f32, Expand);
+  setTruncStoreAction(MVT::f64, MVT::f32, Expand);
   for (auto T : MVT::integer_valuetypes()) {
     for (auto Ext : {ISD::EXTLOAD, ISD::ZEXTLOAD, ISD::SEXTLOAD}) {
       setLoadExtAction(Ext, T, MVT::i1, Promote);

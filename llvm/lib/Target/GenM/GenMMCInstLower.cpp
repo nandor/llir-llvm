@@ -99,7 +99,19 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
         break;
       }
       case MachineOperand::MO_FPImmediate: {
-        llvm_unreachable("not implemented");
+        const ConstantFP *Imm = MO.getFPImm();
+        if (Imm->getType()->isFloatTy()) {
+          union { uint32_t iv; float fv; };
+          fv = Imm->getValueAPF().convertToFloat();
+          MCOp = MCOperand::createImm(iv);
+        } else if (Imm->getType()->isDoubleTy()) {
+          union { uint64_t iv; double fv; };
+          fv = Imm->getValueAPF().convertToDouble();
+          MCOp = MCOperand::createImm(iv);
+        } else {
+          llvm_unreachable("unknown floating point immediate type");
+        }
+        break;
       }
       case MachineOperand::MO_GlobalAddress: {
         MCOp = LowerSymbolOperand(

@@ -26,6 +26,8 @@ class Return<GenMRegClass vt, string name>
 
 def RETURN_I32: Return<G32, "i32">;
 def RETURN_I64: Return<G64, "i64">;
+def RETURN_F32: Return<F32, "f32">;
+def RETURN_F64: Return<F64, "f64">;
 def RETURN_VOID: TerminatorInst<(ins), [(GenMreturn)], "ret", 0x70>
 {
   let isReturn = 1;

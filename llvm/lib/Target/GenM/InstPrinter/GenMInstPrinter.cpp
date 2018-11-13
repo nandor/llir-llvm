@@ -124,5 +124,10 @@ void GenMInstPrinter::printOperand(
     return;
   }
 
+  if (MO.isFPImm()) {
+    OS << MO.getFPImm();
+    return;
+  }
+
   assert(false && "Unknown operand kind");
 }
