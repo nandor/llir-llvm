@@ -29,8 +29,8 @@ public:
   unsigned getGMReg(unsigned VReg) const;
   bool hasGMReg(unsigned VReg) const;
 
-  void setVAIndex(unsigned Reg) { VAIndex = Reg; }
-  unsigned getVAIndex() const { return VAIndex; }
+  void setNumFixedArgs(unsigned Reg) { NumFixedArgs = Reg; }
+  unsigned getNumFixedArgs() const { return NumFixedArgs; }
 
 private:
   /// Reference to the machine function.
@@ -38,7 +38,7 @@ private:
   /// List of parameters to a function.
   std::vector<MVT> Params;
   /// Reference to the array storing varargs.
-  unsigned VAIndex;
+  unsigned NumFixedArgs;
   /// A mapping from CodeGen vreg index to WebAssembly register number.
   mutable std::vector<unsigned> GMRegs;
 };

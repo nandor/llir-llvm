@@ -50,14 +50,14 @@ void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 void GenMAsmPrinter::EmitFunctionBodyStart()
 {
   MachineFrameInfo &MFI = MF->getFrameInfo();
+  auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
+
   if (auto StackSize = MFI.getStackSize()) {
     getTargetStreamer().emitStackSize(StackSize);
   }
-  auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
-  if (MF->getFunction().isVarArg()) {
-    getTargetStreamer().emitVAIndex(FuncInfo->getVAIndex());
+  if (auto NumFixedArgs = FuncInfo->getNumFixedArgs()) {
+    getTargetStreamer().emitNumFixedArgs(NumFixedArgs);
   }
-
   getTargetStreamer().emitCallingConv(MF->getFunction().getCallingConv());
 
   AsmPrinter::EmitFunctionBodyStart();
