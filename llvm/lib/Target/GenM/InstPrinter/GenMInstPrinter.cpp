@@ -69,9 +69,9 @@ void GenMInstPrinter::printCallOps(
     const MCInst *MI,
     const MCSubtargetInfo &STI)
 {
-  printCallingConv(OS, MI->getOperand(1).getImm());
-  OS << ", ";
   printOperand(MI, 0, STI, OS);
+  OS << ", ";
+  printCallingConv(OS, MI->getOperand(1).getImm());
   for (unsigned i = 2; i < MI->getNumOperands(); i += 1) {
     OS << ", ";
     printOperand(MI, i, STI, OS);
