@@ -18,9 +18,12 @@
 
 def SDT_GenMargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
 def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
-def SDT_GenMcall     : SDTypeProfile<1, -1, [SDTCisPtrTy<0>]>;
-def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
-def SDT_GenMtcall    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+def SDT_GenMcall     : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
+def SDT_GenMcall_va  : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
+def SDT_GenMvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
+def SDT_GenMvoid_va  : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_GenMtcall    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
+def SDT_GenMtcall_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
 def SDT_GenMbrjt     : SDTypeProfile<0,  2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 
@@ -42,14 +45,29 @@ def GenMcall : SDNode
   , SDT_GenMcall
   , [SDNPHasChain, SDNPVariadic]
   >;
+def GenMcall_va : SDNode
+  < "GenMISD::CALL"
+  , SDT_GenMcall_va
+  , [SDNPHasChain, SDNPVariadic]
+  >;
 def GenMtcall : SDNode
   < "GenMISD::TCALL"
   , SDT_GenMtcall
   , [SDNPHasChain, SDNPVariadic]
   >;
+def GenMtcall_va : SDNode
+  < "GenMISD::TCALL"
+  , SDT_GenMtcall_va
+  , [SDNPHasChain, SDNPVariadic]
+  >;
 def GenMvoid : SDNode
   < "GenMISD::VOID"
   , SDT_GenMvoid
+  , [SDNPHasChain, SDNPVariadic]
+  >;
+def GenMvoid_va : SDNode
+  < "GenMISD::VOID"
+  , SDT_GenMvoid_va
   , [SDNPHasChain, SDNPVariadic]
   >;
 def GenMbrjt : SDNode
@@ -74,6 +92,7 @@ class GenMOperand<ValueType ty, string type> : Operand<ty>
 
 
 def bb_op      : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
+def i8imm_op   : GenMOperand<i8,  "OPERAND_I8IMM">;
 def i32imm_op  : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op  : GenMOperand<i64, "OPERAND_I64IMM">;
 def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;

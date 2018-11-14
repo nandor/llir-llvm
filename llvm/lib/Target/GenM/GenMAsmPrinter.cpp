@@ -53,6 +53,12 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
   if (auto StackSize = MFI.getStackSize()) {
     getTargetStreamer().emitStackSize(StackSize);
   }
+  auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
+  if (MF->getFunction().isVarArg()) {
+    getTargetStreamer().emitVAIndex(FuncInfo->getVAIndex());
+  }
+
+  getTargetStreamer().emitCallingConv(MF->getFunction().getCallingConv());
 
   AsmPrinter::EmitFunctionBodyStart();
 }

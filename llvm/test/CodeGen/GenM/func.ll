@@ -12,15 +12,15 @@ define void @f0() {
 }
 
 ; CHECK-LABEL: _f1:
-; CHECK: imm.i32   $0, 0
-; CHECK-NEXT: ret.i32  $0
+; CHECK: imm.i32   $1, 0
+; CHECK-NEXT: ret.i32  $1
  define i32 @f1() {
   ret i32 0
 }
 
 ; CHECK-LABEL: _f2:
-; CHECK: imm.i32   $0, 0
-; CHECK-NEXT: ret.i32  $0
+; CHECK: imm.i32   $1, 0
+; CHECK-NEXT: ret.i32  $1
 define i32 @f2(i32 %p1, float %p2) {
   ret i32 0
 }

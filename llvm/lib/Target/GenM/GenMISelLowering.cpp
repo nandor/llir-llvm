@@ -231,10 +231,11 @@ SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
 SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
 {
   SDLoc DL(Op);
-  EVT PtrVT = getPointerTy(DAG.getMachineFunction().getDataLayout());
+  MachineFunction *MF = &DAG.getMachineFunction();
+  EVT PtrVT = getPointerTy(MF->getDataLayout());
 
-  auto *MFI = DAG.getMachineFunction().getInfo<GenMMachineFunctionInfo>();
   const Value *SV = cast<SrcValueSDNode>(Op.getOperand(2))->getValue();
+  unsigned Reg = MF->addLiveIn(GenM::VA, &GenM::I64RegClass);
 
   // Store the VAReg in the value.
   return DAG.getStore(
@@ -243,7 +244,7 @@ SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
       DAG.getCopyFromReg(
           DAG.getEntryNode(),
           DL,
-          MFI->getVAReg(),
+          Reg,
           PtrVT
       ),
       Op.getOperand(1),
@@ -342,6 +343,15 @@ EVT GenMTargetLowering::getSetCCResultType(
   }
 }
 
+static bool isCallingConvSupported(CallingConv::ID ID)
+{
+  switch (ID) {
+    case CallingConv::C:    return true;
+    case CallingConv::Fast: return true;
+    default: return false;
+  }
+}
+
 SDValue GenMTargetLowering::LowerFormalArguments(
     SDValue Chain,
     CallingConv::ID CallConv,
@@ -353,6 +363,10 @@ SDValue GenMTargetLowering::LowerFormalArguments(
 {
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
+
+  if (!isCallingConvSupported(CallConv)) {
+    Fail(DL, DAG, "unsupported calling convention");
+  }
 
   for (const auto &In : Ins) {
     // TODO(nand): check for argument types.
@@ -366,21 +380,7 @@ SDValue GenMTargetLowering::LowerFormalArguments(
   }
 
   if (IsVarArg) {
-    MachineRegisterInfo &MRI = MF.getRegInfo();
-    MVT PtrVT = getPointerTy(MF.getDataLayout());
-    unsigned VAReg = MRI.createVirtualRegister(getRegClassFor(PtrVT));
-    MFI->setVAReg(VAReg);
-    Chain = DAG.getCopyToReg(
-      Chain,
-      DL,
-      VAReg,
-      DAG.getNode(
-          GenMISD::ARGUMENT,
-          DL,
-          PtrVT,
-          DAG.getTargetConstant(Ins.size(), DL, MVT::i32)
-      )
-    );
+    MFI->setVAIndex(Ins.size());
   }
 
   return Chain;
@@ -392,14 +392,16 @@ SDValue GenMTargetLowering::LowerCall(
 {
   SelectionDAG &DAG = CLI.DAG;
   SDLoc DL = CLI.DL;
-  MachineFunction &MF = DAG.getMachineFunction();
-  const DataLayout &Layout = MF.getDataLayout();
-  MVT PtrVT = getPointerTy(MF.getDataLayout());
   SDValue Chain = CLI.Chain;
   SDValue Callee = CLI.Callee;
+  CallingConv::ID CallConv = CLI.CallConv;
 
   if (CLI.Ins.size() > 1) {
     Fail(DL, DAG, "more than 1 return value not supported");
+  }
+
+  if (!isCallingConvSupported(CallConv)) {
+    Fail(DL, DAG, "unsupported calling convention");
   }
 
   // Argument to the call node.
@@ -412,74 +414,14 @@ SDValue GenMTargetLowering::LowerCall(
     NumFixedArgs += Out.IsFixed;
   }
 
-  // Collect all variable arguments.
+  // Add all arguments to the call.
+  Ops.push_back(Chain);
+  Ops.push_back(Callee);
+  Ops.push_back(DAG.getTargetConstant(static_cast<int>(CallConv), DL, MVT::i32));
   if (CLI.IsVarArg) {
-    auto FixedEnd = CLI.OutVals.begin() + NumFixedArgs;
-
-    // Compute the number of bytes required on the stack to hold args.
-    SmallVector<CCValAssign, 16> ArgLocs;
-    CCState CCInfo(CLI.CallConv, true, MF, ArgLocs, *DAG.getContext());
-    for (SDValue Arg : make_range(FixedEnd, CLI.OutVals.end())) {
-      EVT VT = Arg.getValueType();
-      Type *Ty = VT.getTypeForEVT(*DAG.getContext());
-      unsigned Offset = CCInfo.AllocateStack(
-          Layout.getTypeAllocSize(Ty),
-          Layout.getABITypeAlignment(Ty)
-      );
-      CCInfo.addLoc(CCValAssign::getMem(
-          ArgLocs.size(),
-          VT.getSimpleVT(),
-          Offset,
-          VT.getSimpleVT(),
-          CCValAssign::Full
-      ));
-    }
-
-    // Allocate an object on the stack to hold args.
-    SDValue FINode;
-    SmallVector<SDValue, 8> Chains;
-    if (unsigned NumBytes = CCInfo.getAlignedCallFrameSize()) {
-      int FI = MF.getFrameInfo().CreateStackObject(
-          NumBytes,
-          Layout.getStackAlignment(),
-          false
-      );
-      unsigned I = 0;
-      for (SDValue Arg : make_range(FixedEnd, CLI.OutVals.end())) {
-        FINode = DAG.getFrameIndex(FI, getPointerTy(Layout));
-
-        unsigned Offset = ArgLocs[I++].getLocMemOffset();
-        SDValue Add = DAG.getNode(
-            ISD::ADD,
-            DL,
-            PtrVT,
-            FINode,
-            DAG.getConstant(Offset, DL, PtrVT)
-        );
-        Chains.push_back(DAG.getStore(
-            Chain,
-            DL,
-            Arg,
-            Add,
-            MachinePointerInfo::getFixedStack(MF, FI, Offset), 0
-        ));
-      }
-      if (!Chains.empty()) {
-        Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, Chains);
-      }
-    } else {
-      FINode = DAG.getIntPtrConstant(0, DL);
-    }
-
-    Ops.push_back(Chain);
-    Ops.push_back(Callee);
-    Ops.append(CLI.OutVals.begin(), FixedEnd);
-    Ops.push_back(FINode);
-  } else {
-    Ops.push_back(Chain);
-    Ops.push_back(Callee);
-    Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
+    Ops.push_back(DAG.getTargetConstant(NumFixedArgs, DL, MVT::i32));
   }
+  Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
 
   if (CLI.IsTailCall) {
     SmallVector<EVT, 8> InTys = { MVT::Other };
