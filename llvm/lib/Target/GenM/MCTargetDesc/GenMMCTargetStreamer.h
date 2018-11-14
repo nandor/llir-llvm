@@ -21,8 +21,8 @@ public:
 
   /// .stack
   virtual void emitStackSize(int Size) = 0;
-  /// .va_idx
-  virtual void emitVAIndex(int Index) = 0;
+  /// .args
+  virtual void emitNumFixedArgs(int Count) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
 };
@@ -33,7 +33,7 @@ public:
   GenMMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
 
   virtual void emitStackSize(int Size) override;
-  virtual void emitVAIndex(int Index) override;
+  virtual void emitNumFixedArgs(int Count) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
 private:
@@ -46,7 +46,7 @@ public:
   GenMMCTargetELFStreamer(MCStreamer &S);
 
   virtual void emitStackSize(int Size) override;
-  virtual void emitVAIndex(int Index) override;
+  virtual void emitNumFixedArgs(int Count) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
   MCELFStreamer &getStreamer();

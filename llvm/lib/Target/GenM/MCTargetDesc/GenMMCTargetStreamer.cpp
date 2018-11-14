@@ -36,9 +36,9 @@ void GenMMCTargetAsmStreamer::emitStackSize(int Size)
   OS << "\t.stack\t" << Size << '\n';
 }
 
-void GenMMCTargetAsmStreamer::emitVAIndex(int Index)
+void GenMMCTargetAsmStreamer::emitNumFixedArgs(int Count)
 {
-  OS << "\t.va_idx\t" << Index << '\n';
+  OS << "\t.args\t" << Count << '\n';
 }
 
 void GenMMCTargetAsmStreamer::emitCallingConv(CallingConv::ID CallConv)
@@ -60,7 +60,7 @@ void GenMMCTargetELFStreamer::emitStackSize(int Size)
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitVAIndex(int Index)
+void GenMMCTargetELFStreamer::emitNumFixedArgs(int Count)
 {
   llvm_unreachable("not implemented");
 }

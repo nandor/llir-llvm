@@ -5,6 +5,7 @@ declare i32 @fn_i32_i32_i32(i32, i32)
 declare void @fn_void()
 
 ; CHECK-LABEL: _call_i32_i32_i32:
+; CHECK-NEXT:  .args 1
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT:  # %bb.0:
 ; CHECK-NEXT:  arg.i32 $1, 0
@@ -17,6 +18,7 @@ define i32 @call_i32_i32_i32(i32 %a) {
 }
 
 ; CHECK-LABEL: _call_void:
+; CHECK-NEXT:  .args 1
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT:  # %bb.0:
 ; CHECK-NEXT:  addr.i64 $1, _fn_void@FUNCTION

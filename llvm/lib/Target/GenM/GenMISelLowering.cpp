@@ -379,9 +379,7 @@ SDValue GenMTargetLowering::LowerFormalArguments(
     MFI->addParam(In.VT);
   }
 
-  if (IsVarArg) {
-    MFI->setVAIndex(Ins.size());
-  }
+  MFI->setNumFixedArgs(Ins.size());
 
   return Chain;
 }
