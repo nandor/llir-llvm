@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=x86 -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=genm -verify-machineinstrs < %s | FileCheck %s
 
 ; CHECK-LABEL: _test1:
 define i32 *@test1(i1 %a, i32* %b) {

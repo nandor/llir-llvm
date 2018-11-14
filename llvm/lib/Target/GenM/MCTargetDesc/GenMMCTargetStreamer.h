@@ -10,6 +10,7 @@
 #ifndef LLVM_LIB_TARGET_GENM_MCTARGETDESC_GENMMCTARGETSTREAMER_H
 #define LLVM_LIB_TARGET_GENM_MCTARGETDESC_GENMMCTARGETSTREAMER_H
 
+#include "llvm/IR/CallingConv.h"
 #include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCStreamer.h"
 
@@ -20,6 +21,10 @@ public:
 
   /// .stack
   virtual void emitStackSize(int Size) = 0;
+  /// .va_idx
+  virtual void emitVAIndex(int Index) = 0;
+  /// .fast, .c, etc.
+  virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
 };
 
 // This part is for ascii assembly output
@@ -28,6 +33,8 @@ public:
   GenMMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
 
   virtual void emitStackSize(int Size) override;
+  virtual void emitVAIndex(int Index) override;
+  virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
 private:
   formatted_raw_ostream &OS;
@@ -39,6 +46,8 @@ public:
   GenMMCTargetELFStreamer(MCStreamer &S);
 
   virtual void emitStackSize(int Size) override;
+  virtual void emitVAIndex(int Index) override;
+  virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
   MCELFStreamer &getStreamer();
 };

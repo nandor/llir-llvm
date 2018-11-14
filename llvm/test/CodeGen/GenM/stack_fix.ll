@@ -6,10 +6,11 @@ declare void @ext_func_i32(i32* %ptr)
 
 ; CHECK-LABEL: _alloca32:
 ; CHECK-NEXT: .stack 4
+; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca32() noredzone {
-  ; CHECK-NEXT: imm.i32 $0, 0
-  ; CHECK-NEXT: st.4 [$sp], $0
+  ; CHECK-NEXT: imm.i32 $1, 0
+  ; CHECK-NEXT: st.4 [$sp], $1
   ; CHECK-NEXT: ret
   %retval = alloca i32
   store i32 0, i32* %retval
@@ -18,6 +19,7 @@ define void @alloca32() noredzone {
 
 ; CHECK-LABEL: _alloca3264:
 ; CHECK-NEXT: .stack 16
+; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca3264() {
   %r1 = alloca i32
@@ -29,6 +31,7 @@ define void @alloca3264() {
 
 ; CHECK-LABEL: _allocarray:
 ; CHECK-NEXT: .stack 132
+; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @allocarray() {
   %r = alloca [33 x i32]
@@ -41,6 +44,7 @@ define void @allocarray() {
 
 ; CHECK-LABEL: _non_mem_use:
 ; CHECK-NEXT: .stack 48
+; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @non_mem_use(i8** %addr) {
   %buf = alloca [27 x i8], align 16
@@ -55,6 +59,7 @@ define void @non_mem_use(i8** %addr) {
 
 ; CHECK-LABEL: _allocarray_inbounds:
 ; CHECK-NEXT: .stack 20
+; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @allocarray_inbounds() {
   %r = alloca [5 x i32]

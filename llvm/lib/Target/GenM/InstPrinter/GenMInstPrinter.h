@@ -55,6 +55,19 @@ public:
   );
 
   static const char *getRegisterName(unsigned RegNo);
+
+private:
+  void printCallOps(
+      llvm::raw_ostream &OS,
+      const MCInst *MI,
+      const MCSubtargetInfo &STI
+  );
+
+  void printVoidOps(
+      llvm::raw_ostream &OS,
+      const MCInst *MI,
+      const MCSubtargetInfo &STI
+  );
 };
 } // end namespace llvm
 

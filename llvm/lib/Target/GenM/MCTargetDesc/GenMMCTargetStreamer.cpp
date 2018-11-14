@@ -36,12 +36,36 @@ void GenMMCTargetAsmStreamer::emitStackSize(int Size)
   OS << "\t.stack\t" << Size << '\n';
 }
 
+void GenMMCTargetAsmStreamer::emitVAIndex(int Index)
+{
+  OS << "\t.va_idx\t" << Index << '\n';
+}
+
+void GenMMCTargetAsmStreamer::emitCallingConv(CallingConv::ID CallConv)
+{
+  switch (CallConv) {
+    case CallingConv::C:    OS << "\t.call c\n";    break;
+    case CallingConv::Fast: OS << "\t.call fast\n"; break;
+    default: llvm_unreachable("not implemented");
+  }
+}
+
 GenMMCTargetELFStreamer::GenMMCTargetELFStreamer(MCStreamer &S)
   : GenMMCTargetStreamer(S)
 {
 }
 
 void GenMMCTargetELFStreamer::emitStackSize(int Size)
+{
+  llvm_unreachable("not implemented");
+}
+
+void GenMMCTargetELFStreamer::emitVAIndex(int Index)
+{
+  llvm_unreachable("not implemented");
+}
+
+void GenMMCTargetELFStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
   llvm_unreachable("not implemented");
 }
