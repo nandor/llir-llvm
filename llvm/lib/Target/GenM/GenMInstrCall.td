@@ -25,7 +25,7 @@ multiclass CALL<GenMRegClass vt, string suffix>
 
   def _VA : CallInst
     < (outs vt:$dst)
-    , (ins i32imm:$conv, I64:$callee, i32imm:$fixed, variable_ops)
+    , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
     , [(set vt:$dst, (GenMcall_va I64:$callee, timm:$conv, timm:$fixed))]
     , ""
     , 0x51
@@ -47,7 +47,7 @@ def CALL_VOID : CallInst
 
 def CALL_VOID_VA : CallInst
   < (outs)
-  , (ins i32imm:$conv, I64:$callee, i32imm:$fixed, variable_ops)
+  , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
   , [(GenMvoid_va I64:$callee, timm:$conv, timm:$fixed)]
   , ""
   , 0x53
@@ -66,7 +66,7 @@ def TCALL : CallInst
 
 def TCALL_VA : CallInst
   < (outs)
-  , (ins i32imm:$conv, I64:$callee, i32imm:$fixed, variable_ops)
+  , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
   , [(GenMtcall_va I64:$callee, timm:$conv, timm:$fixed)]
   , ""
   , 0x54
