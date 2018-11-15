@@ -6,6 +6,7 @@
 
 
 ; CHECK-LABEL: va_func:
+; CHECK call.i32 $6, c, $5, $3, $4, $sp
 define void @va_func(i32, i8* nocapture readonly, ...) {
   %3 = alloca [1 x %struct.__va_list_tag], align 16
   %4 = bitcast [1 x %struct.__va_list_tag]* %3 to i8*
@@ -24,6 +25,8 @@ declare void @varargvoid(i32 %sum, ...)
 
 
 ; CHECK-LABEL: va_call:
+; CHECK:  call.1  c, $5, $4, $3, $2, $1
+; CHECK:  call.i32.1  $7, c, $6, $4, $3, $2, $1
 define i32 @va_call() {
 entry:
   call void (i32, ...) @varargvoid(i32 0, i32 1, i32 2, i32 3)
