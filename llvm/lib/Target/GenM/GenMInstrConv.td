@@ -125,7 +125,7 @@ def F64_PROMOTE_F32 : I
   < (outs F64:$dst)
   , (ins F32:$src)
   , [(set F64:$dst, (fpextend F32:$src))]
-  , "mov.f64\t$dst, $src"
+  , "fext.f64\t$dst, $src"
   , 0xbb
   >;
 
@@ -133,6 +133,6 @@ def F32_DEMOTE_F64 : I
   < (outs F32:$dst)
   , (ins F64:$src)
   , [(set F32:$dst, (fpround F64:$src))]
-  , "mov.f32\t$dst, $src"
+  , "trunc.f32\t$dst, $src"
   , 0xb6
   >;
