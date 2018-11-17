@@ -41,14 +41,12 @@ void GenMFrameLowering::emitPrologue(
     MachineFunction &MF,
     MachineBasicBlock &MBB) const
 {
-  // TODO
 }
 
 void GenMFrameLowering::emitEpilogue(
     MachineFunction &MF,
     MachineBasicBlock &MBB) const
 {
-  // TODO
 }
 
 MachineBasicBlock::iterator

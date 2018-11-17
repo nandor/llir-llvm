@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
+#include "llvm/CodeGen/MachineModuleInfo.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
 #include "llvm/CodeGen/SelectionDAG.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
@@ -394,12 +395,28 @@ SDValue GenMTargetLowering::LowerCall(
   SDValue Callee = CLI.Callee;
   CallingConv::ID CallConv = CLI.CallConv;
 
+  MachineFunction &MF = DAG.getMachineFunction();
+  const auto *CI = dyn_cast_or_null<CallInst>(CLI.CS.getInstruction());
+  const Function *Fn = CI ? CI->getCalledFunction() : nullptr;
+  const Module *M = MF.getMMI().getModule();
+  Metadata *IsCFProtectionSupported = M->getModuleFlag("cf-protection-branch");
+
   if (CLI.Ins.size() > 1) {
     Fail(DL, DAG, "more than 1 return value not supported");
   }
 
+  bool HasCINSCR = CI && CI->hasFnAttr("no_caller_saved_registers");
+  bool HasFnNSCR = Fn && Fn->hasFnAttribute("no_caller_saved_registers");
+  if (HasCINSCR || HasFnNSCR) {
+    Fail(DL, DAG, "unsupported no_caller_saved_registers");
+  }
+
   if (!isCallingConvSupported(CallConv)) {
     Fail(DL, DAG, "unsupported calling convention");
+  }
+
+  if (IsCFProtectionSupported) {
+    Fail(DL, DAG, "CF protection not supported");
   }
 
   // Argument to the call node.
