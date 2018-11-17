@@ -22,8 +22,8 @@ multiclass BinaryInt
 {
   def _I32 : I
     < (outs I32:$dst)
-    , (ins G32:$lhs, G32:$rhs)
-    , [(set I32:$dst, (node G32:$lhs, G32:$rhs))]
+    , (ins I32:$lhs, I32:$rhs)
+    , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
     , !strconcat(
           !strconcat(name, "."),
           !strconcat(type, "32\t$dst, $lhs, $rhs")
@@ -33,8 +33,8 @@ multiclass BinaryInt
 
   def _I64 : I
     < (outs I64:$dst)
-    , (ins G64:$lhs, G64:$rhs)
-    , [(set I64:$dst, (node G64:$lhs, G64:$rhs))]
+    , (ins I64:$lhs, I64:$rhs)
+    , [(set I64:$dst, (node I64:$lhs, I64:$rhs))]
     , !strconcat(
           !strconcat(name, "."),
           !strconcat(type, "64\t$dst, $lhs, $rhs")
@@ -63,16 +63,16 @@ multiclass CmpInt
 {
   def _I32 : I
     < (outs I32:$dst)
-    , (ins G32:$lhs, G32:$rhs)
-    , [(set I32:$dst, (setcc G32:$lhs, G32:$rhs, cond))]
+    , (ins I32:$lhs, I32:$rhs)
+    , [(set I32:$dst, (setcc I32:$lhs, I32:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
     , enc
     >;
 
   def _I64 : I
     < (outs I32:$dst)
-    , (ins G64:$lhs, G64:$rhs)
-    , [(set I32:$dst, (setcc G64:$lhs, G64:$rhs, cond))]
+    , (ins I64:$lhs, I64:$rhs)
+    , [(set I32:$dst, (setcc I64:$lhs, I64:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
     , enc
     >;
@@ -98,8 +98,8 @@ multiclass TernaryInt
 {
   def _I32 : I
     < (outs I32:$dst)
-    , (ins G32:$op, G32:$lhs, G32:$rhs)
-    , [(set I32:$dst, (node G32:$op, G32:$lhs, G32:$rhs))]
+    , (ins I32:$op, I32:$lhs, I32:$rhs)
+    , [(set I32:$dst, (node I32:$op, I32:$lhs, I32:$rhs))]
     , !strconcat(
           !strconcat(name, "."),
           !strconcat(type, "32\t$dst, $op, $lhs, $rhs")
@@ -109,8 +109,8 @@ multiclass TernaryInt
 
   def _I64 : I
     < (outs I64:$dst)
-    , (ins G32:$op, G64:$lhs, G64:$rhs)
-    , [(set I64:$dst, (node G32:$op, G64:$lhs, G64:$rhs))]
+    , (ins I32:$op, I64:$lhs, I64:$rhs)
+    , [(set I64:$dst, (node I32:$op, I64:$lhs, I64:$rhs))]
     , !strconcat(
           !strconcat(name, "."),
           !strconcat(type, "64\t$dst, $op, $lhs, $rhs")
@@ -151,19 +151,19 @@ defm GE_U : CmpInt<SETUGE, "uge", 0x4f>;
 defm SELECT : TernaryInt<select, "select", "i", 0xB0, 0xB1>;
 
 def : Pat
-  < (select (i32 (setne G32:$cond, 0)), G32:$lhs, G32:$rhs)
-  , (SELECT_I32 G32:$cond, G32:$lhs, G32:$rhs)
+  < (select (i32 (setne I32:$cond, 0)), I32:$lhs, I32:$rhs)
+  , (SELECT_I32 I32:$cond, I32:$lhs, I32:$rhs)
   >;
 def : Pat
-  < (select (i32 (setne G32:$cond, 0)), G64:$lhs, G64:$rhs)
-  , (SELECT_I64 G32:$cond, G64:$lhs, G64:$rhs)
+  < (select (i32 (setne I32:$cond, 0)), I64:$lhs, I64:$rhs)
+  , (SELECT_I64 I32:$cond, I64:$lhs, I64:$rhs)
   >;
 def : Pat
-  < (select (i32 (seteq G32:$cond, 0)), G32:$lhs, G32:$rhs)
-  , (SELECT_I32 G32:$cond, G32:$rhs, G32:$lhs)
+  < (select (i32 (seteq I32:$cond, 0)), I32:$lhs, I32:$rhs)
+  , (SELECT_I32 I32:$cond, I32:$rhs, I32:$lhs)
   >;
 def : Pat
-  < (select (i32 (seteq G32:$cond, 0)), G64:$lhs, G64:$rhs)
-  , (SELECT_I64 G32:$cond, G64:$rhs, G64:$lhs)
+  < (select (i32 (seteq I32:$cond, 0)), I64:$lhs, I64:$rhs)
+  , (SELECT_I64 I32:$cond, I64:$rhs, I64:$lhs)
   >;
 

@@ -109,16 +109,16 @@ multiclass TernaryFloat
 {
   def _F32 : I
     < (outs F32:$dst)
-    , (ins G32:$op, F32:$lhs, F32:$rhs)
-    , [(set F32:$dst, (node G32:$op, F32:$lhs, F32:$rhs))]
+    , (ins I32:$op, F32:$lhs, F32:$rhs)
+    , [(set F32:$dst, (node I32:$op, F32:$lhs, F32:$rhs))]
     , !strconcat(name, ".f32\t$dst, $op, $lhs, $rhs")
     , b32
     >;
 
   def _F64 : I
     < (outs F64:$dst)
-    , (ins G32:$op, F64:$lhs, F64:$rhs)
-    , [(set F64:$dst, (node G32:$op, F64:$lhs, F64:$rhs))]
+    , (ins I32:$op, F64:$lhs, F64:$rhs)
+    , [(set F64:$dst, (node I32:$op, F64:$lhs, F64:$rhs))]
     , !strconcat(name, ".f64\t$dst, $op, $lhs, $rhs")
     , b64
     >;
@@ -157,18 +157,19 @@ defm UGE : CmpFloat<SETUGE, "uge", 0x60>;
 defm SELECT : TernaryFloat<select, "select", 0xB0, 0xB1>;
 
 def : Pat
-  < (select (i32 (setne G32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_I32 G32:$cond, F32:$lhs, F32:$rhs)
+  < (select (i32 (setne I32:$cond, 0)), F32:$lhs, F32:$rhs)
+  , (SELECT_I32 I32:$cond, F32:$lhs, F32:$rhs)
   >;
 def : Pat
-  < (select (i32 (setne G32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_I64 G32:$cond, F64:$lhs, F64:$rhs)
+  < (select (i32 (setne I32:$cond, 0)), F64:$lhs, F64:$rhs)
+  , (SELECT_I64 I32:$cond, F64:$lhs, F64:$rhs)
   >;
 def : Pat
-  < (select (i32 (seteq G32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_I32 G32:$cond, F32:$rhs, F32:$lhs)
+  < (select (i32 (seteq I32:$cond, 0)), F32:$lhs, F32:$rhs)
+  , (SELECT_I32 I32:$cond, F32:$rhs, F32:$lhs)
   >;
 def : Pat
-  < (select (i32 (seteq G32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_I64 G32:$cond, F64:$rhs, F64:$lhs)
+  < (select (i32 (seteq I32:$cond, 0)), F64:$lhs, F64:$rhs)
+  , (SELECT_I64 I32:$cond, F64:$rhs, F64:$lhs)
   >;
+
