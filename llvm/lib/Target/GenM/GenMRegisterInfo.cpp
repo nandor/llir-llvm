@@ -45,9 +45,6 @@ GenMRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
 BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
   BitVector Reserved(getNumRegs());
-  for (auto Reg : { GenM::FP, GenM::SP }) {
-    Reserved.set(Reg);
-  }
   return Reserved;
 }
 
@@ -67,40 +64,17 @@ void GenMRegisterInfo::eliminateFrameIndex(
   const GenMInstrInfo *TII = MF.getSubtarget<GenMSubtarget>().getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
 
-  unsigned FrameReg, StackReg;
-  if (int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg)) {
-    unsigned TempReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::COPY_I64), TempReg)
-        .addReg(FrameReg);
+  unsigned FrameReg;
+  int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg);
 
-    unsigned ConstReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::CONST_I64), ConstReg)
-        .addImm(Offset);
-
-    unsigned AddrReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::ADD_I64), AddrReg)
-        .addReg(TempReg)
-        .addReg(ConstReg);
-
-    StackReg = AddrReg;
-  } else {
-    unsigned TempReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-    BuildMI(MBB, II, DL, TII->get(GenM::COPY_I64), TempReg)
-        .addReg(FrameReg);
-
-    StackReg = TempReg;
-  }
-
-  MI.getOperand(FIOperandNum).ChangeToRegister(StackReg, false);
+  unsigned TempReg = MRI.createVirtualRegister(&GenM::I64RegClass);
+  BuildMI(MBB, II, DL, TII->get(GenM::FRAME_I64), TempReg).addImm(Offset);
+  MI.getOperand(FIOperandNum).ChangeToRegister(TempReg, false);
 }
 
 unsigned GenMRegisterInfo::getFrameRegister(const MachineFunction &MF) const
 {
-  if (getFrameLowering(MF)->hasFP(MF)) {
-    return GenM::FP;
-  } else {
-    return GenM::SP;
-  }
+  return GenM::NUM_TARGET_REGS;
 }
 
 const TargetRegisterClass *GenMRegisterInfo::getPointerRegClass(

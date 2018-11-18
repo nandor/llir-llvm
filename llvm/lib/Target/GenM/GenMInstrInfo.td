@@ -144,7 +144,6 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , 0x04
       >;
 
-
   let isMoveImm = 1 in
   {
     def CONST_I32 : I
@@ -218,6 +217,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , []
     , "addr.i64\t$dst, $addr"
     , 0x0D
+    >;
+
+  def FRAME_I64 : I
+    < (outs I64:$res)
+    , (ins i32imm:$offset)
+    , []
+    , "frame.i64\t$res, $offset"
+    , 0x0E
     >;
 }
 
