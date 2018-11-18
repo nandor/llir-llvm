@@ -28,7 +28,7 @@ enum NodeType : unsigned {
   TCALL,
   VOID,
   SYMBOL,
-  BR_JT,
+  SWITCH,
 };
 } // end namespace GenMISD
 

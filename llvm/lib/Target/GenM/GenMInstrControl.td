@@ -57,3 +57,14 @@ def : Pat
   >;
 
 def TRAP: TerminatorInst<(ins), [(trap)], "trap", 0x75>;
+
+def SWITCH_I64 : TerminatorInst
+  < (ins I64:$index, variable_ops)
+  , [(GenMswitch I64:$index)]
+  , "switch\t$index"
+  , 0x72
+  >
+{
+  let hasCtrlDep = 1;
+  let isBarrier = 1;
+}

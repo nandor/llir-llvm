@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
+#include "llvm/CodeGen/MachineJumpTableInfo.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
 #include "llvm/CodeGen/SelectionDAG.h"
@@ -64,6 +65,7 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::f64, &GenM::F64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
+  // Custom lowerings for most operations.
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
   setOperationAction(ISD::GlobalAddress, MVTPtr, Custom);
   setOperationAction(ISD::ExternalSymbol, MVTPtr, Custom);
@@ -72,6 +74,7 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::BRIND, MVT::Other, Custom);
   setOperationAction(ISD::BR_JT, MVT::Other, Custom);
   setOperationAction(ISD::CopyToReg, MVT::Other, Custom);
+  setOperationAction(ISD::BR_JT, MVT::Other, Custom);
 
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
@@ -130,9 +133,6 @@ GenMTargetLowering::GenMTargetLowering(
   }
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
-
-  // Disable jump tables.
-  setMinimumJumpTableEntries(INT_MAX);
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
@@ -204,17 +204,22 @@ SDValue GenMTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const
 {
   SDLoc DL(Op);
   SDValue Chain = Op.getOperand(0);
-  SDValue JT = Op.getOperand(1);
+
+  const auto *JT = cast<JumpTableSDNode>(Op.getOperand(1));
   SDValue Index = Op.getOperand(2);
 
-  return DAG.getNode(
-      GenMISD::BR_JT,
-      DL,
-      MVT::Other,
-      Chain,
-      Index,
-      JT
-  );
+  SmallVector<SDValue, 8> Ops;
+  Ops.push_back(Chain);
+  Ops.push_back(Index);
+
+  // Add a BB operand for each case.
+  MachineJumpTableInfo *MJTI = DAG.getMachineFunction().getJumpTableInfo();
+  for (auto MBB : MJTI->getJumpTables()[JT->getIndex()].MBBs) {
+    Ops.push_back(DAG.getBasicBlock(MBB));
+  }
+
+  // Create a custom node.
+  return DAG.getNode(GenMISD::SWITCH, DL, MVT::Other, Ops);
 }
 
 SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
@@ -305,7 +310,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::TCALL:        return "GenMISD::TCALL";
   case GenMISD::VOID:         return "GenMISD::VOID";
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
-  case GenMISD::BR_JT:        return "GenMISD::BR_JT";
+  case GenMISD::SWITCH:       return "GenMISD::SWITCH";
   }
 }
 

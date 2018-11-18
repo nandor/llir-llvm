@@ -26,6 +26,7 @@ def SDT_GenMtcall    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 def SDT_GenMtcall_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
 def SDT_GenMbrjt     : SDTypeProfile<0,  2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
+def SDT_GenMswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
@@ -70,14 +71,14 @@ def GenMvoid_va : SDNode
   , SDT_GenMvoid_va
   , [SDNPHasChain, SDNPVariadic]
   >;
-def GenMbrjt : SDNode
-  < "GenMISD::BR_JT"
-  , SDT_GenMbrjt
-  , [SDNPHasChain]
-  >;
 def GenMsymbol : SDNode
   < "GenMISD::SYMBOL"
   , SDT_GenMsymbol
+  >;
+def GenMswitch : SDNode
+  < "GenMISD::SWITCH"
+  , SDT_GenMswitch
+  , [SDNPHasChain, SDNPVariadic]
   >;
 
 //===----------------------------------------------------------------------===//
