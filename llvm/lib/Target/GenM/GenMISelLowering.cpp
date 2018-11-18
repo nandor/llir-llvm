@@ -62,8 +62,6 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
   addRegisterClass(MVT::f32, &GenM::F32RegClass);
   addRegisterClass(MVT::f64, &GenM::F64RegClass);
-  addRegisterClass(MVT::i32, &GenM::G32RegClass);
-  addRegisterClass(MVT::i64, &GenM::G64RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
