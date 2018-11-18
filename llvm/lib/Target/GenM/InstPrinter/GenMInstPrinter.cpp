@@ -110,6 +110,16 @@ void GenMInstPrinter::printInst(
     case GenM::CALL_VOID:    printCall("call",     OS, MI, STI, 1, 0); break;
     case GenM::CALL_VOID_VA: printCall("call",     OS, MI, STI, 1, 1); break;
 
+    case GenM::SWITCH_I64: {
+      OS << "\tswitch\t";
+      printOperand(MI, 0, STI, OS);
+      for (unsigned i = 1; i < MI->getNumOperands(); ++i) {
+        OS << ", ";
+        printOperand(MI, i, STI, OS);
+      }
+      break;
+    }
+
     default: {
       printInstruction(MI, STI, OS);
       break;
