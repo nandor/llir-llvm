@@ -151,7 +151,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I32:$res)
       , (ins i32imm_op:$imm)
       , [(set I32:$res, imm:$imm)]
-      , "imm.i32\t$res, $imm"
+      , "mov.i32\t$res, $imm"
       , 0x05
       >;
 
@@ -159,7 +159,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs I64:$res)
       , (ins i64imm_op:$imm)
       , [(set I64:$res, imm:$imm)]
-      , "imm.i64\t$res, $imm"
+      , "mov.i64\t$res, $imm"
       , 0x06
       >;
 
@@ -167,7 +167,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs F32:$res)
       , (ins f32imm_op:$imm)
       , [(set F32:$res, fpimm:$imm)]
-      , "imm.f32\t$res, $imm"
+      , "mov.f32\t$res, $imm"
       , 0x07
       >;
 
@@ -175,7 +175,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       < (outs F64:$res)
       , (ins f64imm_op:$imm)
       , [(set F64:$res, fpimm:$imm)]
-      , "imm.f64\t$res, $imm"
+      , "mov.f64\t$res, $imm"
       , 0x08
       >;
   }
