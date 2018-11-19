@@ -212,11 +212,11 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x0C
     >;
 
-  def ADDR : I
+  def ADDR_I64 : I
     < (outs I64:$dst)
     , (ins i64addr_op:$addr)
     , []
-    , "addr.i64\t$dst, $addr"
+    , "mov.i64\t$dst, $addr"
     , 0x0D
     >;
 
@@ -232,12 +232,12 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
 def : Pat
   < (GenMsymbol tglobaladdr:$addr)
-  , (ADDR i64addr_op:$addr)
+  , (ADDR_I64 i64addr_op:$addr)
   >;
 
 def : Pat
   < (GenMsymbol texternalsym:$addr)
-  , (ADDR i64addr_op:$addr)
+  , (ADDR_I64 i64addr_op:$addr)
   >;
 
 //===----------------------------------------------------------------------===//
