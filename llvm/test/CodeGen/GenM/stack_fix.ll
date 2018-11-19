@@ -9,7 +9,7 @@ declare void @ext_func_i32(i32* %ptr)
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca32() noredzone {
-  ; CHECK-NEXT: imm.i32 $1, 0
+  ; CHECK-NEXT: mov.i32 $1, 0
   ; CHECK-NEXT: frame.i64 $2, 0
   ; CHECK-NEXT: st.4 [$2], $1
   ; CHECK-NEXT: ret
