@@ -6,6 +6,7 @@
 
 
 ; CHECK-LABEL: va_func:
+; CHECK: .args 2, 1
 ; CHECK call.i32 $6, c, $5, $3, $4, $sp
 define void @va_func(i32, i8* nocapture readonly, ...) {
   %3 = alloca [1 x %struct.__va_list_tag], align 16
