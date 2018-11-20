@@ -51,14 +51,15 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
 {
   MachineFrameInfo &MFI = MF->getFrameInfo();
   auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
+  auto &Streamer = getTargetStreamer();
 
   if (auto StackSize = MFI.getStackSize()) {
-    getTargetStreamer().emitStackSize(StackSize);
+    Streamer.emitStackSize(StackSize);
   }
   if (auto NumFixedArgs = FuncInfo->getNumFixedArgs()) {
-    getTargetStreamer().emitNumFixedArgs(NumFixedArgs);
+    Streamer.emitNumFixedArgs(NumFixedArgs, MF->getFunction().isVarArg());
   }
-  getTargetStreamer().emitCallingConv(MF->getFunction().getCallingConv());
+  Streamer.emitCallingConv(MF->getFunction().getCallingConv());
 
   AsmPrinter::EmitFunctionBodyStart();
 }
