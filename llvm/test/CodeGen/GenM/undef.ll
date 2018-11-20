@@ -6,7 +6,7 @@ declare void @ext_func(i64 %val)
 ; CHECK-LABEL: _call_undef:
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0
-; CHECK: call c, $1, $undef
+; CHECK: call.c $1, $undef
 define void @call_undef() {
   call void @ext_func(i64 undef)
   ret void
