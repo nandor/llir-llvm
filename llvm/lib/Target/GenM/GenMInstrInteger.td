@@ -137,7 +137,7 @@ defm SRA  : BinaryInt<sra,  "sra",  "i", 0xA7, 0xAA>;
 defm ROTL : BinaryInt<rotl, "rotl", "i", 0xA8, 0xAB>;
 
 defm EQ : CommCmpInt<SETEQ, "eq",  0x46>;
-defm NE : CommCmpInt<SETNE, "neq", 0x47>;
+defm NE : CommCmpInt<SETNE, "ne", 0x47>;
 
 defm LT_S : CmpInt<SETLT,  "lt",  0x48>;
 defm LT_U : CmpInt<SETULT, "ult", 0x49>;
