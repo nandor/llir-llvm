@@ -73,19 +73,21 @@ void GenMInstPrinter::printCall(
 {
   unsigned start = isVoid ? 0 : 1;
   if (isVA) {
-    OS << '\t' << Op << '.' << MI->getOperand(start++).getImm() << '\t';
+    OS << '\t' << Op << '.' << MI->getOperand(start++).getImm() << '.';
   } else {
-    OS << '\t' << Op << '\t';
+    OS << '\t' << Op << '.';
   }
+  printCallingConv(OS, MI->getOperand(start++).getImm());
+  OS << '\t';
 
   if (!isVoid) {
     printOperand(MI, 0, STI, OS);
-    OS << ", ";
   }
-  printCallingConv(OS, MI->getOperand(start++).getImm());
 
   for (unsigned i = start; i < MI->getNumOperands(); ++i) {
-    OS << ", ";
+    if (!isVoid || i != start) {
+      OS << ", ";
+    }
     printOperand(MI, i, STI, OS);
   }
 }
