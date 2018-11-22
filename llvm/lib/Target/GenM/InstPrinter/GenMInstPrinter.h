@@ -63,7 +63,8 @@ private:
       const MCInst *MI,
       const MCSubtargetInfo &STI,
       bool isVoid,
-      bool isVA
+      bool isVA,
+      bool isTail
   );
 };
 } // end namespace llvm

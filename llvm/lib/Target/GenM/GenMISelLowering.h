@@ -27,6 +27,7 @@ enum NodeType : unsigned {
   CALL,
   TCALL,
   VOID,
+  TVOID,
   SYMBOL,
   SWITCH,
 };
