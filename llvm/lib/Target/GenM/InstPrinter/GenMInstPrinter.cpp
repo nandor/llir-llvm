@@ -69,7 +69,8 @@ void GenMInstPrinter::printCall(
     const MCInst *MI,
     const MCSubtargetInfo &STI,
     bool isVoid,
-    bool isVA)
+    bool isVA,
+    bool isTail)
 {
   unsigned start = isVoid ? 0 : 1;
   if (isVA) {
@@ -80,12 +81,12 @@ void GenMInstPrinter::printCall(
   printCallingConv(OS, MI->getOperand(start++).getImm());
   OS << '\t';
 
-  if (!isVoid) {
+  if (!isVoid && !isTail) {
     printOperand(MI, 0, STI, OS);
   }
 
   for (unsigned i = start; i < MI->getNumOperands(); ++i) {
-    if (!isVoid || i != start) {
+    if ((!isVoid && !isTail) || i != start) {
       OS << ", ";
     }
     printOperand(MI, i, STI, OS);
@@ -99,18 +100,27 @@ void GenMInstPrinter::printInst(
     const MCSubtargetInfo &STI)
 {
   switch (auto Op = MI->getOpcode()) {
-    case GenM::CALL_I32:     printCall("call.i32", OS, MI, STI, 0, 0); break;
-    case GenM::CALL_I32_VA:  printCall("call.i32", OS, MI, STI, 0, 1); break;
-    case GenM::CALL_F32:     printCall("call.f32", OS, MI, STI, 0, 0); break;
-    case GenM::CALL_F32_VA:  printCall("call.f32", OS, MI, STI, 0, 1); break;
-    case GenM::CALL_I64:     printCall("call.i64", OS, MI, STI, 0, 0); break;
-    case GenM::CALL_I64_VA:  printCall("call.i64", OS, MI, STI, 0, 1); break;
-    case GenM::CALL_F64:     printCall("call.f64", OS, MI, STI, 0, 0); break;
-    case GenM::CALL_F64_VA:  printCall("call.f64", OS, MI, STI, 0, 1); break;
-    case GenM::TCALL:        printCall("tcall",    OS, MI, STI, 1, 0); break;
-    case GenM::TCALL_VA:     printCall("tcall",    OS, MI, STI, 1, 1); break;
-    case GenM::CALL_VOID:    printCall("call",     OS, MI, STI, 1, 0); break;
-    case GenM::CALL_VOID_VA: printCall("call",     OS, MI, STI, 1, 1); break;
+    case GenM::CALL_I32:      printCall("call.i32",  OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_I32_VA:   printCall("call.i32",  OS, MI, STI, 0, 1, 0); break;
+    case GenM::CALL_F32:      printCall("call.f32",  OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_F32_VA:   printCall("call.f32",  OS, MI, STI, 0, 1, 0); break;
+    case GenM::CALL_I64:      printCall("call.i64",  OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_I64_VA:   printCall("call.i64",  OS, MI, STI, 0, 1, 0); break;
+    case GenM::CALL_F64:      printCall("call.f64",  OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_F64_VA:   printCall("call.f64",  OS, MI, STI, 0, 1, 0); break;
+    case GenM::CALL_VOID:     printCall("call",      OS, MI, STI, 1, 0, 0); break;
+    case GenM::CALL_VOID_VA:  printCall("call",      OS, MI, STI, 1, 1, 0); break;
+
+    case GenM::TCALL_I32:     printCall("tcall.i32", OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_I32_VA:  printCall("tcall.i32", OS, MI, STI, 0, 1, 1); break;
+    case GenM::TCALL_F32:     printCall("tcall.f32", OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_F32_VA:  printCall("tcall.f32", OS, MI, STI, 0, 1, 1); break;
+    case GenM::TCALL_I64:     printCall("tcall.i64", OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_I64_VA:  printCall("tcall.i64", OS, MI, STI, 0, 1, 1); break;
+    case GenM::TCALL_F64:     printCall("tcall.f64", OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_F64_VA:  printCall("tcall.f64", OS, MI, STI, 0, 1, 1); break;
+    case GenM::TCALL_VOID:    printCall("tcall",     OS, MI, STI, 1, 0, 1); break;
+    case GenM::TCALL_VOID_VA: printCall("tcall",     OS, MI, STI, 1, 1, 1); break;
 
     case GenM::SWITCH_I64: {
       OS << "\tswitch\t";

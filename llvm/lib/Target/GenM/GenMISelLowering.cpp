@@ -309,6 +309,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::CALL:         return "GenMISD::CALL";
   case GenMISD::TCALL:        return "GenMISD::TCALL";
   case GenMISD::VOID:         return "GenMISD::VOID";
+  case GenMISD::TVOID:        return "GenMISD::TVOID";
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::SWITCH:       return "GenMISD::SWITCH";
   }
@@ -441,31 +442,31 @@ SDValue GenMTargetLowering::LowerCall(
   }
   Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
 
-  if (CLI.IsTailCall) {
-    SmallVector<EVT, 8> InTys = { MVT::Other };
-    return DAG.getNode(GenMISD::TCALL, DL, DAG.getVTList(InTys), Ops);
-  } else {
-    // Collect the types of return values.
-    SmallVector<EVT, 8> InTys;
-    for (const auto &In : CLI.Ins) {
-      // TODO(nand): analyse argument types.
-      InTys.push_back(In.VT);
-    }
-    InTys.push_back(MVT::Other);
+  // Collect the types of return values.
+  SmallVector<EVT, 8> InTys;
+  for (const auto &In : CLI.Ins) {
+    // TODO(nand): analyse argument types.
+    InTys.push_back(In.VT);
+  }
+  InTys.push_back(MVT::Other);
 
-    // Construct the call node.
-    if (CLI.Ins.empty()) {
-      return DAG.getNode(GenMISD::VOID, DL, DAG.getVTList(InTys), Ops);
-    } else {
-      SDValue Call = DAG.getNode(
-          GenMISD::CALL,
-          DL,
-          DAG.getVTList(InTys),
-          Ops
-      );
-      InVals.push_back(Call);
-      return Call.getValue(1);
-    }
+  // Construct the call node.
+  if (CLI.Ins.empty()) {
+    return DAG.getNode(
+        CLI.IsTailCall ? GenMISD::TVOID : GenMISD::VOID,
+        DL,
+        DAG.getVTList(InTys),
+        Ops
+    );
+  } else {
+    SDValue Call = DAG.getNode(
+        CLI.IsTailCall ? GenMISD::TCALL : GenMISD::CALL,
+        DL,
+        DAG.getVTList(InTys),
+        Ops
+    );
+    InVals.push_back(Call);
+    return Call.getValue(1);
   }
 }
 
