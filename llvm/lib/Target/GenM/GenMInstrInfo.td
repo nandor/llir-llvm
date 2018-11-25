@@ -20,6 +20,7 @@ def SDT_GenMargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
 def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 def SDT_GenMswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+def SDT_GenMvastart  : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
 
 def SDT_GenMcall     : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
 def SDT_GenMcall_va  : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
@@ -38,6 +39,7 @@ def GenMargument  : SDNode<"GenMISD::ARGUMENT", SDT_GenMargument>;
 def GenMreturn    : SDNode<"GenMISD::RETURN",   SDT_GenMreturn, [SDNPHasChain]>;
 def GenMsymbol    : SDNode<"GenMISD::SYMBOL",   SDT_GenMsymbol>;
 def GenMswitch    : SDNode<"GenMISD::SWITCH",   SDT_GenMswitch, [SDNPHasChain, SDNPVariadic]>;
+def GenMvastart   : SDNode<"GenMISD::VASTART",  SDT_GenMvastart, [SDNPHasChain]>;
 
 def GenMcall      : SDNode<"GenMISD::CALL",     SDT_GenMcall,     [SDNPHasChain, SDNPVariadic]>;
 def GenMcall_va   : SDNode<"GenMISD::CALL",     SDT_GenMcall_va,  [SDNPHasChain, SDNPVariadic]>;
@@ -77,6 +79,17 @@ include "GenMInstrFormats.td"
 //===----------------------------------------------------------------------===//
 // Additional instructions.
 //===----------------------------------------------------------------------===//
+
+def VASTART : I
+  < (outs)
+  , (ins I64:$frame)
+  , [(GenMvastart I64:$frame)]
+  , "vastart\t$frame"
+  , 0x00
+  >
+{
+  let hasSideEffects = 1;
+}
 
 let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 {
@@ -147,23 +160,23 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       >;
   }
 
-  def COPY_I32 : I
+  def MOV_I32 : I
     < (outs I32:$dst)
-    , (ins G32:$src)
+    , (ins I32:$src)
     , []
     , "mov.i32\t$dst, $src"
     , 0x09
     >;
 
-  def COPY_I64 : I
+  def MOV_I64 : I
     < (outs I64:$dst)
-    , (ins G64:$src)
+    , (ins I64:$src)
     , []
     , "mov.i64\t$dst, $src"
     , 0x0A
     >;
 
-  def COPY_F32 : I
+  def MOV_F32 : I
     < (outs F32:$dst)
     , (ins F32:$src)
     , []
@@ -171,7 +184,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x0B
     >;
 
-  def COPY_F64 : I
+  def MOV_F64 : I
     < (outs F64:$dst)
     , (ins F64:$src)
     , []

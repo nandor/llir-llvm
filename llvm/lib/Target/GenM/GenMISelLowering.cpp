@@ -78,8 +78,8 @@ GenMTargetLowering::GenMTargetLowering(
 
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
-  setOperationAction(ISD::VAARG, MVT::Other, Expand);
-  setOperationAction(ISD::VACOPY, MVT::Other, Expand);
+  setOperationAction(ISD::VAARG, MVT::Other, Custom);
+  setOperationAction(ISD::VACOPY, MVT::Other, Custom);
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
@@ -144,6 +144,8 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::JumpTable:      return LowerJumpTable(Op, DAG);
     case ISD::BR_JT:          return LowerBR_JT(Op, DAG);
     case ISD::VASTART:        return LowerVASTART(Op, DAG);
+    case ISD::VAARG:          return LowerVAARG(Op, DAG);
+    case ISD::VACOPY:         return LowerVACOPY(Op, DAG);
     case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
@@ -235,26 +237,24 @@ SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
 SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
 {
   SDLoc DL(Op);
-  MachineFunction *MF = &DAG.getMachineFunction();
-  EVT PtrVT = getPointerTy(MF->getDataLayout());
 
-  const Value *SV = cast<SrcValueSDNode>(Op.getOperand(2))->getValue();
-  unsigned Reg = MF->addLiveIn(GenM::VA, &GenM::I64RegClass);
-
-  // Store the VAReg in the value.
-  return DAG.getStore(
-      Op.getOperand(0),
+  return DAG.getNode(
+      GenMISD::VASTART,
       DL,
-      DAG.getCopyFromReg(
-          DAG.getEntryNode(),
-          DL,
-          Reg,
-          PtrVT
-      ),
-      Op.getOperand(1),
-      MachinePointerInfo(SV),
-      0
+      MVT::Other,
+      Op.getOperand(0),
+      Op.getOperand(1)
   );
+}
+
+SDValue GenMTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const
+{
+  llvm_unreachable(!"not implemented");
+}
+
+SDValue GenMTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const
+{
+  llvm_unreachable(!"not implemented");
 }
 
 SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
@@ -266,7 +266,7 @@ SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
 
     EVT VT = Src.getValueType();
     SDValue Copy(DAG.getMachineNode(
-        VT == MVT::i32 ? GenM::COPY_I32 : GenM::COPY_I64,
+        VT == MVT::i32 ? GenM::MOV_I32 : GenM::MOV_I64,
         DL,
         VT,
         Src
@@ -312,6 +312,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::TVOID:        return "GenMISD::TVOID";
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::SWITCH:       return "GenMISD::SWITCH";
+  case GenMISD::VASTART:      return "GenMISD::VASTART";
   }
 }
 

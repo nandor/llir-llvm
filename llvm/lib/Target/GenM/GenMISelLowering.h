@@ -30,6 +30,7 @@ enum NodeType : unsigned {
   TVOID,
   SYMBOL,
   SWITCH,
+  VASTART,
 };
 } // end namespace GenMISD
 
@@ -46,6 +47,8 @@ public:
   SDValue LowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerBR_JT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVASTART(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerVAARG(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override;
