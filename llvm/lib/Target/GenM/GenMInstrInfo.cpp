@@ -158,9 +158,9 @@ void GenMInstrInfo::copyPhysReg(
 
   unsigned Op;
   if (&GenM::I32RegClass == DstCls) {
-    Op = GenM::COPY_I32;
+    Op = GenM::MOV_I32;
   } else if (&GenM::I64RegClass == DstCls) {
-    Op = GenM::COPY_I64;
+    Op = GenM::MOV_I64;
   } else {
     llvm_unreachable("cannot copy physical registers");
   }

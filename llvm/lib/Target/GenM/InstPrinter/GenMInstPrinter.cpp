@@ -44,8 +44,6 @@ void GenMInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
       OS << "$undef";
       break;
     }
-    case GenM::SP: OS << "$sp"; break;
-    case GenM::VA: OS << "$va"; break;
     default: {
       assert(RegNo >= GenM::NUM_TARGET_REGS);
       OS << "$" << (RegNo - GenM::NUM_TARGET_REGS);
