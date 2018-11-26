@@ -91,7 +91,7 @@ GenMTargetLowering::GenMTargetLowering(
 
   // Preserve undefined values.
   for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64 }) {
-    setOperationAction(ISD::UNDEF, T, Legal);
+    setOperationAction(ISD::UNDEF, T, Custom);
   }
 
   // Deal with floating point operations.
@@ -147,6 +147,7 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::VAARG:          return LowerVAARG(Op, DAG);
     case ISD::VACOPY:         return LowerVACOPY(Op, DAG);
     case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
+    case ISD::UNDEF:          return LowerUNDEF(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -288,6 +289,17 @@ SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
   return SDValue();
 }
 
+SDValue GenMTargetLowering::LowerUNDEF(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  auto T =  Op.getValueType();
+  return DAG.getNode(
+      GenMISD::UNDEF,
+      DL,
+      T
+  );
+}
+
 bool GenMTargetLowering::useSoftFloat() const
 {
   return false;
@@ -313,6 +325,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::SWITCH:       return "GenMISD::SWITCH";
   case GenMISD::VASTART:      return "GenMISD::VASTART";
+  case GenMISD::UNDEF:        return "GenMISD::UNDEF";
   }
 }
 

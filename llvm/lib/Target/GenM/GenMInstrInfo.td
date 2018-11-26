@@ -21,6 +21,7 @@ def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 def SDT_GenMswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMvastart  : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
+def SDT_GenMundef    : SDTypeProfile<1,  0, []>;
 
 def SDT_GenMcall     : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
 def SDT_GenMcall_va  : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
@@ -40,6 +41,7 @@ def GenMreturn    : SDNode<"GenMISD::RETURN",   SDT_GenMreturn, [SDNPHasChain]>;
 def GenMsymbol    : SDNode<"GenMISD::SYMBOL",   SDT_GenMsymbol>;
 def GenMswitch    : SDNode<"GenMISD::SWITCH",   SDT_GenMswitch, [SDNPHasChain, SDNPVariadic]>;
 def GenMvastart   : SDNode<"GenMISD::VASTART",  SDT_GenMvastart, [SDNPHasChain]>;
+def GenMundef     : SDNode<"GenMISD::UNDEF",    SDT_GenMundef>;
 
 def GenMcall      : SDNode<"GenMISD::CALL",     SDT_GenMcall,     [SDNPHasChain, SDNPVariadic]>;
 def GenMcall_va   : SDNode<"GenMISD::CALL",     SDT_GenMcall_va,  [SDNPHasChain, SDNPVariadic]>;
@@ -207,6 +209,39 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , "frame.i64\t$res, $offset"
     , 0x0E
     >;
+
+  def UNDEF_I32 : I
+      < (outs I32:$res)
+      , (ins)
+      , [(set I32:$res, GenMundef)]
+      , "undef.i32\t$res"
+      , 0x11
+      >;
+
+  def UNDEF_I64 : I
+      < (outs I64:$res)
+      , (ins)
+      , [(set I64:$res, GenMundef)]
+      , "undef.i64\t$res"
+      , 0x12
+      >;
+
+  def UNDEF_F32 : I
+      < (outs F32:$res)
+      , (ins)
+      , [(set F32:$res, GenMundef)]
+      , "undef.f32\t$res"
+      , 0x13
+      >;
+
+  def UNDEF_F64 : I
+      < (outs F64:$res)
+      , (ins)
+      , [(set F64:$res, GenMundef)]
+      , "undef.f64\t$res"
+      , 0x14
+      >;
+
 }
 
 
