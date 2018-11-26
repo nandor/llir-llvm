@@ -385,8 +385,6 @@ SDValue GenMTargetLowering::LowerFormalArguments(
     MFI->addParam(In.VT);
   }
 
-  MFI->setNumFixedArgs(Ins.size());
-
   return Chain;
 }
 

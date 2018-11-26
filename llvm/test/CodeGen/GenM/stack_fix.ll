@@ -45,7 +45,7 @@ define void @allocarray() {
 
 ; CHECK-LABEL: _non_mem_use:
 ; CHECK-NEXT: .stack 48
-; CHECK-NEXT: .args 1
+; CHECK-NEXT: .args 0, i64
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @non_mem_use(i8** %addr) {

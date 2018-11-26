@@ -13,6 +13,7 @@
 #include "llvm/IR/CallingConv.h"
 #include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCStreamer.h"
+#include "llvm/Support/MachineValueType.h"
 
 namespace llvm {
 class GenMMCTargetStreamer : public MCTargetStreamer {
@@ -22,7 +23,7 @@ public:
   /// .stack
   virtual void emitStackSize(int Size) = 0;
   /// .args
-  virtual void emitNumFixedArgs(int Count, bool IsVA) = 0;
+  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
 };
@@ -33,7 +34,7 @@ public:
   GenMMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
 
   virtual void emitStackSize(int Size) override;
-  virtual void emitNumFixedArgs(int Count, bool IsVA) override;
+  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
 private:
@@ -46,7 +47,7 @@ public:
   GenMMCTargetELFStreamer(MCStreamer &S);
 
   virtual void emitStackSize(int Size) override;
-  virtual void emitNumFixedArgs(int Count, bool IsVA) override;
+  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
 
   MCELFStreamer &getStreamer();
