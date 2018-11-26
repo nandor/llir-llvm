@@ -56,8 +56,11 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
   if (auto StackSize = MFI.getStackSize()) {
     Streamer.emitStackSize(StackSize);
   }
-  if (auto NumFixedArgs = FuncInfo->getNumFixedArgs()) {
-    Streamer.emitNumFixedArgs(NumFixedArgs, MF->getFunction().isVarArg());
+
+  auto &Params = FuncInfo->getParams();
+  bool IsVA = MF->getFunction().isVarArg();
+  if (!Params.empty() || IsVA) {
+    Streamer.emitParams(Params, IsVA);
   }
   Streamer.emitCallingConv(MF->getFunction().getCallingConv());
 

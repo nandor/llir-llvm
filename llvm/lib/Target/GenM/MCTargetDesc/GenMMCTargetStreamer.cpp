@@ -36,9 +36,20 @@ void GenMMCTargetAsmStreamer::emitStackSize(int Size)
   OS << "\t.stack\t" << Size << '\n';
 }
 
-void GenMMCTargetAsmStreamer::emitNumFixedArgs(int Count, bool IsVA)
+void GenMMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
 {
-  OS << "\t.args\t" << Count << ", " << IsVA << "\n";
+  OS << "\t.args\t" << IsVA;
+  for (const auto &VT : params) {
+    OS << ", ";
+    switch (VT.SimpleTy) {
+      case MVT::i32: OS << "i32"; break;
+      case MVT::i64: OS << "i64"; break;
+      case MVT::f32: OS << "f32"; break;
+      case MVT::f64: OS << "f64"; break;
+      default: llvm_unreachable("not implemented");
+    }
+  }
+  OS << "\n";
 }
 
 void GenMMCTargetAsmStreamer::emitCallingConv(CallingConv::ID CallConv)
@@ -60,7 +71,7 @@ void GenMMCTargetELFStreamer::emitStackSize(int Size)
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitNumFixedArgs(int Count, bool IsVA)
+void GenMMCTargetELFStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
 {
   llvm_unreachable("not implemented");
 }
