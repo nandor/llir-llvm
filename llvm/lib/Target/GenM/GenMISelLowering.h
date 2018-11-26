@@ -31,6 +31,7 @@ enum NodeType : unsigned {
   SYMBOL,
   SWITCH,
   VASTART,
+  UNDEF,
 };
 } // end namespace GenMISD
 
@@ -50,6 +51,7 @@ public:
   SDValue LowerVAARG(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerUNDEF(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override;
 

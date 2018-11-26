@@ -6,7 +6,8 @@ declare void @ext_func(i64 %val)
 ; CHECK-LABEL: _call_undef:
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0
-; CHECK: call.c $1, $undef
+; CHECK: undef.i64 $1
+; CHECK: call.c $2, $1
 define void @call_undef() {
   call void @ext_func(i64 undef)
   ret void
@@ -15,7 +16,8 @@ define void @call_undef() {
 ; CHECK-LABEL: _ret_undef_i64:
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0
-; CHECK: ret.i64 $undef
+; CHECK: undef.i64 $1
+; CHECK: ret.i64 $1
 define i64 @ret_undef_i64() {
   ret i64 undef
 }
@@ -23,7 +25,8 @@ define i64 @ret_undef_i64() {
 ; CHECK-LABEL: _ret_undef_i32:
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0
-; CHECK: ret.i32 $undef
+; CHECK: undef.i32 $1
+; CHECK: ret.i32 $1
 define i32 @ret_undef_i32() {
   ret i32 undef
 }
