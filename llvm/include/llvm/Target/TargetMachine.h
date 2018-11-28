@@ -23,6 +23,7 @@
 
 namespace llvm {
 
+class AsmPrinter;
 class Function;
 class GlobalValue;
 class MachineModuleInfoWrapperPass;
@@ -396,9 +397,13 @@ public:
 
   /// Adds an AsmPrinter pass to the pipeline that prints assembly or
   /// machine code from the MI representation.
-  bool addAsmPrinter(PassManagerBase &PM, raw_pwrite_stream &Out,
-                     raw_pwrite_stream *DwoOut, CodeGenFileType FileType,
-                     MCContext &Context);
+  AsmPrinter *addAsmPrinter(
+      PassManagerBase &PM,
+      raw_pwrite_stream &Out,
+      raw_pwrite_stream *DwoOut,
+      CodeGenFileType FileType,
+      MCContext &Context
+  );
 
   /// True if the target uses physical regs (as nearly all targets do). False
   /// for stack machines such as WebAssembly and other virtual-register

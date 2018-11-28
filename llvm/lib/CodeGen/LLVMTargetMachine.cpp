@@ -113,11 +113,13 @@ addPassesToGenerateCode(LLVMTargetMachine &TM, PassManagerBase &PM,
   return PassConfig;
 }
 
-bool LLVMTargetMachine::addAsmPrinter(PassManagerBase &PM,
-                                      raw_pwrite_stream &Out,
-                                      raw_pwrite_stream *DwoOut,
-                                      CodeGenFileType FileType,
-                                      MCContext &Context) {
+AsmPrinter *LLVMTargetMachine::addAsmPrinter(
+    PassManagerBase &PM,
+    raw_pwrite_stream &Out,
+    raw_pwrite_stream *DwoOut,
+    CodeGenFileType FileType,
+    MCContext &Context)
+{
   if (Options.MCOptions.MCSaveTempLabels)
     Context.setAllowTemporaryLabels(false);
 
@@ -155,7 +157,7 @@ bool LLVMTargetMachine::addAsmPrinter(PassManagerBase &PM,
     MCAsmBackend *MAB =
         getTarget().createMCAsmBackend(STI, MRI, Options.MCOptions);
     if (!MCE || !MAB)
-      return true;
+      return nullptr;
 
     Triple T(getTargetTriple().str());
     AsmStreamer.reset(getTarget().createMCObjectStreamer(
@@ -175,13 +177,13 @@ bool LLVMTargetMachine::addAsmPrinter(PassManagerBase &PM,
   }
 
   // Create the AsmPrinter, which takes ownership of AsmStreamer if successful.
-  FunctionPass *Printer =
+  AsmPrinter *Printer =
       getTarget().createAsmPrinter(*this, std::move(AsmStreamer));
   if (!Printer)
-    return true;
+    return nullptr;
 
   PM.add(Printer);
-  return false;
+  return Printer;
 }
 
 bool LLVMTargetMachine::addPassesToEmitFile(
