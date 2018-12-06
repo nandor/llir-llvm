@@ -41,7 +41,9 @@ void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 {
   LLVM_DEBUG(dbgs() << "EmitInstruction: " << *MI << '\n');
 
-  GenMMCInstLower MCInstLowering(OutContext, *this);
+  auto &MF = *MI->getParent()->getParent();
+
+  GenMMCInstLower MCInstLowering(OutContext, MF, *this);
   MCInst TmpInst;
   MCInstLowering.Lower(MI, TmpInst);
   EmitToStreamer(*OutStreamer, TmpInst);

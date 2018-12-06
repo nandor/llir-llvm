@@ -20,6 +20,7 @@
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/Mangler.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
@@ -30,15 +31,33 @@
 using namespace llvm;
 
 MCSymbol *
-GenMMCInstLower::GetGlobalAddressSymbol(const MachineOperand &MO) const
+GenMMCInstLower::GetSymbolFromOperand(const MachineOperand &MO) const
 {
-  return Printer.getSymbol(MO.getGlobal());
-}
+  const DataLayout &DL = MF.getDataLayout();
+  MCSymbol *Sym = nullptr;
+  SmallString<128> Name;
 
-MCSymbol *
-GenMMCInstLower::GetExternalSymbolSymbol(const MachineOperand &MO) const
-{
-  return Printer.GetExternalSymbolSymbol(MO.getSymbolName());
+  if (MO.isGlobal()) {
+    const GlobalValue *GV = MO.getGlobal();
+    if (GV->hasName() && GV->getName()[0] == '\1') {
+      Sym = Ctx.getOrCreateSymbol(GV->getName());
+    } else {
+      Printer.getNameWithPrefix(Name, GV);
+      Sym = Ctx.getOrCreateSymbol(Name);
+    }
+  } else if (MO.isSymbol()) {
+    auto name = MO.getSymbolName();
+    if (name[0] == '\1') {
+      Sym = Ctx.getOrCreateSymbol(name);
+    } else {
+      Mangler::getNameWithPrefix(Name, name, DL);
+      Sym = Ctx.getOrCreateSymbol(Name);
+    }
+  } else if (MO.isMBB()) {
+    Sym = MO.getMBB()->getSymbol();
+  }
+
+  return Sym;
 }
 
 MCOperand GenMMCInstLower::LowerSymbolOperand(
@@ -115,7 +134,7 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
       }
       case MachineOperand::MO_GlobalAddress: {
         MCOp = LowerSymbolOperand(
-            GetGlobalAddressSymbol(MO),
+            GetSymbolFromOperand(MO),
             MO.getOffset(),
             MO.getGlobal()->getValueType()->isFunctionTy(),
             false
@@ -125,7 +144,7 @@ void GenMMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
       case MachineOperand::MO_ExternalSymbol: {
         // TODO(nand): remove hardcoded symbols.
         MCOp = LowerSymbolOperand(
-            GetExternalSymbolSymbol(MO),
+            GetSymbolFromOperand(MO),
             0,
             true,
             true

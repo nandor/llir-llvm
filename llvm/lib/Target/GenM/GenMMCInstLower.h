@@ -25,12 +25,17 @@ class MCContext;
 class MCSymbol;
 class MachineInstr;
 class MachineOperand;
+class MachineFunction;
 
 /// This class is used to lower an MachineInstr into an MCInst.
 class LLVM_LIBRARY_VISIBILITY GenMMCInstLower {
 public:
-  GenMMCInstLower(MCContext &Ctx, GenMAsmPrinter &Printer)
+  GenMMCInstLower(
+      MCContext &Ctx,
+      const MachineFunction &MF,
+      GenMAsmPrinter &Printer)
     : Ctx(Ctx)
+    , MF(MF)
     , Printer(Printer)
   {
   }
@@ -39,11 +44,10 @@ public:
 
 private:
   MCContext &Ctx;
+  const MachineFunction &MF;
   GenMAsmPrinter &Printer;
 
-  MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
-
-  MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
+  MCSymbol *GetSymbolFromOperand(const MachineOperand &MO) const;
 
   MCOperand LowerSymbolOperand(
       MCSymbol *Sym,
