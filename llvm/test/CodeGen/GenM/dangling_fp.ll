@@ -4,7 +4,7 @@
 %struct.compare_stack = type { [8 x i32], i32* }
 
 
-; CHECK-LABEL: _compare_val
+; CHECK-LABEL: compare_val
 define i64 @compare_val(i64 %v1)  {
 entry:
   %stk = alloca %struct.compare_stack, align 8
