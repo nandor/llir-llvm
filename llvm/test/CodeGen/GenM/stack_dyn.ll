@@ -6,7 +6,7 @@ declare void @ext_func_i32(i32* %ptr)
 declare void @use_i8_star(i8*)
 declare i8* @llvm.frameaddress(i32)
 
-; CHECK-LABEL: _dynamic_alloca:
+; CHECK-LABEL: dynamic_alloca:
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca(i32 %alloc) {
  %r = alloca i32, i32 %alloc
@@ -14,7 +14,7 @@ define void @dynamic_alloca(i32 %alloc) {
  ret void
 }
 
-; CHECK-LABEL: _dynamic_alloca_redzone:
+; CHECK-LABEL: dynamic_alloca_redzone:
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca_redzone(i32 %alloc) {
  %r = alloca i32, i32 %alloc
@@ -22,7 +22,7 @@ define void @dynamic_alloca_redzone(i32 %alloc) {
  ret void
 }
 
-; CHECK-LABEL: _dynamic_static_alloca:
+; CHECK-LABEL: dynamic_static_alloca:
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_static_alloca(i32 %alloc) noredzone {
  %static = alloca i32
@@ -42,7 +42,7 @@ define void @dynamic_static_alloca(i32 %alloc) noredzone {
 declare i8* @llvm.stacksave()
 declare void @llvm.stackrestore(i8*)
 
-; CHECK-LABEL: _llvm_stack_builtins:
+; CHECK-LABEL: llvm_stack_builtins:
 ; CHECK-NEXT: # %bb.0:
 define void @llvm_stack_builtins(i32 %alloc) noredzone {
  %stack = call i8* @llvm.stacksave()
@@ -52,7 +52,7 @@ define void @llvm_stack_builtins(i32 %alloc) noredzone {
 }
 ; CHECK: .size _llvm_stack_builtins
 
-; CHECK-LABEL: _dynamic_alloca_nouse:
+; CHECK-LABEL: dynamic_alloca_nouse:
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca_nouse(i32 %alloc) noredzone {
  %dynamic = alloca i32, i32 %alloc
@@ -60,7 +60,7 @@ define void @dynamic_alloca_nouse(i32 %alloc) noredzone {
 }
 ; CHECK: .size _dynamic_alloca_nouse
 
-; CHECK-LABEL: _copytoreg_fi:
+; CHECK-LABEL: copytoreg_fi:
 ; CHECK-NEXT: # %bb.0:
 define void @copytoreg_fi(i1 %cond, i32* %b) {
 entry:
@@ -76,7 +76,7 @@ exit:
 ; CHECK: .size _copytoreg_fi
 
 
-; CHECK-LABEL: _frameaddress_0:
+; CHECK-LABEL: frameaddress_0:
 ; CHECK-NEXT: # %bb.0:
 define void @frameaddress_0() {
   %t = call i8* @llvm.frameaddress(i32 0)
@@ -85,7 +85,7 @@ define void @frameaddress_0() {
 }
 ; CHECK: .size _frameaddress_0
 
-; CHECK-LABEL: _frameaddress_1:
+; CHECK-LABEL: frameaddress_1:
 ; CHECK-NEXT: # %bb.0:
 define void @frameaddress_1() {
   %t = call i8* @llvm.frameaddress(i32 1)

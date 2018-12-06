@@ -2,7 +2,7 @@
 
 ; Test that wasm select instruction is selected from LLVM select instruction.
 
-; CHECK-LABEL: _select_i32_bool:
+; CHECK-LABEL: select_i32_bool:
 ; CHECK-NEXT:  .args 0, i32, i32, i32
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:
@@ -16,7 +16,7 @@ define i32 @select_i32_bool(i1 zeroext %a, i32 %b, i32 %c) {
   ret i32 %cond
 }
 
-; CHECK-LABEL: _select_i32_eq:
+; CHECK-LABEL: select_i32_eq:
 ; CHECK-NEXT:  .args 0, i32, i32, i32
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:
@@ -31,7 +31,7 @@ define i32 @select_i32_eq(i32 %a, i32 %b, i32 %c) {
   ret i32 %cond
 }
 
-; CHECK-LABEL: _select_i32_ne:
+; CHECK-LABEL: select_i32_ne:
 ; CHECK-NEXT:  .args 0, i32, i32, i32
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:
@@ -46,7 +46,7 @@ define i32 @select_i32_ne(i32 %a, i32 %b, i32 %c) {
   ret i32 %cond
 }
 
-; CHECK-LABEL: _select_i64_bool:
+; CHECK-LABEL: select_i64_bool:
 ; CHECK-NEXT:  .args 0, i32, i64, i64
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:
@@ -60,7 +60,7 @@ define i64 @select_i64_bool(i1 zeroext %a, i64 %b, i64 %c) {
   ret i64 %cond
 }
 
-; CHECK-LABEL: _select_i64_eq:
+; CHECK-LABEL: select_i64_eq:
 ; CHECK-NEXT:  .args 0, i32, i64, i64
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:
@@ -75,7 +75,7 @@ define i64 @select_i64_eq(i32 %a, i64 %b, i64 %c) {
   ret i64 %cond
 }
 
-; CHECK-LABEL: _select_i64_ne:
+; CHECK-LABEL: select_i64_ne:
 ; CHECK-NEXT:  .args 0, i32, i64, i64
 ; CHECK-NEXT:  .call c
 ; CHECK-NEXT: # %bb.0:

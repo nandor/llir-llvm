@@ -4,7 +4,7 @@ declare void @ext_func(i64* %ptr)
 declare void @ext_func_i32(i32* %ptr)
 
 
-; CHECK-LABEL: _alloca32:
+; CHECK-LABEL: alloca32:
 ; CHECK-NEXT: .stack 4
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
@@ -18,7 +18,7 @@ define void @alloca32() noredzone {
   ret void
 }
 
-; CHECK-LABEL: _alloca3264:
+; CHECK-LABEL: alloca3264:
 ; CHECK-NEXT: .stack 16
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
@@ -30,7 +30,7 @@ define void @alloca3264() {
   ret void
 }
 
-; CHECK-LABEL: _allocarray:
+; CHECK-LABEL: allocarray:
 ; CHECK-NEXT: .stack 132
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
@@ -43,7 +43,7 @@ define void @allocarray() {
   ret void
 }
 
-; CHECK-LABEL: _non_mem_use:
+; CHECK-LABEL: non_mem_use:
 ; CHECK-NEXT: .stack 48
 ; CHECK-NEXT: .args 0, i64
 ; CHECK-NEXT: .call c
@@ -59,7 +59,7 @@ define void @non_mem_use(i8** %addr) {
   ret void
 }
 
-; CHECK-LABEL: _allocarray_inbounds:
+; CHECK-LABEL: allocarray_inbounds:
 ; CHECK-NEXT: .stack 20
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0

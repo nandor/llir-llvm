@@ -5,33 +5,33 @@
 target datalayout = "e-m:e-p:32:32-i64:64-n32:64-S128"
 target triple = "wasm32-unknown-unknown"
 
-; CHECK-LABEL: _f0:
+; CHECK-LABEL: f0:
 ; CHECK: ret
 define void @f0() {
   ret void
 }
 
-; CHECK-LABEL: _f1:
+; CHECK-LABEL: f1:
 ; CHECK: mov.i32   $1, 0
 ; CHECK-NEXT: ret.i32  $1
  define i32 @f1() {
   ret i32 0
 }
 
-; CHECK-LABEL: _f2:
+; CHECK-LABEL: f2:
 ; CHECK: mov.i32   $1, 0
 ; CHECK-NEXT: ret.i32  $1
 define i32 @f2(i32 %p1, float %p2) {
   ret i32 0
 }
 
-; CHECK-LABEL: _f3:
+; CHECK-LABEL: f3:
 ; CHECK: ret
 define void @f3(i32 %p1, float %p2) {
   ret void
 }
 
-; CHECK-LABEL: _f4:
+; CHECK-LABEL: f4:
 ; CHECK: jf
 ; CHECK: ret.i32
 ; CHECK: ret.i32
