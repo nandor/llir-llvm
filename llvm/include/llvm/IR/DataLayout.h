@@ -327,7 +327,7 @@ public:
     case MM_WinCOFFX86:
       return '_';
     case MM_GenM:
-      return '\0';
+      return '_';
     }
     llvm_unreachable("invalid mangling mode");
   }
