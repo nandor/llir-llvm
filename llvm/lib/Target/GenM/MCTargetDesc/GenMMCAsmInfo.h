@@ -34,6 +34,8 @@ public:
       unsigned Encoding,
       MCStreamer &Streamer
   ) const override;
+
+  bool isValidUnquotedName(StringRef Name) const override;
 };
 
 } // end namespace llvm

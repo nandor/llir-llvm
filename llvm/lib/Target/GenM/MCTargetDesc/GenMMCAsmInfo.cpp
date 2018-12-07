@@ -43,3 +43,15 @@ const MCExpr* GenMELFMCAsmInfo::getExprForFDESymbol(
 {
   llvm_unreachable("getExprForFDESymbol");
 }
+
+
+bool GenMELFMCAsmInfo::isValidUnquotedName(StringRef Name) const
+{
+  if (Name.empty()) {
+    return false;
+  }
+  if (Name[0] == '\1' && MCAsmInfo::isValidUnquotedName(Name.substr(1))) {
+    return true;
+  }
+  return MCAsmInfo::isValidUnquotedName(Name);
+}
