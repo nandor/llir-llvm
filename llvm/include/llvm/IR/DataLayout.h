@@ -327,7 +327,23 @@ public:
     case MM_WinCOFFX86:
       return '_';
     case MM_GenM:
-      return '_';
+      return '\0';
+    }
+    llvm_unreachable("invalid mangling mode");
+  }
+
+  bool hasAsmLabelPrefix() const {
+    switch (ManglingMode) {
+    case MM_None:
+    case MM_ELF:
+    case MM_Mips:
+    case MM_WinCOFF:
+      return false;
+    case MM_MachO:
+    case MM_WinCOFFX86:
+      return true;
+    case MM_GenM:
+      return true;
     }
     llvm_unreachable("invalid mangling mode");
   }
