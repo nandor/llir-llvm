@@ -113,8 +113,7 @@ addPassesToGenerateCode(LLVMTargetMachine &TM, PassManagerBase &PM,
   return PassConfig;
 }
 
-AsmPrinter *LLVMTargetMachine::addAsmPrinter(
-    PassManagerBase &PM,
+AsmPrinter *LLVMTargetMachine::createAsmPrinter(
     raw_pwrite_stream &Out,
     raw_pwrite_stream *DwoOut,
     CodeGenFileType FileType,
@@ -177,13 +176,22 @@ AsmPrinter *LLVMTargetMachine::addAsmPrinter(
   }
 
   // Create the AsmPrinter, which takes ownership of AsmStreamer if successful.
-  AsmPrinter *Printer =
-      getTarget().createAsmPrinter(*this, std::move(AsmStreamer));
-  if (!Printer)
-    return nullptr;
+  return getTarget().createAsmPrinter(*this, std::move(AsmStreamer));
+}
 
-  PM.add(Printer);
-  return Printer;
+bool LLVMTargetMachine::addAsmPrinter(
+    PassManagerBase &PM,
+    raw_pwrite_stream &Out,
+    raw_pwrite_stream *DwoOut,
+    CodeGenFileType FileType,
+    MCContext &Context)
+{
+  if (auto *printer = createAsmPrinter(Out, DwoOut, FileType, Context)) {
+    PM.add(printer);
+    return false;
+  } else {
+    return true;
+  }
 }
 
 bool LLVMTargetMachine::addPassesToEmitFile(
