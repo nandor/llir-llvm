@@ -114,6 +114,8 @@ public:
       AtomicRMWInst *AI
   ) const override;
 
+  bool mayBeEmittedAsTailCall(const CallInst *CI) const override;
+
 private:
   const GenMSubtarget *Subtarget;
 };
