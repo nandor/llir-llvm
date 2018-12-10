@@ -10,3 +10,12 @@ define i32 @CMP(i32* nocapture readonly %prog) {
   %4 = zext i1 %3 to i32
   ret i32 %4
 }
+
+@addr = external local_unnamed_addr global i32*, align 8
+
+; Function Attrs: norecurse nounwind readonly ssp uwtable
+define i32 @main() local_unnamed_addr #0 {
+  %1 = load i64, i64* bitcast (i32** @addr to i64*), align 8, !tbaa !3
+  %2 = trunc i64 %1 to i32
+  ret i32 %2
+}
