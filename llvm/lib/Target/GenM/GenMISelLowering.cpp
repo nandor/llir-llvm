@@ -518,3 +518,35 @@ GenMTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const
   llvm_unreachable("not implemented");
 }
 
+bool GenMTargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
+  // Make sure tail calls aren't disabled.
+  auto Attr = CI->getParent()->getParent()->getFnAttribute("disable-tail-calls");
+  if (!CI->isTailCall() || Attr.getValueAsString() == "true") {
+    return false;
+  }
+
+  ImmutableCallSite CS(CI);
+  switch (CS.getCallingConv()) {
+    // C calling conventions:
+    case CallingConv::C:
+    case CallingConv::Win64:
+    case CallingConv::X86_64_SysV:
+      return true;
+    // Callee pop conventions:
+    case CallingConv::X86_ThisCall:
+    case CallingConv::X86_StdCall:
+    case CallingConv::X86_VectorCall:
+    case CallingConv::X86_FastCall:
+      return true;
+    // Guarantee TCO.
+    case CallingConv::Fast:
+    case CallingConv::GHC:
+    case CallingConv::X86_RegCall:
+    case CallingConv::HiPE:
+    case CallingConv::HHVM:
+      return true;
+    // Don't tail call otherwise.
+    default:
+      return false;
+  }
+}
