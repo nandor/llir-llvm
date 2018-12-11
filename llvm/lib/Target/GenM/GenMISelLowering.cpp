@@ -106,16 +106,29 @@ GenMTargetLowering::GenMTargetLowering(
 
   // Disable some integer operations.
   for (auto T : {MVT::i32, MVT::i64}) {
-    // Expand unavailable integer operations.
-    SmallVector<unsigned, 64> Ops{
-        ISD::BSWAP, ISD::SMUL_LOHI, ISD::UMUL_LOHI, ISD::MULHS, ISD::MULHU,
-        ISD::SDIVREM, ISD::UDIVREM, ISD::SHL_PARTS, ISD::SRA_PARTS,
-        ISD::SRL_PARTS, ISD::ADDC, ISD::ADDE, ISD::SUBC, ISD::SUBE
-    };
+    // Custom lowering for some actions.
+    setOperationAction(ISD::SADDO, T, Custom);
+    setOperationAction(ISD::UADDO, T, Custom);
+    setOperationAction(ISD::SSUBO, T, Custom);
+    setOperationAction(ISD::USUBO, T, Custom);
+    setOperationAction(ISD::SMULO, T, Custom);
+    setOperationAction(ISD::UMULO, T, Custom);
 
-    for (auto Op : Ops) {
-      setOperationAction(Op, T, Expand);
-    }
+    // Expand unavailable integer operations.
+    setOperationAction(ISD::BSWAP, T, Expand);
+    setOperationAction(ISD::SMUL_LOHI, T, Expand);
+    setOperationAction(ISD::UMUL_LOHI, T, Expand);
+    setOperationAction(ISD::MULHS, T, Expand);
+    setOperationAction(ISD::MULHU, T, Expand);
+    setOperationAction(ISD::SDIVREM, T, Expand);
+    setOperationAction(ISD::UDIVREM, T, Expand);
+    setOperationAction(ISD::SHL_PARTS, T, Expand);
+    setOperationAction(ISD::SRA_PARTS, T, Expand);
+    setOperationAction(ISD::SRL_PARTS, T, Expand);
+    setOperationAction(ISD::ADDC, T, Expand);
+    setOperationAction(ISD::ADDE, T, Expand);
+    setOperationAction(ISD::SUBC, T, Expand);
+    setOperationAction(ISD::SUBE, T, Expand);
   }
 
   // Disable in-register sign extension.
@@ -148,6 +161,12 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::VACOPY:         return LowerVACOPY(Op, DAG);
     case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
     case ISD::UNDEF:          return LowerUNDEF(Op, DAG);
+    case ISD::SADDO:          return LowerALUO(Op, DAG);
+    case ISD::UADDO:          return LowerALUO(Op, DAG);
+    case ISD::SSUBO:          return LowerALUO(Op, DAG);
+    case ISD::USUBO:          return LowerALUO(Op, DAG);
+    case ISD::SMULO:          return LowerALUO(Op, DAG);
+    case ISD::UMULO:          return LowerALUO(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -300,6 +319,28 @@ SDValue GenMTargetLowering::LowerUNDEF(SDValue Op, SelectionDAG &DAG) const
   );
 }
 
+SDValue GenMTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
+{
+  SDLoc DL(Op);
+  SDNode *N = Op.getNode();
+  SDValue LHS = N->getOperand(0);
+  SDValue RHS = N->getOperand(1);
+
+  unsigned vop, op;
+  switch (Op.getOpcode()) {
+    case ISD::SADDO: vop = ISD::ADD; op = GenMISD::SADDO; break;
+    case ISD::UADDO: vop = ISD::ADD; op = GenMISD::UADDO; break;
+    case ISD::SSUBO: vop = ISD::SUB; op = GenMISD::SSUBO; break;
+    case ISD::USUBO: vop = ISD::SUB; op = GenMISD::USUBO; break;
+    case ISD::SMULO: vop = ISD::MUL; op = GenMISD::SMULO; break;
+    case ISD::UMULO: vop = ISD::MUL; op = GenMISD::UMULO; break;
+  }
+
+  SDValue Result = DAG.getNode(vop, DL, N->getValueType(0), LHS, RHS);
+  SDValue Flag = DAG.getNode(op, DL, N->getValueType(1), LHS, RHS);
+  return DAG.getNode(ISD::MERGE_VALUES, DL, N->getVTList(), Result, Flag);
+}
+
 bool GenMTargetLowering::useSoftFloat() const
 {
   return false;
@@ -326,6 +367,12 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::SWITCH:       return "GenMISD::SWITCH";
   case GenMISD::VASTART:      return "GenMISD::VASTART";
   case GenMISD::UNDEF:        return "GenMISD::UNDEF";
+  case GenMISD::SADDO:        return "GenMISD::SADDO";
+  case GenMISD::UADDO:        return "GenMISD::UADDO";
+  case GenMISD::SSUBO:        return "GenMISD::SSUBO";
+  case GenMISD::USUBO:        return "GenMISD::USUBO";
+  case GenMISD::SMULO:        return "GenMISD::SMULO";
+  case GenMISD::UMULO:        return "GenMISD::UMULO";
   }
 }
 

@@ -22,16 +22,20 @@ namespace llvm {
 namespace GenMISD {
 enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
+  // Arguments.
   ARGUMENT,
-  RETURN,
-  CALL,
-  TCALL,
-  VOID,
-  TVOID,
+  // Calls.
+  CALL, TCALL, VOID, TVOID,
+  // Symbols.
   SYMBOL,
-  SWITCH,
+  // Control flow.
+  SWITCH, RETURN,
+  // Varargs.
   VASTART,
+  // Trap.
   UNDEF,
+  // Overflow checks.
+  SADDO, UADDO, SSUBO, USUBO, SMULO, UMULO
 };
 } // end namespace GenMISD
 
@@ -52,6 +56,7 @@ public:
   SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerUNDEF(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerALUO(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override;
 
