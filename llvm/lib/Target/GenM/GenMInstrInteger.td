@@ -119,6 +119,36 @@ multiclass TernaryInt
     >;
 }
 
+multiclass OverflowInt
+  < SDNode node
+  , string name
+  , string type
+  , bits<32> b32
+  , bits<32> b64
+  >
+{
+  def _I32 : I
+    < (outs I32:$dst)
+    , (ins I32:$lhs, I32:$rhs)
+    , [(set I32:$dst, (node I32:$lhs, I32:$rhs))]
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "\t$dst, $lhs, $rhs")
+      )
+    , b32
+    >;
+
+  def _I64 : I
+    < (outs I32:$dst)
+    , (ins I64:$lhs, I64:$rhs)
+    , [(set I32:$dst, (node I64:$lhs, I64:$rhs))]
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "\t$dst, $lhs, $rhs")
+      )
+    , b64
+    >;
+}
 
 defm ADD : CommBinaryInt<add, "add",  "i", 0x90, 0x91>;
 defm XOR : CommBinaryInt<xor, "xor",  "i", 0x90, 0x93>;
@@ -167,3 +197,9 @@ def : Pat
   , (SELECT_I64 I32:$cond, I64:$rhs, I64:$lhs)
   >;
 
+defm SADDO : OverflowInt<GenMsaddo, "saddo", "i32", 0x70, 0x70>;
+defm UADDO : OverflowInt<GenMuaddo, "uaddo", "i32", 0x71, 0x71>;
+defm SSUBO : OverflowInt<GenMssubo, "ssubo", "i32", 0x72, 0x72>;
+defm USUBO : OverflowInt<GenMusubo, "usubo", "i32", 0x73, 0x73>;
+defm SMULO : OverflowInt<GenMsmulo, "smulo", "i32", 0x74, 0x74>;
+defm UMULO : OverflowInt<GenMumulo, "umulo", "i32", 0x75, 0x75>;

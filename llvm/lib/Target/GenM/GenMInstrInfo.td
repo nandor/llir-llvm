@@ -32,6 +32,8 @@ def SDT_GenMtcall_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, S
 def SDT_GenMtvoid    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
 def SDT_GenMtvoid_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
 
+def SDT_GenMover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
+
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
@@ -51,6 +53,13 @@ def GenMvoid      : SDNode<"GenMISD::VOID",     SDT_GenMvoid,     [SDNPHasChain,
 def GenMvoid_va   : SDNode<"GenMISD::VOID",     SDT_GenMvoid_va,  [SDNPHasChain, SDNPVariadic]>;
 def GenMtvoid     : SDNode<"GenMISD::TVOID",    SDT_GenMtvoid,    [SDNPHasChain, SDNPVariadic]>;
 def GenMtvoid_va  : SDNode<"GenMISD::TVOID",    SDT_GenMtvoid_va, [SDNPHasChain, SDNPVariadic]>;
+
+def GenMsaddo     : SDNode<"GenMISD::SADDO",    SDT_GenMover>;
+def GenMuaddo     : SDNode<"GenMISD::UADDO",    SDT_GenMover>;
+def GenMssubo     : SDNode<"GenMISD::SSUBO",    SDT_GenMover>;
+def GenMusubo     : SDNode<"GenMISD::USUBO",    SDT_GenMover>;
+def GenMsmulo     : SDNode<"GenMISD::SMULO",    SDT_GenMover>;
+def GenMumulo     : SDNode<"GenMISD::UMULO",    SDT_GenMover>;
 
 //===----------------------------------------------------------------------===//
 // WebAssembly-specific Operands.
