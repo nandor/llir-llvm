@@ -139,6 +139,27 @@ public:
   const DomSetType &calculate(const DomTreeT &DT, const DomTreeNodeT *Node);
 };
 
+template <class BlockT>
+class ReverseDominanceFrontierBase
+    : public DominanceFrontierBase<BlockT, true> {
+private:
+  using BlockTraits = GraphTraits<Inverse<BlockT *>>;
+
+public:
+  using DomTreeT = PostDomTreeBase<BlockT>;
+  using DomTreeNodeT = DomTreeNodeBase<BlockT>;
+  using DomSetType = typename DominanceFrontierBase<BlockT, true>::DomSetType;
+
+  void analyze(DomTreeT &DT) {
+    for (auto &root : this->Roots) {
+      this->Roots.push_back(root);
+      calculate(DT, DT[root]);
+    }
+  }
+
+  const DomSetType &calculate(const DomTreeT &DT, const DomTreeNodeT *Node);
+};
+
 class DominanceFrontier : public ForwardDominanceFrontierBase<BasicBlock> {
 public:
   using DomTreeT = DomTreeBase<BasicBlock>;

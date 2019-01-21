@@ -226,6 +226,76 @@ ForwardDominanceFrontierBase<BlockT>::calculate(const DomTreeT &DT,
   return *Result;
 }
 
+template <class BlockT>
+const typename ReverseDominanceFrontierBase<BlockT>::DomSetType &
+ReverseDominanceFrontierBase<BlockT>::calculate(const DomTreeT &DT,
+                                                const DomTreeNodeT *Node) {
+  BlockT *BB = Node->getBlock();
+  DomSetType *Result = nullptr;
+
+  std::vector<DFCalculateWorkObject<BlockT>> workList;
+  SmallPtrSet<BlockT *, 32> visited;
+
+  workList.push_back(DFCalculateWorkObject<BlockT>(BB, nullptr, Node, nullptr));
+  do {
+    DFCalculateWorkObject<BlockT> *currentW = &workList.back();
+    assert(currentW && "Missing work object.");
+
+    BlockT *currentBB = currentW->currentBB;
+    BlockT *parentBB = currentW->parentBB;
+    const DomTreeNodeT *currentNode = currentW->Node;
+    const DomTreeNodeT *parentNode = currentW->parentNode;
+    assert(currentBB && "Invalid work object. Missing current Basic Block");
+    assert(currentNode && "Invalid work object. Missing current Node");
+    DomSetType &S = this->Frontiers[currentBB];
+
+    // Visit each block only once.
+    if (visited.insert(currentBB).second) {
+      // Loop over CFG successors to calculate DFlocal[currentNode]
+      for (const auto Succ : inverse_children<BlockT *>(currentBB)) {
+        // Does Node immediately dominate this successor?
+        if (DT[Succ]->getIDom() != currentNode)
+          S.insert(Succ);
+      }
+    }
+
+    // At this point, S is DFlocal.  Now we union in DFup's of our children...
+    // Loop through and visit the nodes that Node immediately dominates (Node's
+    // children in the IDomTree)
+    bool visitChild = false;
+    for (typename DomTreeNodeT::const_iterator NI = currentNode->begin(),
+                                               NE = currentNode->end();
+         NI != NE; ++NI) {
+      DomTreeNodeT *IDominee = *NI;
+      BlockT *childBB = IDominee->getBlock();
+      if (visited.count(childBB) == 0) {
+        workList.push_back(DFCalculateWorkObject<BlockT>(
+            childBB, currentBB, IDominee, currentNode));
+        visitChild = true;
+      }
+    }
+
+    // If all children are visited or there is any child then pop this block
+    // from the workList.
+    if (!visitChild) {
+      if (!parentBB) {
+        Result = &S;
+        break;
+      }
+
+      typename DomSetType::const_iterator CDFI = S.begin(), CDFE = S.end();
+      DomSetType &parentSet = this->Frontiers[parentBB];
+      for (; CDFI != CDFE; ++CDFI) {
+        if (!DT.properlyDominates(parentNode, DT[*CDFI]))
+          parentSet.insert(*CDFI);
+      }
+      workList.pop_back();
+    }
+
+  } while (!workList.empty());
+  return *Result;
+}
+
 } // end namespace llvm
 
 #endif // LLVM_ANALYSIS_DOMINANCEFRONTIERIMPL_H
