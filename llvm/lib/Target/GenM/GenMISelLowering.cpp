@@ -132,7 +132,7 @@ GenMTargetLowering::GenMTargetLowering(
   }
 
   // Disable in-register sign extension.
-  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
+  for (auto T : { MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
     setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
   }
 
