@@ -30,6 +30,7 @@ public:
 
   StringRef getPassName() const override { return "GenM Assembly Printer"; }
 
+  void EmitGlobalVariable(const GlobalVariable *GV) override;
   void EmitFunctionBodyStart() override;
   void EmitInstruction(const MachineInstr *MI) override;
 

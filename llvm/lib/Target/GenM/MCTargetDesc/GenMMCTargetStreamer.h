@@ -26,6 +26,8 @@ public:
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
+  /// .end
+  virtual void emitEnd() = 0;
 };
 
 // This part is for ascii assembly output
@@ -36,6 +38,7 @@ public:
   virtual void emitStackSize(int Size) override;
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
+  virtual void emitEnd() override;
 
 private:
   formatted_raw_ostream &OS;
@@ -49,6 +52,7 @@ public:
   virtual void emitStackSize(int Size) override;
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
+  virtual void emitEnd() override;
 
   MCELFStreamer &getStreamer();
 };

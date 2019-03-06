@@ -49,6 +49,12 @@ void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
+void GenMAsmPrinter::EmitGlobalVariable(const GlobalVariable *GV)
+{
+  AsmPrinter::EmitGlobalVariable(GV);
+  getTargetStreamer().emitEnd();
+}
+
 void GenMAsmPrinter::EmitFunctionBodyStart()
 {
   MachineFrameInfo &MFI = MF->getFrameInfo();
