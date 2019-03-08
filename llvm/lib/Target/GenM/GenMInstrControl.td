@@ -12,11 +12,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-class Return<GenMRegClass vt, string name>
+class Return<GenMRegClass vt>
   : TerminatorInst
     < (ins vt:$val)
     , [(GenMreturn vt:$val)]
-    , !strconcat("ret.", !strconcat(name, "\t$val"))
+    , "ret\t$val"
     , 0x70
     >
 {
@@ -24,10 +24,10 @@ class Return<GenMRegClass vt, string name>
   let isBarrier = 1;
 }
 
-def RETURN_I32: Return<I32, "i32">;
-def RETURN_I64: Return<I64, "i64">;
-def RETURN_F32: Return<F32, "f32">;
-def RETURN_F64: Return<F64, "f64">;
+def RETURN_I32: Return<I32>;
+def RETURN_I64: Return<I64>;
+def RETURN_F32: Return<F32>;
+def RETURN_F64: Return<F64>;
 def RETURN_VOID: TerminatorInst<(ins), [(GenMreturn)], "ret", 0x70>
 {
   let isReturn = 1;
