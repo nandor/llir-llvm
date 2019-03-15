@@ -241,6 +241,15 @@ namespace CallingConv {
     /// The remainder matches the regular calling convention.
     WASM_EmscriptenInvoke = 99,
 
+    /// Calling convention to call OCaml functions.
+    OCAML = 98,
+
+    /// Calling convention for C from OCaml.
+    OCAML_EXT = 99,
+
+    /// Calling convention of the OCaml allocation function.
+    OCAML_ALLOC = 100,
+
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023
   };
