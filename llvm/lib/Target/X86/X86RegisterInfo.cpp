@@ -484,6 +484,12 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
         return CSR_32_AllRegs_SSE_RegMask;
       return CSR_32_AllRegs_RegMask;
     }
+  case CallingConv::OCAML:
+    return CSR_64_OCaml_RegMask;
+  case CallingConv::OCAML_EXT:
+    return CSR_64_OCaml_Ext_RegMask;
+  case CallingConv::OCAML_ALLOC:
+    return CSR_64_OCaml_Alloc_RegMask;
   default:
     break;
   }
