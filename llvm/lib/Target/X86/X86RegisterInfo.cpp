@@ -370,6 +370,14 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
         return CSR_32_AllRegs_SSE_SaveList;
       return CSR_32_AllRegs_SaveList;
     }
+  case CallingConv::CAML:
+    return CSR_64_Caml_SaveList;
+  case CallingConv::CAML_EXT:
+    return CSR_64_Caml_Ext_SaveList;
+  case CallingConv::CAML_ALLOC:
+    return CSR_64_Caml_Alloc_SaveList;
+  case CallingConv::CAML_GC:
+    return CSR_64_Caml_Gc_SaveList;
   default:
     break;
   }
