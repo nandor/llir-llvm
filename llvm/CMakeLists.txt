@@ -1117,6 +1117,49 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN "LICENSE.TXT"
     )
 
+  install(DIRECTORY lib/Target/X86
+    DESTINATION include/llvm/Target
+    COMPONENT llvm-headers
+    FILES_MATCHING
+    PATTERN "*.def"
+    PATTERN "*.h"
+    PATTERN "*.td"
+    PATTERN "*LICENSE.TXT"
+    )
+
+  install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/Target/X86
+    DESTINATION include/llvm/Target
+    FILES_MATCHING
+    PATTERN "*.inc"
+    PATTERN "CMakeFiles" EXCLUDE
+    )
+
+  install(FILES
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmMatcher.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenFastISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenGlobalISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter1.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenInstrInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterBank.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDAGISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDisassemblerTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenEVEX2VEXTables.inc
+    DESTINATION include/llvm/Target/X86/MCTargetDesc
+    )
+
+  install(DIRECTORY lib/CodeGen/SelectionDAG
+    DESTINATION include/llvm/CodeGen
+    FILES_MATCHING
+    PATTERN "*.def"
+    PATTERN "*.h"
+    PATTERN "*.td"
+    PATTERN "*LICENSE.TXT"
+    )
+
   install(DIRECTORY ${LLVM_INCLUDE_DIR}/llvm ${LLVM_INCLUDE_DIR}/llvm-c
     DESTINATION include
     COMPONENT llvm-headers
