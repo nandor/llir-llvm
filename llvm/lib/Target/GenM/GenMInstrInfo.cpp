@@ -156,8 +156,13 @@ void GenMInstrInfo::copyPhysReg(
   auto &MRI = MBB.getParent()->getRegInfo();
   const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
 
+
   unsigned Op;
-  if (&GenM::I32RegClass == DstCls) {
+  if (SrcReg == GenM::RSP) {
+    Op = GenM::GET_I64;
+  } else if (DstReg == GenM::RSP) {
+    Op = GenM::SET_I64;
+  } else if (&GenM::I32RegClass == DstCls) {
     Op = GenM::MOV_I32;
   } else if (&GenM::I64RegClass == DstCls) {
     Op = GenM::MOV_I64;

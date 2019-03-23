@@ -35,7 +35,9 @@ enum NodeType : unsigned {
   // Trap.
   UNDEF,
   // Overflow checks.
-  SADDO, UADDO, SSUBO, USUBO, SMULO, UMULO
+  SADDO, UADDO, SSUBO, USUBO, SMULO, UMULO,
+  // Alloca.
+  ALLOCA
 };
 } // end namespace GenMISD
 
@@ -51,6 +53,7 @@ public:
   SDValue LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerJumpTable(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerBR_JT(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerDynamicStackalloc(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVASTART(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVAARG(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
