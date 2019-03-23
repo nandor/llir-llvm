@@ -35,6 +35,8 @@ def SDT_GenMtvoid_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, S
 
 def SDT_GenMover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
 
+def SDT_GenMalloca   : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
+
 //===----------------------------------------------------------------------===//
 // GenM-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
@@ -61,6 +63,8 @@ def GenMssubo     : SDNode<"GenMISD::SSUBO",    SDT_GenMover>;
 def GenMusubo     : SDNode<"GenMISD::USUBO",    SDT_GenMover>;
 def GenMsmulo     : SDNode<"GenMISD::SMULO",    SDT_GenMover>;
 def GenMumulo     : SDNode<"GenMISD::UMULO",    SDT_GenMover>;
+
+def GenMalloca    : SDNode<"GenMISD::ALLOCA",   SDT_GenMalloca, [SDNPHasChain]>;
 
 //===----------------------------------------------------------------------===//
 // WebAssembly-specific Operands.
@@ -218,6 +222,30 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , []
     , "frame.i64\t$res, $offset"
     , 0x0E
+    >;
+
+  def GET_I64 : I
+    < (outs I64:$dst)
+    , (ins G64:$src)
+    , []
+    , "mov.i64\t$dst, $src"
+    , 0x0A
+    >;
+
+  def SET_I64 : I
+    < (outs)
+    , (ins G64:$dst, I64:$src)
+    , []
+    , "set\t$dst, $src"
+    , 0x0A
+    >;
+
+  def ALLOCA_I64 : I
+    < (outs I64:$res)
+    , (ins I64:$size, i64imm:$align)
+    , [(set I64:$res, (GenMalloca I64:$size, imm:$align))]
+    , "alloca.i64\t$res, $size, $align"
+    , 0x0F
     >;
 
   def UNDEF_I32 : I

@@ -40,8 +40,8 @@ GenMInstPrinter::GenMInstPrinter(
 void GenMInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
 {
   switch (RegNo) {
-    case GenM::NUM_TARGET_REGS: {
-      OS << "$undef";
+    case GenM::RSP: {
+      OS << "$rsp";
       break;
     }
     default: {

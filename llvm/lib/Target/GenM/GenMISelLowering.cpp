@@ -76,6 +76,12 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::CopyToReg, MVT::Other, Custom);
   setOperationAction(ISD::BR_JT, MVT::Other, Custom);
 
+  // Handle alloca.
+  setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
+  setOperationAction(ISD::STACKRESTORE, MVT::Other, Expand);
+  setOperationAction(ISD::DYNAMIC_STACKALLOC, MVTPtr, Custom);
+  setStackPointerRegisterToSaveRestore(GenM::RSP);
+
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
   setOperationAction(ISD::VAARG, MVT::Other, Custom);
@@ -151,22 +157,23 @@ GenMTargetLowering::GenMTargetLowering(
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
   switch (Op.getOpcode()) {
-    case ISD::FrameIndex:     return LowerFrameIndex(Op, DAG);
-    case ISD::GlobalAddress:  return LowerGlobalAddress(Op, DAG);
-    case ISD::ExternalSymbol: return LowerExternalSymbol(Op, DAG);
-    case ISD::JumpTable:      return LowerJumpTable(Op, DAG);
-    case ISD::BR_JT:          return LowerBR_JT(Op, DAG);
-    case ISD::VASTART:        return LowerVASTART(Op, DAG);
-    case ISD::VAARG:          return LowerVAARG(Op, DAG);
-    case ISD::VACOPY:         return LowerVACOPY(Op, DAG);
-    case ISD::CopyToReg:      return LowerCopyToReg(Op, DAG);
-    case ISD::UNDEF:          return LowerUNDEF(Op, DAG);
-    case ISD::SADDO:          return LowerALUO(Op, DAG);
-    case ISD::UADDO:          return LowerALUO(Op, DAG);
-    case ISD::SSUBO:          return LowerALUO(Op, DAG);
-    case ISD::USUBO:          return LowerALUO(Op, DAG);
-    case ISD::SMULO:          return LowerALUO(Op, DAG);
-    case ISD::UMULO:          return LowerALUO(Op, DAG);
+    case ISD::FrameIndex:         return LowerFrameIndex(Op, DAG);
+    case ISD::GlobalAddress:      return LowerGlobalAddress(Op, DAG);
+    case ISD::ExternalSymbol:     return LowerExternalSymbol(Op, DAG);
+    case ISD::JumpTable:          return LowerJumpTable(Op, DAG);
+    case ISD::BR_JT:              return LowerBR_JT(Op, DAG);
+    case ISD::DYNAMIC_STACKALLOC: return LowerDynamicStackalloc(Op, DAG);
+    case ISD::VASTART:            return LowerVASTART(Op, DAG);
+    case ISD::VAARG:              return LowerVAARG(Op, DAG);
+    case ISD::VACOPY:             return LowerVACOPY(Op, DAG);
+    case ISD::CopyToReg:          return LowerCopyToReg(Op, DAG);
+    case ISD::UNDEF:              return LowerUNDEF(Op, DAG);
+    case ISD::SADDO:              return LowerALUO(Op, DAG);
+    case ISD::UADDO:              return LowerALUO(Op, DAG);
+    case ISD::SSUBO:              return LowerALUO(Op, DAG);
+    case ISD::USUBO:              return LowerALUO(Op, DAG);
+    case ISD::SMULO:              return LowerALUO(Op, DAG);
+    case ISD::UMULO:              return LowerALUO(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -254,13 +261,23 @@ SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
   );
 }
 
+SDValue GenMTargetLowering::LowerDynamicStackalloc(SDValue Op, SelectionDAG &DAG) const
+{
+  return DAG.getNode(
+      GenMISD::ALLOCA,
+      SDLoc(Op),
+      MVT::i64,
+      Op.getOperand(0),
+      Op.getOperand(1),
+      Op.getOperand(2)
+  );
+}
+
 SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
 {
-  SDLoc DL(Op);
-
   return DAG.getNode(
       GenMISD::VASTART,
-      DL,
+      SDLoc(Op),
       MVT::Other,
       Op.getOperand(0),
       Op.getOperand(1)
@@ -373,6 +390,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::USUBO:        return "GenMISD::USUBO";
   case GenMISD::SMULO:        return "GenMISD::SMULO";
   case GenMISD::UMULO:        return "GenMISD::UMULO";
+  case GenMISD::ALLOCA:       return "GenMISD::ALLOCA";
   }
 }
 
