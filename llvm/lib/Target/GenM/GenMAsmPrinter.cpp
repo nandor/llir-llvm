@@ -59,10 +59,15 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
 {
   MachineFrameInfo &MFI = MF->getFrameInfo();
   auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
+  auto &F = MF->getFunction();
   auto &Streamer = getTargetStreamer();
 
   if (auto StackSize = MFI.getStackSize()) {
     Streamer.emitStackSize(StackSize);
+  }
+
+  if (F.hasFnAttribute(Attribute::NoInline)) {
+    Streamer.emitNoInline();
   }
 
   auto &Params = FuncInfo->getParams();

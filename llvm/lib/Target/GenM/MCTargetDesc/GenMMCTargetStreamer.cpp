@@ -66,6 +66,11 @@ void GenMMCTargetAsmStreamer::emitEnd()
   OS << "\t.end\n";
 }
 
+void GenMMCTargetAsmStreamer::emitNoInline()
+{
+  OS << "\t.noinline\n";
+}
+
 GenMMCTargetELFStreamer::GenMMCTargetELFStreamer(MCStreamer &S)
   : GenMMCTargetStreamer(S)
 {
@@ -87,6 +92,11 @@ void GenMMCTargetELFStreamer::emitCallingConv(CallingConv::ID CallConv)
 }
 
 void GenMMCTargetELFStreamer::emitEnd()
+{
+  llvm_unreachable("not implemented");
+}
+
+void GenMMCTargetELFStreamer::emitNoInline()
 {
   llvm_unreachable("not implemented");
 }
