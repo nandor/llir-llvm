@@ -166,6 +166,10 @@ void GenMInstrInfo::copyPhysReg(
     Op = GenM::MOV_I32;
   } else if (&GenM::I64RegClass == DstCls) {
     Op = GenM::MOV_I64;
+  } else if (&GenM::F32RegClass == DstCls) {
+    Op = GenM::MOV_F32;
+  } else if (&GenM::F64RegClass == DstCls) {
+    Op = GenM::MOV_F64;
   } else {
     llvm_unreachable("cannot copy physical registers");
   }
