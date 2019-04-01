@@ -31,9 +31,9 @@ GenMMCTargetAsmStreamer::GenMMCTargetAsmStreamer(
 {
 }
 
-void GenMMCTargetAsmStreamer::emitStackSize(int Size)
+void GenMMCTargetAsmStreamer::emitStackSize(int Size, int Align)
 {
-  OS << "\t.stack\t" << Size << '\n';
+  OS << "\t.stack\t" << Size << ", " << Align << '\n';
 }
 
 void GenMMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
@@ -76,7 +76,7 @@ GenMMCTargetELFStreamer::GenMMCTargetELFStreamer(MCStreamer &S)
 {
 }
 
-void GenMMCTargetELFStreamer::emitStackSize(int Size)
+void GenMMCTargetELFStreamer::emitStackSize(int Size, int Align)
 {
   llvm_unreachable("not implemented");
 }

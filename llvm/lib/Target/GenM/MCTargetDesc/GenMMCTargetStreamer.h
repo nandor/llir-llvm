@@ -21,7 +21,7 @@ public:
   GenMMCTargetStreamer(MCStreamer &S);
 
   /// .stack
-  virtual void emitStackSize(int Size) = 0;
+  virtual void emitStackSize(int Size, int Align) = 0;
   /// .args
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) = 0;
   /// .fast, .c, etc.
@@ -37,7 +37,7 @@ class GenMMCTargetAsmStreamer : public GenMMCTargetStreamer {
 public:
   GenMMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
 
-  virtual void emitStackSize(int Size) override;
+  virtual void emitStackSize(int Size, int Align) override;
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitEnd() override;
@@ -52,7 +52,7 @@ class GenMMCTargetELFStreamer : public GenMMCTargetStreamer {
 public:
   GenMMCTargetELFStreamer(MCStreamer &S);
 
-  virtual void emitStackSize(int Size) override;
+  virtual void emitStackSize(int Size, int Align) override;
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitEnd() override;
