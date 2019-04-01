@@ -61,9 +61,14 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
   auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
   auto &F = MF->getFunction();
   auto &Streamer = getTargetStreamer();
+  auto &STI = MF->getSubtarget();
 
   if (auto StackSize = MFI.getStackSize()) {
-    Streamer.emitStackSize(StackSize);
+    if (F.hasFnAttribute(Attribute::StackAlignment)) {
+      Streamer.emitStackSize(StackSize, F.getFnStackAlignment());
+    } else {
+      Streamer.emitStackSize(StackSize, STI.getFrameLowering()->getStackAlignment());
+    }
   }
 
   if (F.hasFnAttribute(Attribute::NoInline)) {
