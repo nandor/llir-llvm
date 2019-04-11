@@ -365,7 +365,7 @@ public:
   const MCSection *getConstTextCoalSection() const {
     return ConstTextCoalSection;
   }
-  const MCSection *getConstDataSection() const { return ConstDataSection; }
+  MCSection *getConstDataSection() const { return ConstDataSection; }
   const MCSection *getDataCoalSection() const { return DataCoalSection; }
   const MCSection *getConstDataCoalSection() const {
     return ConstDataCoalSection;
