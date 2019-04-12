@@ -158,18 +158,18 @@ defm SELECT : TernaryFloat<select, "select", 0xB0, 0xB1>;
 
 def : Pat
   < (select (i32 (setne I32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_I32 I32:$cond, F32:$lhs, F32:$rhs)
+  , (SELECT_F32 I32:$cond, F32:$lhs, F32:$rhs)
   >;
 def : Pat
   < (select (i32 (setne I32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_I64 I32:$cond, F64:$lhs, F64:$rhs)
+  , (SELECT_F64 I32:$cond, F64:$lhs, F64:$rhs)
   >;
 def : Pat
   < (select (i32 (seteq I32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_I32 I32:$cond, F32:$rhs, F32:$lhs)
+  , (SELECT_F32 I32:$cond, F32:$rhs, F32:$lhs)
   >;
 def : Pat
   < (select (i32 (seteq I32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_I64 I32:$cond, F64:$rhs, F64:$lhs)
+  , (SELECT_F64 I32:$cond, F64:$rhs, F64:$lhs)
   >;
 
