@@ -286,12 +286,12 @@ SDValue GenMTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
 
 SDValue GenMTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const
 {
-  llvm_unreachable(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 SDValue GenMTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const
 {
-  llvm_unreachable(!"not implemented");
+  llvm_unreachable("not implemented");
 }
 
 SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
