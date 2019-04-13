@@ -1147,6 +1147,11 @@ public:
     return getOpcode() == TargetOpcode::ANNOTATION_LABEL;
   }
 
+  /// Checks if the instructions sets up a GC frame.
+  bool isGCRoot() const { return getOpcode() == TargetOpcode::GC_FRAME_ROOT; }
+  bool isGCCall() const { return getOpcode() == TargetOpcode::GC_FRAME_CALL; }
+  bool isGCBlock() const { return getOpcode() == TargetOpcode::GC_FRAME_BLOCK; }
+
   /// Returns true if the MachineInstr represents a label.
   bool isLabel() const {
     return isEHLabel() || isGCLabel() || isAnnotationLabel();
@@ -1255,6 +1260,9 @@ public:
     case TargetOpcode::KILL:
     case TargetOpcode::CFI_INSTRUCTION:
     case TargetOpcode::EH_LABEL:
+    case TargetOpcode::GC_FRAME_ROOT:
+    case TargetOpcode::GC_FRAME_CALL:
+    case TargetOpcode::GC_FRAME_BLOCK:
     case TargetOpcode::GC_LABEL:
     case TargetOpcode::DBG_VALUE:
     case TargetOpcode::DBG_INSTR_REF:

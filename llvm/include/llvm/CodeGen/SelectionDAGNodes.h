@@ -2102,6 +2102,30 @@ public:
   }
 };
 
+class GCFrameSDNode : public SDNode {
+  friend class SelectionDAG;
+
+  ISD::FrameType Type;
+
+  MCSymbol *Label;
+
+  GCFrameSDNode(const DebugLoc &dl, ISD::FrameType type, MCSymbol *L)
+    : SDNode(ISD::GC_FRAME, 0, dl, getSDVTList(MVT::Other))
+    , Type(type)
+    , Label(L)
+  {
+  }
+
+public:
+  ISD::FrameType getType() const { return Type; }
+
+  MCSymbol *getLabel() const { return Label; }
+
+  static bool classof(const SDNode *N) {
+    return N->getOpcode() == ISD::GC_FRAME;
+  }
+};
+
 class ExternalSymbolSDNode : public SDNode {
   friend class SelectionDAG;
 

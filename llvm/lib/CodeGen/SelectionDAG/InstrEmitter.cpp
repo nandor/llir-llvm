@@ -1113,6 +1113,21 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
     break;
   }
 
+  case ISD::GC_FRAME: {
+    auto *gcFrame = cast<GCFrameSDNode>(Node);
+
+    unsigned Opc;
+    switch (gcFrame->getType()) {
+      case ISD::ROOT:  Opc = TargetOpcode::GC_FRAME_ROOT;  break;
+      case ISD::CALL:  Opc = TargetOpcode::GC_FRAME_CALL;  break;
+      case ISD::BLOCK: Opc = TargetOpcode::GC_FRAME_BLOCK; break;
+    }
+
+    BuildMI(*MBB, InsertPos, Node->getDebugLoc(), TII->get(Opc))
+      .addSym(gcFrame->getLabel());
+    break;
+  }
+
   case ISD::LIFETIME_START:
   case ISD::LIFETIME_END: {
     unsigned TarOp = (Node->getOpcode() == ISD::LIFETIME_START) ?

@@ -1038,6 +1038,30 @@ def EH_LABEL : StandardPseudoInstruction {
   let hasSideEffects = 0;
   let isNotDuplicable = 1;
 }
+def GC_FRAME_ROOT : StandardPseudoInstruction {
+  let OutOperandList = (outs);
+  let InOperandList = (ins variable_ops);
+  let AsmString = "";
+  let hasCtrlDep = 1;
+  let hasSideEffects = 0;
+  let isNotDuplicable = 1;
+}
+def GC_FRAME_CALL : StandardPseudoInstruction {
+  let OutOperandList = (outs);
+  let InOperandList = (ins variable_ops);
+  let AsmString = "";
+  let hasCtrlDep = 1;
+  let hasSideEffects = 0;
+  let isNotDuplicable = 1;
+}
+def GC_FRAME_BLOCK : StandardPseudoInstruction {
+  let OutOperandList = (outs);
+  let InOperandList = (ins variable_ops);
+  let AsmString = "";
+  let hasCtrlDep = 1;
+  let hasSideEffects = 0;
+  let isNotDuplicable = 1;
+}
 def GC_LABEL : StandardPseudoInstruction {
   let OutOperandList = (outs);
   let InOperandList = (ins i32imm:$id);

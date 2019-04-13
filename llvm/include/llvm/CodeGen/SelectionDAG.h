@@ -747,6 +747,14 @@ public:
                    getRegister(Reg, N.getValueType()), N);
   }
 
+  // GenM frame for garbage collection metadata.
+  SDValue getGCFrame(
+      const SDLoc &dl,
+      ISD::FrameType type,
+      ArrayRef<SDValue> ops,
+      MCSymbol *label
+  );
+
   // This version of the getCopyToReg method takes an extra operand, which
   // indicates that there is potentially an incoming glue value (if Glue is not
   // null) and that there should be a glue result.
