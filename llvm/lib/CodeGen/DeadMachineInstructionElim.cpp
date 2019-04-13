@@ -67,6 +67,10 @@ bool DeadMachineInstructionElim::isDead(const MachineInstr *MI) const {
   if (MI->getOpcode() == TargetOpcode::LOCAL_ESCAPE)
     return false;
 
+  // Don't delete GC markers.
+  if (MI->isGCRoot() || MI->isGCCall() || MI->isGCBlock())
+    return false;
+
   // Don't delete instructions with side effects.
   bool SawStore = false;
   if (!MI->isSafeToMove(nullptr, SawStore) && !MI->isPHI())
