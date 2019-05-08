@@ -739,7 +739,7 @@ rescheduleMIBelowKill(MachineBasicBlock::iterator &mi,
     return false;
 
   if (KillMI->hasUnmodeledSideEffects() || KillMI->isCall() ||
-      KillMI->isBranch() || KillMI->isTerminator())
+      KillMI->isBranch() || KillMI->isTerminator() || KillMI->isGCFrame())
     // Don't move pass calls, etc.
     return false;
 
@@ -924,7 +924,7 @@ rescheduleKillAboveMI(MachineBasicBlock::iterator &mi,
   } else {
     KillMI = LV->getVarInfo(Reg).findKill(MBB);
   }
-  if (!KillMI || MI == KillMI || KillMI->isCopy() || KillMI->isCopyLike())
+  if (!KillMI || MI == KillMI || KillMI->isCopy() || KillMI->isCopyLike() || KillMI->isGCFrame())
     // Don't mess with copies, they may be coalesced later.
     return false;
 

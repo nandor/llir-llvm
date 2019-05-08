@@ -1641,7 +1641,11 @@ bool PeepholeOptimizer::runOnMachineFunction(MachineFunction &MF) {
 
       // Skip debug instructions. They should not affect this peephole optimization.
       if (MI->isDebugInstr())
-          continue;
+        continue;
+
+      // Skip GC frame instructions.
+      if (MI->isGCFrame())
+        continue;
 
       if (MI->isPosition())
         continue;
