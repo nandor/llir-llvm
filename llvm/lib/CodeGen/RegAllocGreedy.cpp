@@ -149,9 +149,6 @@ class RAGreedy : public MachineFunctionPass,
   using SmallLISet = SmallPtrSet<LiveInterval *, 4>;
   using SmallVirtRegSet = SmallSet<Register, 16>;
 
-  // context
-  MachineFunction *MF;
-
   // Shortcuts to some useful interface.
   const TargetInstrInfo *TII;
   const TargetRegisterInfo *TRI;
@@ -3046,6 +3043,32 @@ MCRegister RAGreedy::selectOrSplitImpl(LiveInterval &VirtReg,
     } else
       return PhysReg;
   }
+
+  // Do not split if the virt reg is used in a GC frame.
+  bool isGCRoot = false;
+  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
+    if (RI->isGCFrame()) {
+      isGCRoot = true;
+    }
+  }
+  if (isGCRoot) {
+    NamedRegionTimer T(
+        "GC spill",
+        "GC Spiller",
+        TimerGroupName,
+        TimerGroupDescription,
+        TimePassesIsEnabled
+    );
+    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
+    spiller().spill(LRE);
+    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
+
+    if (VerifyEnabled) {
+      MF->verify(this, "After spilling");
+    }
+    return 0;
+  }
+
 
   LiveRangeStage Stage = getStage(VirtReg);
   LLVM_DEBUG(dbgs() << StageName[Stage] << " Cascade "

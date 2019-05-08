@@ -731,8 +731,8 @@ SlotIndex SplitEditor::enterIntvAfter(SlotIndex Idx) {
   MachineInstr *MI = LIS.getInstructionFromIndex(Idx);
   assert(MI && "enterIntvAfter called with invalid index");
 
-  VNInfo *VNI = defFromParent(OpenIdx, ParentVNI, Idx, *MI->getParent(),
-                              std::next(MachineBasicBlock::iterator(MI)));
+  auto it = std::next(MachineBasicBlock::iterator(MI));
+  VNInfo *VNI = defFromParent(OpenIdx, ParentVNI, Idx, *MI->getParent(), it);
   return VNI->def;
 }
 
@@ -871,7 +871,7 @@ void SplitEditor::removeBackCopies(SmallVectorImpl<VNInfo*> &Copies) {
     MachineBasicBlock::iterator MBBI(MI);
     bool AtBegin;
     do AtBegin = MBBI == MBB->begin();
-    while (!AtBegin && (--MBBI)->isDebugInstr());
+    while (!AtBegin && ((--MBBI)->isDebugInstr()/* || MBBI->isGCFrame()*/));
 
     LLVM_DEBUG(dbgs() << "Removing " << Def << '\t' << *MI);
     LIS.removeVRegDefAt(*LI, Def);
@@ -1586,8 +1586,7 @@ bool SplitAnalysis::shouldSplitSingleBlock(const BlockInfo &BI,
 void SplitEditor::splitSingleBlock(const SplitAnalysis::BlockInfo &BI) {
   openIntv();
   SlotIndex LastSplitPoint = SA.getLastSplitPoint(BI.MBB->getNumber());
-  SlotIndex SegStart = enterIntvBefore(std::min(BI.FirstInstr,
-    LastSplitPoint));
+  SlotIndex SegStart = enterIntvBefore(std::min(BI.FirstInstr, LastSplitPoint));
   if (!BI.LiveOut || BI.LastInstr < LastSplitPoint) {
     useIntv(SegStart, leaveIntvAfter(BI.LastInstr));
   } else {

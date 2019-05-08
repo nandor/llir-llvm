@@ -60,9 +60,6 @@ namespace {
 class RABasic : public MachineFunctionPass,
                 public RegAllocBase,
                 private LiveRangeEdit::Delegate {
-  // context
-  MachineFunction *MF;
-
   // state
   std::unique_ptr<Spiller> SpillerInstance;
   std::priority_queue<LiveInterval*, std::vector<LiveInterval*>,

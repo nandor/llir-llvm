@@ -68,7 +68,7 @@ bool DeadMachineInstructionElim::isDead(const MachineInstr *MI) const {
     return false;
 
   // Don't delete GC markers.
-  if (MI->isGCRoot() || MI->isGCCall() || MI->isGCBlock())
+  if (MI->isGCFrame())
     return false;
 
   // Don't delete instructions with side effects.

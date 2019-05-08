@@ -404,7 +404,8 @@ bool MachineCSE::isCSECandidate(MachineInstr *MI) {
 
   // Ignore stuff that we obviously can't move.
   if (MI->mayStore() || MI->isCall() || MI->isTerminator() ||
-      MI->mayRaiseFPException() || MI->hasUnmodeledSideEffects())
+      MI->mayRaiseFPException() || MI->hasUnmodeledSideEffects() ||
+      MI->isGCFrame())
     return false;
 
   if (MI->mayLoad()) {
@@ -422,6 +423,17 @@ bool MachineCSE::isCSECandidate(MachineInstr *MI) {
   // be spilled and get loaded back with corrupted data.
   if (MI->getOpcode() == TargetOpcode::LOAD_STACK_GUARD)
     return false;
+
+  for (auto &MO : MI->operands()) {
+    if (!MO.isReg())
+      continue;
+
+    for (auto RI = MRI->reg_instr_begin(MO.getReg()), E = MRI->reg_instr_end(); RI != E; RI++) {
+      if (RI->isGCFrame()) {
+        return false;
+      }
+    }
+  }
 
   return true;
 }

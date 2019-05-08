@@ -536,14 +536,23 @@ SDValue GenMTargetLowering::LowerCall(
         Ops
     );
   } else {
-    SDValue Call = DAG.getNode(
-        CLI.IsTailCall ? GenMISD::TCALL : GenMISD::CALL,
-        DL,
-        DAG.getVTList(InTys),
-        Ops
-    );
-    InVals.push_back(Call);
-    return Call.getValue(1);
+    if (CLI.IsTailCall) {
+      return DAG.getNode(
+          GenMISD::TCALL,
+          DL,
+          DAG.getVTList(InTys),
+          Ops
+      ).getValue(1);
+    } else {
+      SDValue Call = DAG.getNode(
+          CLI.IsTailCall ? GenMISD::TCALL : GenMISD::CALL,
+          DL,
+          DAG.getVTList(InTys),
+          Ops
+      );
+      InVals.push_back(Call);
+      return Call.getValue(1);
+    }
   }
 }
 

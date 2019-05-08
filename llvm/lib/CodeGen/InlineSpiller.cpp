@@ -31,6 +31,7 @@
 #include "llvm/CodeGen/MachineBlockFrequencyInfo.h"
 #include "llvm/CodeGen/MachineDominators.h"
 #include "llvm/CodeGen/MachineFunction.h"
+#include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
@@ -665,6 +666,9 @@ void InlineSpiller::reMaterializeAll() {
       // Debug values are not allowed to affect codegen.
       if (MI.isDebugValue())
         continue;
+      // Frames do not affect codegen.
+      if (MI.isGCFrame())
+        continue;
 
       assert(!MI.isDebugInstr() && "Did not expect to find a use in debug "
              "instruction that isn't a DBG_VALUE");
@@ -1019,8 +1023,12 @@ void InlineSpiller::spillAroundUses(Register Reg) {
       continue;
 
     // Analyze instruction.
-    SmallVector<std::pair<MachineInstr*, unsigned>, 8> Ops;
-    VirtRegInfo RI = AnalyzeVirtRegInBundle(*MI, Reg, &Ops);
+    using OpsElem = std::pair<MachineInstr*, unsigned>;
+    SmallVector<OpsElem, 8> Ops;
+    auto RI = MIBundleOperands(*MI).analyzeVirtReg(Reg, &Ops);
+    std::sort(Ops.begin(), Ops.end(), [](const OpsElem &a, const OpsElem &b) {
+      return b.second < a.second;
+    });
 
     // Find the slot index where this instruction reads and writes OldLI.
     // This is usually the def slot, except for tied early clobbers.
@@ -1051,6 +1059,22 @@ void InlineSpiller::spillAroundUses(Register Reg) {
         eliminateRedundantSpills(SibLI, SibLI.getVNInfoAt(Idx));
         // The COPY will fold to a reload below.
       }
+    }
+
+    if (MI->isGCFrame()) {
+      // GC_FRAMES are always folded.
+      MachineFrameInfo &MFI = MF.getFrameInfo();
+      for (auto &[MI, i] : Ops) {
+        auto &MO = MI->getOperand(i);
+        MI->RemoveOperand(i);
+        MI->addMemOperand(MF, MF.getMachineMemOperand(
+            MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
+            MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
+            MFI.getObjectSize(StackSlot),
+            MFI.getObjectAlignment(StackSlot)
+        ));
+      }
+      continue;
     }
 
     // Attempt to fold memory ops.

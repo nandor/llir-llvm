@@ -171,4 +171,22 @@ void RegAllocBase::postOptimization() {
     DeadInst->eraseFromParent();
   }
   DeadRemats.clear();
+
+  // Fixup GC frames and spills.
+  for (auto &MBB : *MF) {
+    for (auto FrameIt = MBB.begin(); FrameIt != MBB.end(); ++FrameIt) {
+      if (!FrameIt->isGCFrame())
+        continue;
+      // Find the call to which the frame is attached.
+      auto CallIt = FrameIt;
+      do { --CallIt; } while (CallIt != MBB.begin() && !CallIt->isCall());
+      if (!CallIt->isCall()) {
+        llvm_unreachable("No call preceding a GC frame");
+      }
+
+      // Move the frame after the call.
+      FrameIt->removeFromParent();
+      MBB.insertAfter(CallIt, &*FrameIt);
+    }
+  }
 }

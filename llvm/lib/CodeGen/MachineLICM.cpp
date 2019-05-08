@@ -1027,6 +1027,10 @@ static bool isCopyFeedingInvariantStore(const MachineInstr &MI,
 /// Returns true if the instruction may be a suitable candidate for LICM.
 /// e.g. If the instruction is a call, then it's obviously not safe to hoist it.
 bool MachineLICMBase::IsLICMCandidate(MachineInstr &I) {
+  // GC_FRAMES are not safe to hoise.
+  if (I.isGCFrame())
+    return false;
+
   // Check if it's safe to move the instruction.
   bool DontMoveAcrossStore = true;
   if ((!I.isSafeToMove(AA, DontMoveAcrossStore)) &&

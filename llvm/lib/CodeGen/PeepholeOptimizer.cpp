@@ -1646,6 +1646,10 @@ bool PeepholeOptimizer::runOnMachineFunction(MachineFunction &MF) {
       if (MI->isDebugInstr())
         continue;
 
+      // Skip GC frame instructions.
+      if (MI->isGCFrame())
+        continue;
+
       if (MI->isPosition())
         continue;
 

@@ -68,6 +68,9 @@ protected:
   LiveRegMatrix *Matrix = nullptr;
   RegisterClassInfo RegClassInfo;
 
+  // context
+  MachineFunction *MF;
+
   /// Inst which is a def of an original reg and whose defs are already all
   /// dead after remat is saved in DeadRemats. The deletion of such inst is
   /// postponed till all the allocations are done, so its remat expr is

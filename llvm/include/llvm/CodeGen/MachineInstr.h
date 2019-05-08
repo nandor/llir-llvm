@@ -1151,6 +1151,7 @@ public:
   bool isGCRoot() const { return getOpcode() == TargetOpcode::GC_FRAME_ROOT; }
   bool isGCCall() const { return getOpcode() == TargetOpcode::GC_FRAME_CALL; }
   bool isGCBlock() const { return getOpcode() == TargetOpcode::GC_FRAME_BLOCK; }
+  bool isGCFrame() const { return isGCRoot() || isGCCall() || isGCBlock(); }
 
   /// Returns true if the MachineInstr represents a label.
   bool isLabel() const {

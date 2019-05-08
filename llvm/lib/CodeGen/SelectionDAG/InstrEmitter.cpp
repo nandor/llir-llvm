@@ -1123,8 +1123,16 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
       case ISD::BLOCK: Opc = TargetOpcode::GC_FRAME_BLOCK; break;
     }
 
-    BuildMI(*MBB, InsertPos, Node->getDebugLoc(), TII->get(Opc))
-      .addSym(gcFrame->getLabel());
+    auto MIB = BuildMI(*MBB, InsertPos, Node->getDebugLoc(), TII->get(Opc));
+    MIB.addSym(gcFrame->getLabel());
+
+    for (unsigned i = 1, n = Node->getNumOperands(); i < n; ++i) {
+      AddOperand(
+          MIB, Node->getOperand(i), i, nullptr, VRBaseMap,
+          false, false, false
+      );
+    }
+
     break;
   }
 
