@@ -175,7 +175,7 @@ void RegAllocBase::postOptimization() {
   // Fixup GC frames and spills.
   for (auto &MBB : *MF) {
     for (auto FrameIt = MBB.begin(); FrameIt != MBB.end(); ++FrameIt) {
-      if (!FrameIt->isGCFrame())
+      if (!FrameIt->isGCRoot() && !FrameIt->isGCCall())
         continue;
       // Find the call to which the frame is attached.
       auto CallIt = FrameIt;
