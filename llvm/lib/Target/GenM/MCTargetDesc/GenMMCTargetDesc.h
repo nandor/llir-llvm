@@ -63,7 +63,7 @@ namespace GenM {
     // 32-bit function identifier.
     OPERAND_I64FUNC,
   };
-};
+}
 
 } // End llvm namespace
 
