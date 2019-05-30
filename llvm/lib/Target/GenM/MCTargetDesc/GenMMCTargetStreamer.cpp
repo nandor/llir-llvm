@@ -78,25 +78,25 @@ GenMMCTargetGenMStreamer::GenMMCTargetGenMStreamer(MCStreamer &S)
 
 void GenMMCTargetGenMStreamer::emitStackSize(int Size, int Align)
 {
-  llvm_unreachable("not implemented");
+  llvm::errs() << "GenMMCTargetGenMStreamer::emitStackSize\n";
 }
 
 void GenMMCTargetGenMStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
 {
-  llvm_unreachable("not implemented");
+  llvm::errs() << "GenMMCTargetGenMStreamer::emitParams\n";
 }
 
 void GenMMCTargetGenMStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
-  llvm_unreachable("not implemented");
+  llvm::errs() << "GenMMCTargetGenMStreamer::emitCallingConv\n";
 }
 
 void GenMMCTargetGenMStreamer::emitEnd()
 {
-  llvm_unreachable("not implemented");
+  llvm::errs() << "GenMMCTargetGenMStreamer::emitEnd\n";
 }
 
 void GenMMCTargetGenMStreamer::emitNoInline()
 {
-  llvm_unreachable("not implemented");
+  llvm::errs() << "GenMMCTargetGenMStreamer::emitNoInline\n";
 }
