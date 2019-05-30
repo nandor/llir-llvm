@@ -48,17 +48,15 @@ private:
 };
 
 // This part is for ELF object output
-class GenMMCTargetELFStreamer : public GenMMCTargetStreamer {
+class GenMMCTargetGenMStreamer : public GenMMCTargetStreamer {
 public:
-  GenMMCTargetELFStreamer(MCStreamer &S);
+  GenMMCTargetGenMStreamer(MCStreamer &S);
 
   virtual void emitStackSize(int Size, int Align) override;
   virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
-
-  MCELFStreamer &getStreamer();
 };
 } // end namespace llvm
 

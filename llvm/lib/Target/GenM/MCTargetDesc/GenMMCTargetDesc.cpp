@@ -54,7 +54,7 @@ static MCTargetStreamer *createObjectTargetStreamer(
     MCStreamer &S,
     const MCSubtargetInfo &STI)
 {
-  return new GenMMCTargetELFStreamer(S);
+  return new GenMMCTargetGenMStreamer(S);
 }
 
 static MCTargetStreamer *createAsmTargetStreamer(

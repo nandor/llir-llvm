@@ -230,6 +230,7 @@ public:
     MachO,
     Wasm,
     XCOFF,
+    GenM,
   };
 
 private:
@@ -327,7 +328,7 @@ public:
                              unsigned &Micro) const;
 
   /// getFormat - Get the object format for this triple.
-  ObjectFormatType getObjectFormat() const { return ObjectFormat; }
+  ObjectFormatType getObjectFormat() const;
 
   /// getOSVersion - Parse the version number from the OS name component of the
   /// triple, if present.
@@ -644,6 +645,11 @@ public:
   /// Tests whether the OS uses the XCOFF binary format.
   bool isOSBinFormatXCOFF() const {
     return getObjectFormat() == Triple::XCOFF;
+  }
+
+  /// Tests whether the OS uses the GenM binary format.
+  bool isOSBinFormatGenM() const {
+    return getObjectFormat() == Triple::GenM;
   }
 
   /// Tests whether the target is the PS4 CPU

@@ -192,6 +192,8 @@ MCSymbol *MCContext::createSymbolImpl(const StringMapEntry<bool> *Name,
       return new (Name, *this) MCSymbolWasm(Name, IsTemporary);
     case MCObjectFileInfo::IsXCOFF:
       return createXCOFFSymbolImpl(Name, IsTemporary);
+    case MCObjectFileInfo::IsGenM:
+      return new (Name, *this) MCSymbolGenM(Name, IsTemporary);
     }
   }
   return new (Name, *this) MCSymbol(MCSymbol::SymbolKindUnset, Name,
@@ -695,6 +697,29 @@ MCSectionXCOFF *MCContext::getXCOFFSection(StringRef Section,
     Begin->setFragment(F);
 
   return Result;
+}
+
+MCSectionGenM *MCContext::getGenMSection(
+    StringRef Section,
+    SectionKind Kind,
+    const char *BeginSymName)
+{
+  // Do the lookup, if we have a hit, return it.
+  MCSectionGenM *&Entry = GenMUniquingMap[Section];
+  if (Entry)
+    return Entry;
+
+  MCSymbol *Begin = nullptr;
+  if (BeginSymName) {
+    Begin = createTempSymbol(BeginSymName, false);
+  }
+
+  // Otherwise, return a new section.
+  return Entry = new (GenMAllocator.Allocate()) MCSectionGenM(
+      Section,
+      Kind,
+      Begin
+  );
 }
 
 MCSubtargetInfo &MCContext::getSubtargetCopy(const MCSubtargetInfo &STI) {
