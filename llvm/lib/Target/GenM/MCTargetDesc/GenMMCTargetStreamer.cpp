@@ -71,37 +71,32 @@ void GenMMCTargetAsmStreamer::emitNoInline()
   OS << "\t.noinline\n";
 }
 
-GenMMCTargetELFStreamer::GenMMCTargetELFStreamer(MCStreamer &S)
+GenMMCTargetGenMStreamer::GenMMCTargetGenMStreamer(MCStreamer &S)
   : GenMMCTargetStreamer(S)
 {
 }
 
-void GenMMCTargetELFStreamer::emitStackSize(int Size, int Align)
+void GenMMCTargetGenMStreamer::emitStackSize(int Size, int Align)
 {
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
+void GenMMCTargetGenMStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
 {
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitCallingConv(CallingConv::ID CallConv)
+void GenMMCTargetGenMStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitEnd()
+void GenMMCTargetGenMStreamer::emitEnd()
 {
   llvm_unreachable("not implemented");
 }
 
-void GenMMCTargetELFStreamer::emitNoInline()
+void GenMMCTargetGenMStreamer::emitNoInline()
 {
   llvm_unreachable("not implemented");
-}
-
-MCELFStreamer &GenMMCTargetELFStreamer::getStreamer()
-{
-  return static_cast<MCELFStreamer &>(Streamer);
 }

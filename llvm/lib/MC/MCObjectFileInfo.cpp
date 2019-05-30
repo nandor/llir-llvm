@@ -19,6 +19,7 @@
 #include "llvm/MC/MCSectionMachO.h"
 #include "llvm/MC/MCSectionWasm.h"
 #include "llvm/MC/MCSectionXCOFF.h"
+#include "llvm/MC/MCSectionGenM.h"
 
 using namespace llvm;
 
@@ -895,6 +896,43 @@ void MCObjectFileInfo::initXCOFFMCObjectFileInfo(const Triple &T) {
   DwarfMacinfoSection = nullptr;  // SSUBTYP_DWMAC
 }
 
+void MCObjectFileInfo::initGenMMCObjectFileInfo(const Triple &T) {
+  // GenM
+  SupportsWeakOmittedEHFrame = false;
+
+  EHFrameSection = Ctx->getGenMSection(".data", SectionKind::getData());
+
+  TextSection = Ctx->getGenMSection(".text", SectionKind::getText());
+  DataSection = Ctx->getGenMSection(".data", SectionKind::getData());
+  BSSSection = Ctx->getGenMSection(".bss", SectionKind::getData());
+
+  CStringSection = Ctx->getGenMSection(".data", SectionKind::getData());
+  UStringSection = Ctx->getGenMSection(".data", SectionKind::getData());
+
+  FourByteConstantSection = Ctx->getGenMSection(".const", SectionKind::getData());
+  EightByteConstantSection = Ctx->getGenMSection(".const", SectionKind::getData());
+  SixteenByteConstantSection = Ctx->getGenMSection(".const", SectionKind::getData());
+
+  ReadOnlySection = Ctx->getGenMSection(".const", SectionKind::getData());
+  ConstDataSection = Ctx->getGenMSection(".const", SectionKind::getData());
+
+  TextCoalSection = TextSection;
+  ConstTextCoalSection = ReadOnlySection;
+  DataCoalSection = DataSection;
+  ConstDataCoalSection = ConstDataSection;
+
+  DataCommonSection = Ctx->getGenMSection(".data", SectionKind::getData());
+  DataBSSSection = Ctx->getGenMSection(".bss", SectionKind::getData());
+
+  LazySymbolPointerSection = Ctx->getGenMSection(".data", SectionKind::getData());
+  NonLazySymbolPointerSection = Ctx->getGenMSection(".data", SectionKind::getData());
+  ThreadLocalPointerSection = Ctx->getGenMSection(".thread", SectionKind::getData());
+
+  LSDASection = Ctx->getGenMSection(".lsda", SectionKind::getMetadata());
+  StackMapSection = Ctx->getGenMSection(".stackmap", SectionKind::getMetadata());
+  FaultMapSection = Ctx->getGenMSection(".faultmap", SectionKind::getMetadata());
+}
+
 void MCObjectFileInfo::InitMCObjectFileInfo(const Triple &TheTriple, bool PIC,
                                             MCContext &ctx,
                                             bool LargeCodeModel) {
@@ -948,6 +986,10 @@ void MCObjectFileInfo::InitMCObjectFileInfo(const Triple &TheTriple, bool PIC,
     Env = IsXCOFF;
     initXCOFFMCObjectFileInfo(TT);
     break;
+  case Triple::GenM:
+    Env = IsGenM;
+    initGenMMCObjectFileInfo(TT);
+    break;
   case Triple::UnknownObjectFormat:
     report_fatal_error("Cannot initialize MC for unknown object file format.");
     break;
@@ -970,6 +1012,7 @@ MCSection *MCObjectFileInfo::getDwarfComdatSection(const char *Name,
   case Triple::COFF:
   case Triple::GOFF:
   case Triple::XCOFF:
+  case Triple::GenM:
   case Triple::UnknownObjectFormat:
     report_fatal_error("Cannot get DWARF comdat section for this object file "
                        "format: not implemented.");

@@ -564,6 +564,7 @@ static Triple::ObjectFormatType parseFormat(StringRef EnvironmentName) {
     .EndsWith("goff", Triple::GOFF)
     .EndsWith("macho", Triple::MachO)
     .EndsWith("wasm", Triple::Wasm)
+    .EndsWith("genm", Triple::GenM)
     .Default(Triple::UnknownObjectFormat);
 }
 
@@ -657,6 +658,7 @@ static StringRef getObjectFormatTypeName(Triple::ObjectFormatType Kind) {
   case Triple::MachO: return "macho";
   case Triple::Wasm:  return "wasm";
   case Triple::XCOFF: return "xcoff";
+  case Triple::GenM: return "genm";
   }
   llvm_unreachable("unknown object format type");
 }
@@ -717,7 +719,6 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::thumbeb:
   case Triple::ve:
   case Triple::xcore:
-  case Triple::genm:
     return Triple::ELF;
 
   case Triple::ppc64:
@@ -734,6 +735,8 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::wasm32:
   case Triple::wasm64:
     return Triple::Wasm;
+  case Triple::genm:
+    return Triple::GenM;
   }
   llvm_unreachable("unknown architecture");
 }
@@ -1733,6 +1736,15 @@ StringRef Triple::getARMCPUForArch(StringRef MArch) const {
   }
 
   llvm_unreachable("invalid arch name");
+}
+
+namespace llvm {
+extern bool IsGenM;
+}
+
+Triple::ObjectFormatType Triple::getObjectFormat() const
+{
+  return IsGenM ? Triple::GenM : ObjectFormat;
 }
 
 VersionTuple Triple::getCanonicalVersionForOS(OSType OSKind,
