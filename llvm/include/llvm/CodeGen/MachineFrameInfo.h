@@ -447,6 +447,18 @@ public:
   }
 
   /// Return the size of the specified object.
+  int64_t getAnyObjectSize(int ObjectIdx) const {
+    assert(unsigned(ObjectIdx) < Objects.size() && "Invalid Object Idx!");
+    return Objects[ObjectIdx].Size;
+  }
+
+  /// Return the size of the specified object.
+  int64_t getAnyObjectOffset(int ObjectIdx) const {
+    assert(unsigned(ObjectIdx) < Objects.size() && "Invalid Object Idx!");
+    return Objects[ObjectIdx].SPOffset;
+  }
+
+  /// Return the size of the specified object.
   int64_t getObjectSize(int ObjectIdx) const {
     assert(unsigned(ObjectIdx+NumFixedObjects) < Objects.size() &&
            "Invalid Object Idx!");
