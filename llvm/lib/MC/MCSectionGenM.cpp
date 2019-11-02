@@ -24,7 +24,6 @@ void MCSectionGenM::PrintSwitchToSection(
     raw_ostream &OS,
     const MCExpr *Subsection) const
 {
-  abort();
 }
 
 bool MCSectionGenM::UseCodeAlign() const { return false; }

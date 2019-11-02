@@ -24,7 +24,7 @@ namespace llvm {
 
 class MCSymbol;
 
-/// This represents a section on wasm.
+/// This represents a section on genm.
 class MCSectionGenM final : public MCSection {
   friend class MCContext;
   MCSectionGenM(

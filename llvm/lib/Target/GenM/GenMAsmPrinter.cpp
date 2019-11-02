@@ -69,6 +69,13 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
     } else {
       Streamer.emitStackSize(StackSize, STI.getFrameLowering()->getStackAlignment());
     }
+
+    for (unsigned I = 0, N = MFI.getNumObjects(); I < N; ++I) {
+      auto Size = MFI.getAnyObjectSize(I);
+      if (Size > 0) {
+        Streamer.emitStackObject(StackSize + MFI.getAnyObjectOffset(I), Size);
+      }
+    }
   }
 
   if (F.hasFnAttribute(Attribute::NoInline)) {
