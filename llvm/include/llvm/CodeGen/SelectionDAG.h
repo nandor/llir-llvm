@@ -755,6 +755,9 @@ public:
       MCSymbol *label
   );
 
+  // Argument to GC frame.
+  SDValue getGCArg(const SDLoc &dl, MVT vt, MachineMemOperand *MMO);
+
   // This version of the getCopyToReg method takes an extra operand, which
   // indicates that there is potentially an incoming glue value (if Glue is not
   // null) and that there should be a glue result.
