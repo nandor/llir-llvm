@@ -40,7 +40,6 @@ using namespace llvm;
 void GenMAsmPrinter::EmitInstruction(const MachineInstr *MI)
 {
   LLVM_DEBUG(dbgs() << "EmitInstruction: " << *MI << '\n');
-
   auto &MF = *MI->getParent()->getParent();
 
   GenMMCInstLower MCInstLowering(OutContext, MF, *this);
@@ -61,20 +60,15 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
   auto *FuncInfo = MF->getInfo<GenMMachineFunctionInfo>();
   auto &F = MF->getFunction();
   auto &Streamer = getTargetStreamer();
-  auto &STI = MF->getSubtarget();
 
-  if (auto StackSize = MFI.getStackSize()) {
-    if (F.hasFnAttribute(Attribute::StackAlignment)) {
-      Streamer.emitStackSize(StackSize, F.getFnStackAlignment());
-    } else {
-      Streamer.emitStackSize(StackSize, STI.getFrameLowering()->getStackAlignment());
-    }
-
-    for (unsigned I = 0, N = MFI.getNumObjects(); I < N; ++I) {
-      auto Size = MFI.getAnyObjectSize(I);
-      if (Size > 0) {
-        Streamer.emitStackObject(StackSize + MFI.getAnyObjectOffset(I), Size);
-      }
+  for (unsigned I = 0, N = MFI.getNumObjects(); I < N; ++I) {
+    auto Size = MFI.getAnyObjectSize(I);
+    if (Size > 0) {
+      Streamer.emitStackObject(
+          I,
+          Size,
+          MFI.getAnyObjectAlignment(I)
+      );
     }
   }
 

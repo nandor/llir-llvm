@@ -13,14 +13,14 @@ define void @f0() {
 
 ; CHECK-LABEL: f1:
 ; CHECK: mov.i32   $1, 0
-; CHECK-NEXT: ret.i32  $1
+; CHECK-NEXT: ret  $1
  define i32 @f1() {
   ret i32 0
 }
 
 ; CHECK-LABEL: f2:
 ; CHECK: mov.i32   $1, 0
-; CHECK-NEXT: ret.i32  $1
+; CHECK-NEXT: ret  $1
 define i32 @f2(i32 %p1, float %p2) {
   ret i32 0
 }
@@ -33,8 +33,8 @@ define void @f3(i32 %p1, float %p2) {
 
 ; CHECK-LABEL: f4:
 ; CHECK: jf
-; CHECK: ret.i32
-; CHECK: ret.i32
+; CHECK: ret
+; CHECK: ret
 define i32 @f4(i32 %x) {
 entry:
    %c = trunc i32 %x to i1

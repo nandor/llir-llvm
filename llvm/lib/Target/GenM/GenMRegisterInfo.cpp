@@ -45,6 +45,8 @@ GenMRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
 BitVector GenMRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
   BitVector Reserved(getNumRegs());
+  Reserved.set(GenM::RSP);
+  Reserved.set(GenM::FRAME_ADDR);
   return Reserved;
 }
 
@@ -58,17 +60,13 @@ void GenMRegisterInfo::eliminateFrameIndex(
   MachineBasicBlock &MBB = *MI.getParent();
   MachineFunction &MF = *MBB.getParent();
 
-  const TargetFrameLowering &TFL = *getFrameLowering(MF);
   const int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
   MachineRegisterInfo &MRI = MF.getRegInfo();
   const GenMInstrInfo *TII = MF.getSubtarget<GenMSubtarget>().getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
 
-  unsigned FrameReg;
-  int Offset = TFL.getFrameIndexReference(MF, FrameIndex, FrameReg);
-
   unsigned TempReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-  BuildMI(MBB, II, DL, TII->get(GenM::FRAME_I64), TempReg).addImm(Offset);
+  BuildMI(MBB, II, DL, TII->get(GenM::FRAME_I64), TempReg).addImm(FrameIndex);
   MI.getOperand(FIOperandNum).ChangeToRegister(TempReg, false);
 }
 
