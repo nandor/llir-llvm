@@ -1064,10 +1064,10 @@ void InlineSpiller::spillAroundUses(Register Reg) {
     if (MI->isGCFrame()) {
       // GC_FRAMES are always folded.
       MachineFrameInfo &MFI = MF.getFrameInfo();
-      for (auto &[MI, i] : Ops) {
-        auto &MO = MI->getOperand(i);
-        MI->RemoveOperand(i);
-        MI->addMemOperand(MF, MF.getMachineMemOperand(
+      for (auto &Op : Ops) {
+
+        Op.first->RemoveOperand(Op.second);
+        Op.first->addMemOperand(MF, MF.getMachineMemOperand(
             MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
             MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
             MFI.getObjectSize(StackSlot),

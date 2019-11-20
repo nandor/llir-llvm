@@ -2828,9 +2828,13 @@ void DAGMatcher::SelectCodeCommon(SDNode *NodeToMatch,
   case ISD::WRITE_REGISTER:
     Select_WRITE_REGISTER(NodeToMatch);
     return;
-  case ISD::UNDEF:
-    Select_UNDEF(NodeToMatch);
-    return;
+  case ISD::UNDEF: {
+    if (!TLI->canLowerUndef()) {
+      Select_UNDEF(NodeToMatch);
+      return;
+    }
+    break;
+  }
   case ISD::FREEZE:
     Select_FREEZE(NodeToMatch);
     return;
