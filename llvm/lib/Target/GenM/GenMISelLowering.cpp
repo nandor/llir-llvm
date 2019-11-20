@@ -96,11 +96,6 @@ GenMTargetLowering::GenMTargetLowering(
     }
   }
 
-  // Preserve undefined values.
-  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64 }) {
-    setOperationAction(ISD::UNDEF, T, Custom);
-  }
-
   // Deal with floating point operations.
   for (auto T : { MVT::f32, MVT::f64 }) {
     setOperationAction(ISD::ConstantFP, T, Legal);
@@ -169,7 +164,6 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::VAARG:              return LowerVAARG(Op, DAG);
     case ISD::VACOPY:             return LowerVACOPY(Op, DAG);
     case ISD::CopyToReg:          return LowerCopyToReg(Op, DAG);
-    case ISD::UNDEF:              return LowerUNDEF(Op, DAG);
     case ISD::SADDO:              return LowerALUO(Op, DAG);
     case ISD::UADDO:              return LowerALUO(Op, DAG);
     case ISD::SSUBO:              return LowerALUO(Op, DAG);
@@ -275,10 +269,11 @@ SDValue GenMTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
 
 SDValue GenMTargetLowering::LowerDynamicStackalloc(SDValue Op, SelectionDAG &DAG) const
 {
+  SDVTList VTs = DAG.getVTList(MVT::i64, MVT::Other);
   return DAG.getNode(
       GenMISD::ALLOCA,
       SDLoc(Op),
-      MVT::i64,
+      VTs,
       Op.getOperand(0),
       Op.getOperand(1),
       Op.getOperand(2)
@@ -337,17 +332,6 @@ SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
   return SDValue();
 }
 
-SDValue GenMTargetLowering::LowerUNDEF(SDValue Op, SelectionDAG &DAG) const
-{
-  SDLoc DL(Op);
-  auto T =  Op.getValueType();
-  return DAG.getNode(
-      GenMISD::UNDEF,
-      DL,
-      T
-  );
-}
-
 SDValue GenMTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
 {
   SDLoc DL(Op);
@@ -370,11 +354,6 @@ SDValue GenMTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
   return DAG.getNode(ISD::MERGE_VALUES, DL, N->getVTList(), Result, Flag);
 }
 
-bool GenMTargetLowering::useSoftFloat() const
-{
-  return false;
-}
-
 MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
     MachineInstr &MI,
     MachineBasicBlock *MBB) const
@@ -395,7 +374,6 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::SYMBOL:       return "GenMISD::SYMBOL";
   case GenMISD::SWITCH:       return "GenMISD::SWITCH";
   case GenMISD::VASTART:      return "GenMISD::VASTART";
-  case GenMISD::UNDEF:        return "GenMISD::UNDEF";
   case GenMISD::SADDO:        return "GenMISD::SADDO";
   case GenMISD::UADDO:        return "GenMISD::UADDO";
   case GenMISD::SSUBO:        return "GenMISD::SSUBO";

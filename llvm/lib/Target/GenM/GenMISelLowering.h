@@ -32,8 +32,6 @@ enum NodeType : unsigned {
   SWITCH, RETURN,
   // Varargs.
   VASTART,
-  // Trap.
-  UNDEF,
   // Overflow checks.
   SADDO, UADDO, SSUBO, USUBO, SMULO, UMULO,
   // Alloca.
@@ -59,10 +57,10 @@ public:
   SDValue LowerVAARG(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerUNDEF(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerALUO(SDValue Op, SelectionDAG &DAG) const;
 
-  bool useSoftFloat() const override;
+  bool useSoftFloat() const override { return false; }
+  bool canLowerUndef() const override { return true;}
 
   MachineBasicBlock *EmitInstrWithCustomInserter(
       MachineInstr &MI,

@@ -46,7 +46,6 @@ def GenMreturn    : SDNode<"GenMISD::RETURN",   SDT_GenMreturn, [SDNPHasChain]>;
 def GenMsymbol    : SDNode<"GenMISD::SYMBOL",   SDT_GenMsymbol>;
 def GenMswitch    : SDNode<"GenMISD::SWITCH",   SDT_GenMswitch, [SDNPHasChain, SDNPVariadic]>;
 def GenMvastart   : SDNode<"GenMISD::VASTART",  SDT_GenMvastart, [SDNPHasChain]>;
-def GenMundef     : SDNode<"GenMISD::UNDEF",    SDT_GenMundef>;
 
 def GenMcall      : SDNode<"GenMISD::CALL",     SDT_GenMcall,     [SDNPHasChain, SDNPVariadic]>;
 def GenMcall_va   : SDNode<"GenMISD::CALL",     SDT_GenMcall_va,  [SDNPHasChain, SDNPVariadic]>;
@@ -251,7 +250,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
   def UNDEF_I32 : I
       < (outs I32:$res)
       , (ins)
-      , [(set I32:$res, GenMundef)]
+      , [(set I32:$res, undef)]
       , "undef.i32\t$res"
       , 0x11
       >;
@@ -259,7 +258,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
   def UNDEF_I64 : I
       < (outs I64:$res)
       , (ins)
-      , [(set I64:$res, GenMundef)]
+      , [(set I64:$res, undef)]
       , "undef.i64\t$res"
       , 0x12
       >;
@@ -267,7 +266,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
   def UNDEF_F32 : I
       < (outs F32:$res)
       , (ins)
-      , [(set F32:$res, GenMundef)]
+      , [(set F32:$res, undef)]
       , "undef.f32\t$res"
       , 0x13
       >;
@@ -275,7 +274,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
   def UNDEF_F64 : I
       < (outs F64:$res)
       , (ins)
-      , [(set F64:$res, GenMundef)]
+      , [(set F64:$res, undef)]
       , "undef.f64\t$res"
       , 0x14
       >;
