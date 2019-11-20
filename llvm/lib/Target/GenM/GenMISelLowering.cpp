@@ -66,6 +66,7 @@ GenMTargetLowering::GenMTargetLowering(
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   // Custom lowerings for most operations.
+  setOperationAction(ISD::FRAMEADDR, MVTPtr, Custom);
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
   setOperationAction(ISD::GlobalAddress, MVTPtr, Custom);
   setOperationAction(ISD::ExternalSymbol, MVTPtr, Custom);
@@ -157,6 +158,7 @@ GenMTargetLowering::GenMTargetLowering(
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 {
   switch (Op.getOpcode()) {
+    case ISD::FRAMEADDR:          return LowerFRAMEADDR(Op, DAG);
     case ISD::FrameIndex:         return LowerFrameIndex(Op, DAG);
     case ISD::GlobalAddress:      return LowerGlobalAddress(Op, DAG);
     case ISD::ExternalSymbol:     return LowerExternalSymbol(Op, DAG);
@@ -179,6 +181,16 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
       return SDValue();
     }
   }
+}
+
+SDValue GenMTargetLowering::LowerFRAMEADDR(SDValue Op, SelectionDAG &DAG) const
+{
+  return DAG.getCopyFromReg(
+      Op.getOperand(0),
+      SDLoc(Op),
+      GenM::FRAME_ADDR,
+      MVT::i64
+  );
 }
 
 SDValue GenMTargetLowering::LowerFrameIndex(SDValue Op, SelectionDAG &DAG) const

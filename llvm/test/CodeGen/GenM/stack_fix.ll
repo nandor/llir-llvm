@@ -5,7 +5,7 @@ declare void @ext_func_i32(i32* %ptr)
 
 
 ; CHECK-LABEL: alloca32:
-; CHECK-NEXT: .stack 4
+; CHECK-NEXT: .stack_object 0, 4, 4
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca32() noredzone {
@@ -19,7 +19,8 @@ define void @alloca32() noredzone {
 }
 
 ; CHECK-LABEL: alloca3264:
-; CHECK-NEXT: .stack 16
+; CHECK-NEXT: .stack_object 0, 4, 4
+; CHECK-NEXT: .stack_object 1, 8, 8
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca3264() {
@@ -31,7 +32,7 @@ define void @alloca3264() {
 }
 
 ; CHECK-LABEL: allocarray:
-; CHECK-NEXT: .stack 132
+; CHECK-NEXT: .stack_object 0, 132, 4
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @allocarray() {
@@ -44,7 +45,9 @@ define void @allocarray() {
 }
 
 ; CHECK-LABEL: non_mem_use:
-; CHECK-NEXT: .stack 48
+; CHECK-NEXT: .stack_object 0, 27, 16
+; CHECK-NEXT: .stack_object 1, 8, 8
+; CHECK-NEXT: .stack_object 2, 8, 8
 ; CHECK-NEXT: .args 0, i64
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
@@ -60,7 +63,7 @@ define void @non_mem_use(i8** %addr) {
 }
 
 ; CHECK-LABEL: allocarray_inbounds:
-; CHECK-NEXT: .stack 20
+; CHECK-NEXT: .stack_object 0, 20, 4
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @allocarray_inbounds() {

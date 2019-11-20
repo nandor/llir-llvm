@@ -31,14 +31,9 @@ GenMMCTargetAsmStreamer::GenMMCTargetAsmStreamer(
 {
 }
 
-void GenMMCTargetAsmStreamer::emitStackSize(int Size, int Align)
+void GenMMCTargetAsmStreamer::emitStackObject(int Offset, int Size, int Align)
 {
-  OS << "\t.stack\t" << Size << ", " << Align << '\n';
-}
-
-void GenMMCTargetAsmStreamer::emitStackObject(int Offset, int Size)
-{
-  OS << "\t.stack_object\t" << Offset << ", " << Size << "\n";
+  OS << "\t.stack_object\t" << Offset << ", " << Size << ", " << Align << "\n";
 }
 
 void GenMMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
@@ -81,12 +76,7 @@ GenMMCTargetGenMStreamer::GenMMCTargetGenMStreamer(MCStreamer &S)
 {
 }
 
-void GenMMCTargetGenMStreamer::emitStackSize(int Size, int Align)
-{
-  llvm::errs() << "GenMMCTargetGenMStreamer::emitStackSize\n";
-}
-
-void GenMMCTargetGenMStreamer::emitStackObject(int Offset, int Size)
+void GenMMCTargetGenMStreamer::emitStackObject(int Offset, int Size, int Align)
 {
   llvm::errs() << "GenMMCTargetGenMStreamer::emitStackSize\n";
 }

@@ -452,6 +452,12 @@ public:
     return Objects[ObjectIdx].Size;
   }
 
+  /// Return the alignment of the specified object.
+  unsigned getAnyObjectAlignment(int ObjectIdx) const {
+    assert(unsigned(ObjectIdx) < Objects.size() && "Invalid Object Idx!");
+    return Objects[ObjectIdx].Alignment;
+  }
+
   /// Return the size of the specified object.
   int64_t getAnyObjectOffset(int ObjectIdx) const {
     assert(unsigned(ObjectIdx) < Objects.size() && "Invalid Object Idx!");

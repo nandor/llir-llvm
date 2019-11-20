@@ -27,8 +27,9 @@ class GenMRegClass<list<ValueType> regTypes, int alignment, dag regList>
 //===----------------------------------------------------------------------===//
 
 def RSP : GenMReg<"%rsp">;
+def FRAME_ADDR : GenMReg<"%frame_addr">;
 
-def G64 : GenMRegClass<[i64], 64, (add RSP)>;
+def G64 : GenMRegClass<[i64], 64, (add RSP, FRAME_ADDR)>;
 
 //===----------------------------------------------------------------------===//
 // Virtual register types.
@@ -43,3 +44,9 @@ def I32 : GenMRegClass<[i32], 32, (add I32_0)>;
 def I64 : GenMRegClass<[i64], 64, (add I64_0)>;
 def F32 : GenMRegClass<[f32], 32, (add F32_0)>;
 def F64 : GenMRegClass<[f64], 64, (add F64_0)>;
+
+//===----------------------------------------------------------------------===//
+// Composite register classes.
+//===----------------------------------------------------------------------===//
+
+def GI64 : GenMRegClass<[i64], 64, (add I64_0, RSP, FRAME_ADDR)>;
