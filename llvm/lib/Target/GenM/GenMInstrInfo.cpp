@@ -154,26 +154,36 @@ void GenMInstrInfo::copyPhysReg(
     bool KillSrc) const
 {
   auto &MRI = MBB.getParent()->getRegInfo();
-  const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
-
 
   unsigned Op;
-  if (SrcReg == GenM::RSP) {
-    Op = GenM::GET_I64;
-  } else if (DstReg == GenM::RSP) {
-    Op = GenM::SET_I64;
-  } else if (&GenM::I32RegClass == DstCls) {
-    Op = GenM::MOV_I32;
-  } else if (&GenM::I64RegClass == DstCls) {
-    Op = GenM::MOV_I64;
-  } else if (&GenM::F32RegClass == DstCls) {
-    Op = GenM::MOV_F32;
-  } else if (&GenM::F64RegClass == DstCls) {
-    Op = GenM::MOV_F64;
+  if (TargetRegisterInfo::isVirtualRegister(SrcReg)) {
+    if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
+      // virt -> virt
+      const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
+      if (&GenM::I32RegClass == DstCls) {
+        Op = GenM::MOV_I32;
+      } else if (&GenM::I64RegClass == DstCls) {
+        Op = GenM::MOV_I64;
+      } else if (&GenM::F32RegClass == DstCls) {
+        Op = GenM::MOV_F32;
+      } else if (&GenM::F64RegClass == DstCls) {
+        Op = GenM::MOV_F64;
+      } else {
+        llvm_unreachable("copy kind not supported");
+      }
+    } else {
+      // virt -> phys
+      Op = GenM::SET_I64;
+    }
   } else {
-    llvm_unreachable("cannot copy physical registers");
+    if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
+      // phys -> virt
+      Op = GenM::GET_I64;
+    } else {
+      // phys -> phys
+      llvm_unreachable("phys-phys copy not supported");
+    }
   }
-
   BuildMI(MBB, MBBI, DL, get(Op), DstReg)
       .addReg(SrcReg, getKillRegState(KillSrc));
 }
