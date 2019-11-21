@@ -217,9 +217,9 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
   def FRAME_I64 : I
     < (outs I64:$res)
-    , (ins i32imm:$offset)
+    , (ins i32imm:$index, i64imm:$offset)
     , []
-    , "frame.i64\t$res, $offset"
+    , "frame.i64\t$res, $index, $offset"
     , 0x0E
     >;
 

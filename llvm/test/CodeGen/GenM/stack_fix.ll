@@ -10,7 +10,7 @@ declare void @ext_func_i32(i32* %ptr)
 ; CHECK-NEXT: # %bb.0
 define void @alloca32() noredzone {
   ; CHECK-NEXT: mov.i32 $1, 0
-  ; CHECK-NEXT: frame.i64 $2, 0
+  ; CHECK-NEXT: frame.i64 $2, 0, 0
   ; CHECK-NEXT: st.4 [$2], $1
   ; CHECK-NEXT: ret
   %retval = alloca i32
@@ -24,7 +24,9 @@ define void @alloca32() noredzone {
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0
 define void @alloca3264() {
+  ; CHECK: frame.i64 $3, 1, 0
   %r1 = alloca i32
+  ; CHECK: frame.i64 $4, 0, 0
   %r2 = alloca double
   store i32 0, i32* %r1
   store double 0.0, double* %r2
@@ -75,4 +77,3 @@ define void @allocarray_inbounds() {
   call void @ext_func(i64* null)
   ret void
 }
-

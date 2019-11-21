@@ -66,7 +66,9 @@ void GenMRegisterInfo::eliminateFrameIndex(
   DebugLoc DL = MI.getDebugLoc();
 
   unsigned TempReg = MRI.createVirtualRegister(&GenM::I64RegClass);
-  BuildMI(MBB, II, DL, TII->get(GenM::FRAME_I64), TempReg).addImm(FrameIndex);
+  BuildMI(MBB, II, DL, TII->get(GenM::FRAME_I64), TempReg)
+      .addImm(FrameIndex)
+      .addImm(0ull);
   MI.getOperand(FIOperandNum).ChangeToRegister(TempReg, false);
 }
 
