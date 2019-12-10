@@ -16,14 +16,14 @@
 // Defines a store instruction.
 class GenMSt
   < GenMRegClass R
-  , PatFrag node
+  , PatFrag Node
   , string Size
   , int Opcode
   >
   : I
     < (outs)
     , (ins I64:$addr, R:$val)
-    , [(node R:$val, I64:$addr)]
+    , [(Node R:$val, I64:$addr)]
     , !strconcat(!strconcat("st.", Size), "\t[${addr}], $val")
     , Opcode
     >
@@ -39,17 +39,17 @@ def ST_2_I64 : GenMSt<I64, truncstorei16, "2", 0x34>;
 def ST_4_I64 : GenMSt<I64, truncstorei32, "4", 0x35>;
 def ST_8_I64 : GenMSt<I64, store,         "8", 0x36>;
 
-def ST_4_F32 : GenMSt<F32, store,         "4", 0x37>;
-def ST_8_F64 : GenMSt<F64, store,         "8", 0x38>;
-
+def ST_4_F32  : GenMSt<F32, store,  "4", 0x37>;
+def ST_8_F64  : GenMSt<F64, store,  "8", 0x38>;
+def ST_10_F80 : GenMSt<F80, store, "10", 0x39>;
 
 
 // Defines a load instruction.
-class GenMLd<GenMRegClass R, PatFrag node, string Name, int Opcode>
+class GenMLd<GenMRegClass R, PatFrag Node, string Name, int Opcode>
   : I
     < (outs R:$dst)
     , (ins I64:$addr)
-    , [(set R:$dst, (node I64:$addr))]
+    , [(set R:$dst, (Node I64:$addr))]
     , !strconcat("ld.", !strconcat(Name, "\t$dst, [${addr}]"))
     , Opcode
     >
@@ -77,5 +77,6 @@ def LD_4_U64 : GenMLd<I64, zextloadi32, "4.u64", 0x4C>;
 def LD_8_I64 : GenMLd<I64, load,        "8.i64", 0x49>;
 def LD_8_U64 : GenMLd<I64, load,        "8.u64", 0x4D>;
 
-def LD_4_F32 : GenMLd<F32, load,        "4.f32", 0x4E>;
-def LD_8_F64 : GenMLd<F64, load,        "8.f64", 0x4F>;
+def LD_4_F32  : GenMLd<F32, load,        "4.f32", 0x50>;
+def LD_8_F64  : GenMLd<F64, load,        "8.f64", 0x51>;
+def LD_10_F80 : GenMLd<F80, load,       "10.f80", 0x53>;
