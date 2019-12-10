@@ -63,6 +63,7 @@ GenMTargetLowering::GenMTargetLowering(
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
   addRegisterClass(MVT::f32, &GenM::F32RegClass);
   addRegisterClass(MVT::f64, &GenM::F64RegClass);
+  addRegisterClass(MVT::f80, &GenM::F80RegClass);
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   // Custom lowerings for most operations.
@@ -90,14 +91,14 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
-  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64 }) {
+  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80 }) {
     for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
       setOperationAction(Op, T, Expand);
     }
   }
 
   // Deal with floating point operations.
-  for (auto T : { MVT::f32, MVT::f64 }) {
+  for (auto T : { MVT::f32, MVT::f64, MVT::f80 }) {
     setOperationAction(ISD::ConstantFP, T, Legal);
 
     // Expand floating-point comparisons.
@@ -140,12 +141,19 @@ GenMTargetLowering::GenMTargetLowering(
 
   // Expand extending loads and stores.
   setLoadExtAction(ISD::EXTLOAD, MVT::f64, MVT::f32, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f80, MVT::f32, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f80, MVT::f64, Expand);
   setTruncStoreAction(MVT::f64, MVT::f32, Expand);
+  setTruncStoreAction(MVT::f80, MVT::f32, Expand);
+  setTruncStoreAction(MVT::f80, MVT::f64, Expand);
+
+  // Disable extending from bits.
   for (auto T : MVT::integer_valuetypes()) {
     for (auto Ext : {ISD::EXTLOAD, ISD::ZEXTLOAD, ISD::SEXTLOAD}) {
       setLoadExtAction(Ext, T, MVT::i1, Promote);
     }
   }
+
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
 }

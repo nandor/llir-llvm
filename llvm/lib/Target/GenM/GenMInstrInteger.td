@@ -12,6 +12,30 @@
 ///
 //===----------------------------------------------------------------------===//
 
+multiclass UnaryInt
+  < SDNode node
+  , string name
+  , bits<32> b32
+  , bits<32> b64
+  >
+{
+  def _I32 : I
+    < (outs I32:$dst)
+    , (ins I32:$arg)
+    , [(set I32:$dst, (node I32:$arg))]
+    , !strconcat(name, ".i32\t$dst, $arg")
+    , b32
+    >;
+
+  def _I64 : I
+    < (outs I64:$dst)
+    , (ins I64:$arg)
+    , [(set I64:$dst, (node I64:$arg))]
+    , !strconcat(name, ".i64\t$dst, $arg")
+    , b64
+    >;
+}
+
 multiclass BinaryInt
   < SDNode node
   , string name
@@ -149,6 +173,9 @@ multiclass OverflowInt
     , b64
     >;
 }
+
+defm POPCNT : UnaryInt<ctpop, "popcnt", 0x90, 0x91>;
+defm CLZ : UnaryInt<ctlz, "clz", 0x90, 0x91>;
 
 defm ADD : CommBinaryInt<add, "add",  "i", 0x90, 0x91>;
 defm XOR : CommBinaryInt<xor, "xor",  "i", 0x90, 0x93>;

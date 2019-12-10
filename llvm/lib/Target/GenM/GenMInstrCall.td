@@ -32,10 +32,11 @@ multiclass CALL<GenMRegClass vt, SDNode node, SDNode node_va>
     >;
 }
 
-defm CALL_I32: CALL<I32, GenMcall, GenMcall_va>;
-defm CALL_I64: CALL<I64, GenMcall, GenMcall_va>;
-defm CALL_F32: CALL<F32, GenMcall, GenMcall_va>;
-defm CALL_F64: CALL<F64, GenMcall, GenMcall_va>;
+defm CALL_I32 : CALL<I32, GenMcall, GenMcall_va>;
+defm CALL_I64 : CALL<I64, GenMcall, GenMcall_va>;
+defm CALL_F32 : CALL<F32, GenMcall, GenMcall_va>;
+defm CALL_F64 : CALL<F64, GenMcall, GenMcall_va>;
+defm CALL_F80 : CALL<F80, GenMcall, GenMcall_va>;
 
 def CALL_VOID : CallInst
   < (outs)
@@ -84,6 +85,7 @@ defm TCALL_I32: TCALL<I32, GenMtcall, GenMtcall_va>;
 defm TCALL_I64: TCALL<I64, GenMtcall, GenMtcall_va>;
 defm TCALL_F32: TCALL<F32, GenMtcall, GenMtcall_va>;
 defm TCALL_F64: TCALL<F64, GenMtcall, GenMtcall_va>;
+defm TCALL_F80: TCALL<F80, GenMtcall, GenMtcall_va>;
 
 def TCALL_VOID : CallInst
   < (outs)

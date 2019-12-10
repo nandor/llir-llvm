@@ -84,6 +84,7 @@ def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;
 def i64addr_op : GenMOperand<i64, "OPERAND_I64FUNC">;
 def f32imm_op  : GenMOperand<f32, "OPERAND_F32IMM">;
 def f64imm_op  : GenMOperand<f64, "OPERAND_F64IMM">;
+def f80imm_op  : GenMOperand<f80, "OPERAND_F80IMM">;
 
 //===----------------------------------------------------------------------===//
 // GenM Instruction Format Definitions.
@@ -108,73 +109,6 @@ def VASTART : I
 
 let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 {
-  def ARG_I32 : I
-      < (outs I32:$res)
-      , (ins i32imm:$argno)
-      , [(set I32:$res, (GenMargument timm:$argno))]
-      , "arg.i32\t$res, $argno"
-      , 0x01
-      >;
-
-  def ARG_I64 : I
-      < (outs I64:$res)
-      , (ins i32imm:$argno)
-      , [(set I64:$res, (GenMargument timm:$argno))]
-      , "arg.i64\t$res, $argno"
-      , 0x02
-      >;
-
-  def ARG_F32 : I
-      < (outs F32:$res)
-      , (ins i32imm:$argno)
-      , [(set F32:$res, (GenMargument timm:$argno))]
-      , "arg.f32\t$res, $argno"
-      , 0x03
-      >;
-
-  def ARG_F64 : I
-      < (outs F64:$res)
-      , (ins i32imm:$argno)
-      , [(set F64:$res, (GenMargument timm:$argno))]
-      , "arg.f64\t$res, $argno"
-      , 0x04
-      >;
-
-  let isMoveImm = 1 in
-  {
-    def CONST_I32 : I
-      < (outs I32:$res)
-      , (ins i32imm_op:$imm)
-      , [(set I32:$res, imm:$imm)]
-      , "mov.i32\t$res, $imm"
-      , 0x05
-      >;
-
-    def CONST_I64 : I
-      < (outs I64:$res)
-      , (ins i64imm_op:$imm)
-      , [(set I64:$res, imm:$imm)]
-      , "mov.i64\t$res, $imm"
-      , 0x06
-      >;
-
-    def CONST_F32 : I
-      < (outs F32:$res)
-      , (ins f32imm_op:$imm)
-      , [(set F32:$res, fpimm:$imm)]
-      , "mov.f32\t$res, $imm"
-      , 0x07
-      >;
-
-    def CONST_F64 : I
-      < (outs F64:$res)
-      , (ins f64imm_op:$imm)
-      , [(set F64:$res, fpimm:$imm)]
-      , "mov.f64\t$res, $imm"
-      , 0x08
-      >;
-  }
-
   def MOV_I32 : I
     < (outs I32:$dst)
     , (ins I32:$src)
@@ -225,7 +159,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
   def GET_I64 : I
     < (outs I64:$dst)
-    , (ins G64:$src)
+    , (ins R64:$src)
     , []
     , "mov.i64\t$dst, $src"
     , 0x0A
@@ -233,7 +167,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
   def SET_I64 : I
     < (outs)
-    , (ins G64:$dst, I64:$src)
+    , (ins R64:$dst, I64:$src)
     , []
     , "set\t$dst, $src"
     , 0x0A
@@ -281,7 +215,6 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 
 }
 
-
 def : Pat
   < (GenMsymbol tglobaladdr:$addr)
   , (ADDR_I64 i64addr_op:$addr)
@@ -296,8 +229,10 @@ def : Pat
 // Additional sets of instructions.
 //===----------------------------------------------------------------------===//
 
+include "GenMInstrArg.td"
 include "GenMInstrAtomic.td"
 include "GenMInstrCall.td"
+include "GenMInstrConst.td"
 include "GenMInstrConv.td"
 include "GenMInstrMemory.td"
 include "GenMInstrControl.td"
