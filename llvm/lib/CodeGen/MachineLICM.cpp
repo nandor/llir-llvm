@@ -429,7 +429,7 @@ static bool InstructionStoresToFI(const MachineInstr *MI, int FI) {
   return false;
 }
 
-/// Examine the instruction for potentai LICM candidate. Also
+/// Examine the instruction for potential LICM candidate. Also
 /// gather register def and frame object update information.
 void MachineLICMBase::ProcessMI(MachineInstr *MI,
                                 BitVector &PhysRegDefs,
@@ -1027,7 +1027,7 @@ static bool isCopyFeedingInvariantStore(const MachineInstr &MI,
 /// Returns true if the instruction may be a suitable candidate for LICM.
 /// e.g. If the instruction is a call, then it's obviously not safe to hoist it.
 bool MachineLICMBase::IsLICMCandidate(MachineInstr &I) {
-  // GC_FRAMES are not safe to hoise.
+  // GC_FRAMES are not safe to hoist.
   if (I.isGCFrame())
     return false;
 
@@ -1107,6 +1107,11 @@ bool MachineLICMBase::IsLoopInvariantInst(MachineInstr &I) {
     // isn't loop invariant.
     if (CurLoop->contains(MRI->getVRegDef(Reg)))
       return false;
+
+    // Do not allow the register to be clobbered in a GC frame.
+    for (MachineInstr &I : MRI->use_instructions(Reg))
+      if (I.isGCFrame())
+        return false;
   }
 
   // If we got this far, the instruction is loop invariant!
