@@ -390,6 +390,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::UMULO:        return "GenMISD::UMULO";
   case GenMISD::ALLOCA:       return "GenMISD::ALLOCA";
   }
+  llvm_unreachable("invalid opcode");
 }
 
 std::pair<unsigned, const TargetRegisterClass *>
