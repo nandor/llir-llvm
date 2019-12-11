@@ -489,17 +489,6 @@ bool StackSlotColoring::runOnMachineFunction(MachineFunction &MF) {
   if (skipFunction(MF.getFunction()))
     return false;
 
-  switch (MF.getFunction().getCallingConv()) {
-  case CallingConv::CAML:
-  case CallingConv::CAML_EXT:
-  case CallingConv::CAML_ALLOC:
-  case CallingConv::CAML_GC:
-  case CallingConv::CAML_RAISE:
-    return false;
-  default:
-    break;
-  }
-
   MFI = &MF.getFrameInfo();
   TII = MF.getSubtarget().getInstrInfo();
   LS = &getAnalysis<LiveStacks>();

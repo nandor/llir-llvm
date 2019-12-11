@@ -27,8 +27,9 @@ include "GenMInstrInfo.td"
 
 def GenMInstrInfo : InstrInfo;
 
-def : Processor<"penryn", NoItineraries, []>;
-def : Processor<"x86-64", NoItineraries, []>;
+def : Processor<"penryn",  NoItineraries, []>;
+def : Processor<"skylake", NoItineraries, []>;
+def : Processor<"x86-64",  NoItineraries, []>;
 
 
 //===----------------------------------------------------------------------===//
