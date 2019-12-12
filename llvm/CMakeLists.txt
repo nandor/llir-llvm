@@ -1160,6 +1160,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN "*LICENSE.TXT"
     )
   add_llvm_tool_symlink(genm-gcc clang)
+  add_llvm_tool_symlink(genm-g++ clang)
 
   install(DIRECTORY ${LLVM_INCLUDE_DIR}/llvm ${LLVM_INCLUDE_DIR}/llvm-c
     DESTINATION include
