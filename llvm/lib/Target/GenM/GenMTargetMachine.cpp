@@ -40,6 +40,7 @@ public:
   {
     TargetPassConfig::addInstSelector();
     addPass(createGenMISelDag(getGenMTargetMachine()));
+    addPass(createGenMArgumentMove());
     return false;
   }
 

@@ -80,3 +80,7 @@ def LD_8_U64 : GenMLd<I64, load,        "8.u64", 0x4D>;
 def LD_4_F32  : GenMLd<F32, load,        "4.f32", 0x50>;
 def LD_8_F64  : GenMLd<F64, load,        "8.f64", 0x51>;
 def LD_10_F80 : GenMLd<F80, load,       "10.f80", 0x53>;
+
+def LD_1_X32_ATOMIC : GenMLd<I32, atomic_load_8,  "1.i32", 0x4D>;
+def LD_2_X32_ATOMIC : GenMLd<I32, atomic_load_16, "2.i32", 0x4D>;
+def LD_4_X32_ATOMIC : GenMLd<I32, atomic_load_32, "4.i32", 0x4D>;

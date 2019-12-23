@@ -26,9 +26,11 @@ class MachineInstr;
 // GenM-Specific passes.
 FunctionPass *createGenMISelDag(GenMTargetMachine &TM);
 FunctionPass *createGenMRegisterNumbering();
+FunctionPass *createGenMArgumentMove();
 
 // PassRegistry initialization declarations.
 void initializeGenMRegisterNumberingPass(PassRegistry &);
+void initializeGenMArgumentMovePass(PassRegistry &);
 
 namespace GenM {
 }

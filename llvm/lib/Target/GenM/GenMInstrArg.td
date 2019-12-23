@@ -20,9 +20,8 @@ class GenMArg
     , Opcode
     >
 {
-  let isMoveImm = 1;
-  let isAsCheapAsAMove = 1;
-  let isReMaterializable = 1;
+  let hasSideEffects = 1;
+  let Uses = [ARGUMENTS];
 }
 
 def ARG_I32 : GenMArg<I32, "i32", 0x1>;
