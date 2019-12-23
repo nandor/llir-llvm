@@ -105,6 +105,9 @@ GenMTargetLowering::GenMTargetLowering(
     for (auto CC : { ISD::SETO, ISD::SETUO }) {
       setCondCodeAction(CC, T, Expand);
     }
+
+    // Expand operations which are not yet supported.
+    setOperationAction(ISD::FMA, T, Expand);
   }
 
   // Disable some integer operations.
@@ -399,7 +402,10 @@ GenMTargetLowering::getRegForInlineAsmConstraint(
     StringRef Constraint,
     MVT VT) const
 {
-  llvm_unreachable("getRegForInlineAsmConstraint");
+  if (!Constraint.empty()) {
+    llvm_unreachable("not implemented");
+  }
+  return TargetLowering::getRegForInlineAsmConstraint(TRI, Constraint, VT);
 }
 
 bool GenMTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
@@ -446,6 +452,8 @@ SDValue GenMTargetLowering::LowerFormalArguments(
 {
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<GenMMachineFunctionInfo>();
+
+  MF.getRegInfo().addLiveIn(GenM::ARGUMENTS);
 
   if (!isCallingConvSupported(CallConv)) {
     Fail(DL, DAG, "unsupported calling convention");
