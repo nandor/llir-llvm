@@ -46,6 +46,7 @@ void GenMMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
       case MVT::i64: OS << "i64"; break;
       case MVT::f32: OS << "f32"; break;
       case MVT::f64: OS << "f64"; break;
+      case MVT::f80: OS << "f80"; break;
       default: llvm_unreachable("not implemented");
     }
   }
