@@ -100,6 +100,11 @@ GenMTargetLowering::GenMTargetLowering(
   // Deal with floating point operations.
   for (auto T : { MVT::f32, MVT::f64, MVT::f80 }) {
     setOperationAction(ISD::ConstantFP, T, Legal);
+    setOperationAction(ISD::FEXP,   T, Legal);
+    setOperationAction(ISD::FEXP2,  T, Legal);
+    setOperationAction(ISD::FLOG,   T, Legal);
+    setOperationAction(ISD::FLOG2,  T, Legal);
+    setOperationAction(ISD::FLOG10, T, Legal);
 
     // Expand floating-point comparisons.
     for (auto CC : { ISD::SETO, ISD::SETUO }) {
@@ -159,6 +164,11 @@ GenMTargetLowering::GenMTargetLowering(
 
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
+
+  // Custom lowering for intrinsics.
+  setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::Other, Custom);
+  setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::Other, Custom);
+  setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 }
 
 SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
@@ -181,6 +191,9 @@ SDValue GenMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     case ISD::USUBO:              return LowerALUO(Op, DAG);
     case ISD::SMULO:              return LowerALUO(Op, DAG);
     case ISD::UMULO:              return LowerALUO(Op, DAG);
+    case ISD::INTRINSIC_WO_CHAIN: return LowerINTRINSIC_WO_CHAIN(Op, DAG);
+    case ISD::INTRINSIC_W_CHAIN:  return LowerINTRINSIC_W_CHAIN(Op, DAG);
+    case ISD::INTRINSIC_VOID:     return LowerINTRINSIC_VOID(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -363,6 +376,18 @@ SDValue GenMTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
   SDValue Result = DAG.getNode(vop, DL, N->getValueType(0), LHS, RHS);
   SDValue Flag = DAG.getNode(op, DL, N->getValueType(1), LHS, RHS);
   return DAG.getNode(ISD::MERGE_VALUES, DL, N->getVTList(), Result, Flag);
+}
+
+SDValue GenMTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const {
+  abort();
+}
+
+SDValue GenMTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const {
+  abort();
+}
+
+SDValue GenMTargetLowering::LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const {
+  abort();
 }
 
 MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(

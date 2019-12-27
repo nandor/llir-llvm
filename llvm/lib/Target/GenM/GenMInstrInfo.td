@@ -141,6 +141,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x0C
     >;
 
+  def MOV_F80 : I
+    < (outs F80:$dst)
+    , (ins F80:$src)
+    , []
+    , "mov.f80\t$dst, $src"
+    , 0x0C
+    >;
+
   def ADDR_I64 : I
     < (outs I64:$dst)
     , (ins i64addr_op:$addr)

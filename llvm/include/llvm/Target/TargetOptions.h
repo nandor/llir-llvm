@@ -124,7 +124,7 @@ namespace llvm {
           TrapUnreachable(false), NoTrapAfterNoreturn(false), TLSSize(0),
           EmulatedTLS(false), ExplicitEmulatedTLS(false), EnableIPRA(false),
           EmitStackSizeSection(false), EnableMachineOutliner(false),
-          SupportsDefaultOutlining(false), EmitAddrsig(false),
+          SupportsDefaultOutlining(false), EmitAddrsig(false), EmitGenM(false),
           EmitCallSiteInfo(false), SupportsDebugEntryValues(false),
           EnableDebugEntryValues(false), ValueTrackingVariableLocations(false),
           ForceDwarfFrameSection(false), XRayOmitFunctionIndex(false),
@@ -262,6 +262,9 @@ namespace llvm {
 
     /// Emit address-significance table.
     unsigned EmitAddrsig : 1;
+
+    /// Emit GenM output.
+    unsigned EmitGenM : 1;
 
     /// Emit basic blocks into separate sections.
     BasicBlockSection BBSections = BasicBlockSection::None;

@@ -145,7 +145,6 @@ void GenMInstPrinter::printInst(
   }
 }
 
-
 void GenMInstPrinter::printOperand(
     const MCInst *MI,
     int opNum,
@@ -153,7 +152,6 @@ void GenMInstPrinter::printOperand(
     raw_ostream &OS)
 {
   const MCOperand &MO = MI->getOperand(opNum);
-
   if (MO.isReg()) {
     printRegName(OS, MO.getReg());
     return;
@@ -170,9 +168,11 @@ void GenMInstPrinter::printOperand(
   }
 
   if (MO.isFPImm()) {
-    OS << MO.getFPImm();
+    union { double dv; uint64_t iv; };
+    dv = MO.getFPImm();
+    OS << iv;
     return;
   }
 
-  assert(false && "Unknown operand kind");
+  llvm_unreachable("unknown operand kind");
 }

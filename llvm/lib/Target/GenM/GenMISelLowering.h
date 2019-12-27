@@ -58,6 +58,9 @@ public:
   SDValue LowerVACOPY(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerALUO(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override { return false; }
   bool canLowerUndef() const override { return true;}
