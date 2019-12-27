@@ -158,8 +158,9 @@ void GenMInstrInfo::copyPhysReg(
   unsigned Op;
   if (TargetRegisterInfo::isVirtualRegister(SrcReg)) {
     if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
-      // virt -> virt
+      const TargetRegisterClass *SrcCls = MRI.getRegClass(SrcReg);
       const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
+      // virt -> virt
       if (&GenM::I32RegClass == DstCls) {
         Op = GenM::MOV_I32;
       } else if (&GenM::I64RegClass == DstCls) {
@@ -168,6 +169,8 @@ void GenMInstrInfo::copyPhysReg(
         Op = GenM::MOV_F32;
       } else if (&GenM::F64RegClass == DstCls) {
         Op = GenM::MOV_F64;
+      } else if (&GenM::F80RegClass == DstCls) {
+        Op = GenM::MOV_F80;
       } else {
         llvm_unreachable("copy kind not supported");
       }
