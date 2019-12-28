@@ -158,7 +158,6 @@ void GenMInstrInfo::copyPhysReg(
   unsigned Op;
   if (TargetRegisterInfo::isVirtualRegister(SrcReg)) {
     if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
-      const TargetRegisterClass *SrcCls = MRI.getRegClass(SrcReg);
       const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
       // virt -> virt
       if (&GenM::I32RegClass == DstCls) {
