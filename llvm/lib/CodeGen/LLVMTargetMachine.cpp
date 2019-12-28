@@ -113,6 +113,8 @@ addPassesToGenerateCode(LLVMTargetMachine &TM, PassManagerBase &PM,
   return PassConfig;
 }
 
+extern bool llvm::IsGenM;
+
 AsmPrinter *LLVMTargetMachine::createAsmPrinter(
     raw_pwrite_stream &Out,
     raw_pwrite_stream *DwoOut,
@@ -129,7 +131,7 @@ AsmPrinter *LLVMTargetMachine::createAsmPrinter(
 
   std::unique_ptr<MCStreamer> AsmStreamer;
 
-  switch (FileType) {
+  switch (IsGenM ? CGFT_AssemblyFile : FileType) {
   case CGFT_AssemblyFile: {
     MCInstPrinter *InstPrinter = getTarget().createMCInstPrinter(
         getTargetTriple(), MAI.getAssemblerDialect(), MAI, MII, MRI);
