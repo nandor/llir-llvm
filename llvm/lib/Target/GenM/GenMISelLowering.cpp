@@ -32,6 +32,7 @@
 #include "llvm/IR/DiagnosticInfo.h"
 #include "llvm/IR/DiagnosticPrinter.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
@@ -379,15 +380,20 @@ SDValue GenMTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
 }
 
 SDValue GenMTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const {
-  abort();
+  llvm_unreachable("invalid intrinsic");
 }
 
 SDValue GenMTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const {
-  abort();
+  switch (cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue()) {
+  case llvm::Intrinsic::x86_rdtsc: {
+    return DAG.getNode(GenMISD::RDTSC, SDLoc(Op), MVT::i64, Op.getOperand(0));
+  }
+  }
+  llvm_unreachable("invalid intrinsic");
 }
 
 SDValue GenMTargetLowering::LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const {
-  abort();
+  llvm_unreachable("invalid intrinsic");
 }
 
 MachineBasicBlock *GenMTargetLowering::EmitInstrWithCustomInserter(
@@ -417,6 +423,7 @@ const char *GenMTargetLowering::getTargetNodeName(unsigned Opcode) const
   case GenMISD::SMULO:        return "GenMISD::SMULO";
   case GenMISD::UMULO:        return "GenMISD::UMULO";
   case GenMISD::ALLOCA:       return "GenMISD::ALLOCA";
+  case GenMISD::RDTSC:        return "GenMISD::RDTSC";
   }
   llvm_unreachable("invalid opcode");
 }

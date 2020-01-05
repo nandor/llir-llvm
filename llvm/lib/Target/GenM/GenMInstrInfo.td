@@ -21,7 +21,7 @@ def SDT_GenMreturn   : SDTypeProfile<0, -1, []>;
 def SDT_GenMsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 def SDT_GenMswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 def SDT_GenMvastart  : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
-def SDT_GenMundef    : SDTypeProfile<1,  0, []>;
+def SDT_GenMvalue    : SDTypeProfile<1,  0, []>;
 
 def SDT_GenMcall     : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
 def SDT_GenMcall_va  : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
@@ -62,6 +62,8 @@ def GenMssubo     : SDNode<"GenMISD::SSUBO",    SDT_GenMover>;
 def GenMusubo     : SDNode<"GenMISD::USUBO",    SDT_GenMover>;
 def GenMsmulo     : SDNode<"GenMISD::SMULO",    SDT_GenMover>;
 def GenMumulo     : SDNode<"GenMISD::UMULO",    SDT_GenMover>;
+
+def GenMrdtsc     : SDNode<"GenMISD::RDTSC",    SDT_GenMvalue, [SDNPHasChain]>;
 
 def GenMalloca    : SDNode<"GenMISD::ALLOCA",   SDT_GenMalloca, [SDNPHasChain]>;
 
@@ -221,6 +223,13 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , 0x14
       >;
 
+  def RDTSC_I64 : I
+      < (outs I64:$res)
+      , (ins)
+      , [(set I64:$res, GenMrdtsc)]
+      , "rdtsc.i64\t$res"
+      , 0x15
+      >;
 }
 
 def : Pat

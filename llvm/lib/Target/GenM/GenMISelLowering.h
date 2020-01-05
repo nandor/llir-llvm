@@ -35,7 +35,9 @@ enum NodeType : unsigned {
   // Overflow checks.
   SADDO, UADDO, SSUBO, USUBO, SMULO, UMULO,
   // Alloca.
-  ALLOCA
+  ALLOCA,
+  // RDTSC
+  RDTSC,
 };
 } // end namespace GenMISD
 
