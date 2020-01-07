@@ -35,7 +35,6 @@ HANDLE_TARGET_OPCODE(GC_LABEL)
 HANDLE_TARGET_OPCODE(ANNOTATION_LABEL)
 HANDLE_TARGET_OPCODE(GC_FRAME_ROOT)
 HANDLE_TARGET_OPCODE(GC_FRAME_CALL)
-HANDLE_TARGET_OPCODE(GC_FRAME_BLOCK)
 
 /// KILL - This instruction is a noop that is used only to adjust the
 /// liveness of registers. This can be useful when dealing with

@@ -1178,7 +1178,6 @@ void AsmPrinter::emitFunctionBody() {
       case TargetOpcode::GC_LABEL:
       case TargetOpcode::GC_FRAME_ROOT:
       case TargetOpcode::GC_FRAME_CALL:
-      case TargetOpcode::GC_FRAME_BLOCK:
         OutStreamer->emitLabel(MI.getOperand(0).getMCSymbol());
         break;
       case TargetOpcode::INLINEASM:

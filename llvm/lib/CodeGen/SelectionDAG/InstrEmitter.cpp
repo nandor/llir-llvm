@@ -1124,7 +1124,6 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
     switch (gcFrame->getType()) {
       case ISD::ROOT:  Opc = TargetOpcode::GC_FRAME_ROOT;  break;
       case ISD::CALL:  Opc = TargetOpcode::GC_FRAME_CALL;  break;
-      case ISD::BLOCK: Opc = TargetOpcode::GC_FRAME_BLOCK; break;
     }
 
     auto MIB = BuildMI(*MBB, InsertPos, Node->getDebugLoc(), TII->get(Opc));

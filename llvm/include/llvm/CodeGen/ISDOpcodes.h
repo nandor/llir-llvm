@@ -1246,7 +1246,6 @@ NodeType getExtForLoadExtType(bool IsFP, LoadExtType);
 enum FrameType {
   ROOT,
   CALL,
-  BLOCK,
 };
 
 //===--------------------------------------------------------------------===//

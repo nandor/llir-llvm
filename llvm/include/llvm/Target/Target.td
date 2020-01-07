@@ -1062,18 +1062,6 @@ def GC_FRAME_CALL : StandardPseudoInstruction {
   let mayStore = 1;
   let isCall = 1;
 }
-def GC_FRAME_BLOCK : StandardPseudoInstruction {
-  let OutOperandList = (outs);
-  let InOperandList = (ins variable_ops);
-  let AsmString = "";
-  let hasCtrlDep = 1;
-  let hasSideEffects = 1;
-  let isNotDuplicable = 1;
-  let isBarrier = 1;
-  let mayLoad = 1;
-  let mayStore = 1;
-  let isCall = 1;
-}
 def GC_LABEL : StandardPseudoInstruction {
   let OutOperandList = (outs);
   let InOperandList = (ins i32imm:$id);
