@@ -46,6 +46,7 @@
 #include <iterator>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 using namespace llvm;
 
@@ -95,6 +96,7 @@ namespace {
       ScopeMap.clear();
       PREMap.clear();
       Exps.clear();
+      Values.clear();
     }
 
   private:
@@ -112,6 +114,7 @@ namespace {
         PREMap;
     ScopedHTType VNT;
     SmallVector<MachineInstr *, 64> Exps;
+    std::unordered_set<MachineInstr *> Values;
     unsigned CurrVN = 0;
 
     bool PerformTrivialCopyPropagation(MachineInstr *MI,
@@ -424,18 +427,7 @@ bool MachineCSE::isCSECandidate(MachineInstr *MI) {
   if (MI->getOpcode() == TargetOpcode::LOAD_STACK_GUARD)
     return false;
 
-  for (auto &MO : MI->operands()) {
-    if (!MO.isReg())
-      continue;
-
-    for (auto RI = MRI->reg_instr_begin(MO.getReg()), E = MRI->reg_instr_end(); RI != E; RI++) {
-      if (RI->isGCFrame()) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return Values.count(MI) == 0;
 }
 
 /// isProfitableToCSE - Return true if it's profitable to eliminate MI with a
@@ -907,6 +899,21 @@ bool MachineCSE::runOnMachineFunction(MachineFunction &MF) {
   DT = &getAnalysis<MachineDominatorTree>();
   MBFI = &getAnalysis<MachineBlockFrequencyInfo>();
   LookAheadLimit = TII->getMachineCSELookAheadLimit();
+
+  for (auto &MBB : MF) {
+    for (auto &MI : MBB) {
+      if (!MI.isGCFrame())
+        continue;
+      for (auto &MO : MI.operands()) {
+        if (!MO.isReg())
+          continue;
+        for (auto RI = MRI->reg_instr_begin(MO.getReg()), E = MRI->reg_instr_end(); RI != E; RI++) {
+          Values.insert(&*RI);
+        }
+      }
+    }
+  }
+
   bool ChangedPRE, ChangedCSE;
   ChangedPRE = PerformSimplePRE(DT);
   ChangedCSE = PerformCSE(DT->getRootNode());
