@@ -323,7 +323,18 @@ SDValue GenMTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const
 
 SDValue GenMTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const
 {
-  llvm_unreachable("not implemented");
+  // See the X86ISelLowering implementation
+  SDValue Chain = Op.getOperand(0);
+  SDValue DstPtr = Op.getOperand(1);
+  SDValue SrcPtr = Op.getOperand(2);
+  const Value *DstSV = cast<SrcValueSDNode>(Op.getOperand(3))->getValue();
+  const Value *SrcSV = cast<SrcValueSDNode>(Op.getOperand(4))->getValue();
+  SDLoc DL(Op);
+
+  return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr,
+                       DAG.getIntPtrConstant(24, DL), 8, /*isVolatile*/false,
+                       false, false,
+                       MachinePointerInfo(DstSV), MachinePointerInfo(SrcSV));
 }
 
 SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
