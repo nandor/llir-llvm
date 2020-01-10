@@ -176,6 +176,7 @@ multiclass OverflowInt
 
 defm POPCNT : UnaryInt<ctpop, "popcnt", 0x90, 0x91>;
 defm CLZ : UnaryInt<ctlz, "clz", 0x90, 0x91>;
+defm CTZ : UnaryInt<cttz, "ctz", 0x90, 0x91>;
 
 defm ADD : CommBinaryInt<add, "add",  "i", 0x90, 0x91>;
 defm XOR : CommBinaryInt<xor, "xor",  "i", 0x90, 0x93>;
