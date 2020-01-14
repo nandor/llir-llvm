@@ -256,9 +256,6 @@ namespace CallingConv {
     /// Calling convention for the OCaml gc trampoline.
     CAML_GC = 104,
 
-    /// The OCaml GC trampoline target.
-    CAML_GC_FN = 103,
-
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023
   };

@@ -292,7 +292,6 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   switch (CC) {
   case CallingConv::GHC:
   case CallingConv::HiPE:
-  case CallingConv::CAML_GC_FN:
     return CSR_NoRegs_SaveList;
   case CallingConv::AnyReg:
     if (HasAVX)
@@ -422,7 +421,6 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
   switch (CC) {
   case CallingConv::GHC:
   case CallingConv::HiPE:
-  case CallingConv::CAML_GC_FN:
     return CSR_NoRegs_RegMask;
   case CallingConv::AnyReg:
     if (HasAVX)
