@@ -2303,6 +2303,15 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
   for (MCPhysReg PhysReg : Order) {
     assert(PhysReg);
+
+  auto Advance = [this, Uses](unsigned &I) {
+    while (++I < Uses.size())
+      if (!Indexes->getInstructionFromIndex(Uses[I])->isGCFrame())
+        return;
+  };
+
+  Order.rewind();
+  while (unsigned PhysReg = Order.next()) {
     // Keep track of the largest spill weight that would need to be evicted in
     // order to make use of PhysReg between UseSlots[I] and UseSlots[I + 1].
     calcGapWeights(PhysReg, GapWeight);
@@ -2372,7 +2381,8 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
       // Try to shrink.
       if (Shrink) {
-        if (++SplitBefore < SplitAfter) {
+        Advance(SplitBefore);
+        if (SplitBefore < SplitAfter) {
           LLVM_DEBUG(dbgs() << " shrink\n");
           // Recompute the max when necessary.
           if (GapWeight[SplitBefore - 1] >= MaxGap) {
@@ -2392,7 +2402,8 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
       }
 
       LLVM_DEBUG(dbgs() << " extend\n");
-      MaxGap = std::max(MaxGap, GapWeight[SplitAfter++]);
+      MaxGap = std::max(MaxGap, GapWeight[SplitAfter]);
+      Advance(SplitAfter);
     }
   }
 
@@ -2463,6 +2474,32 @@ unsigned RAGreedy::trySplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
   NamedRegionTimer T("global_split", "Global Splitting", TimerGroupName,
                      TimerGroupDescription, TimePassesIsEnabled);
+
+  // Do not split if the virt reg is used in a GC frame.
+  bool isGCRoot = false;
+  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
+    if (RI->isGCFrame()) {
+      isGCRoot = true;
+    }
+  }
+
+  if (isGCRoot) {// && shouldUse(MF->getName())) {
+    NamedRegionTimer T(
+        "GC spill",
+        "GC Spiller",
+        TimerGroupName,
+        TimerGroupDescription,
+        TimePassesIsEnabled
+    );
+    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
+    spiller().spill(LRE);
+    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
+
+    if (VerifyEnabled) {
+      MF->verify(this, "After spilling");
+    }
+    return 0;
+  }
 
   SA->analyze(&VirtReg);
 
@@ -3043,32 +3080,6 @@ MCRegister RAGreedy::selectOrSplitImpl(LiveInterval &VirtReg,
     } else
       return PhysReg;
   }
-
-  // Do not split if the virt reg is used in a GC frame.
-  bool isGCRoot = false;
-  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
-    if (RI->isGCFrame()) {
-      isGCRoot = true;
-    }
-  }
-  if (isGCRoot) {
-    NamedRegionTimer T(
-        "GC spill",
-        "GC Spiller",
-        TimerGroupName,
-        TimerGroupDescription,
-        TimePassesIsEnabled
-    );
-    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
-    spiller().spill(LRE);
-    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
-
-    if (VerifyEnabled) {
-      MF->verify(this, "After spilling");
-    }
-    return 0;
-  }
-
 
   LiveRangeStage Stage = getStage(VirtReg);
   LLVM_DEBUG(dbgs() << StageName[Stage] << " Cascade "
