@@ -2294,10 +2294,11 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
     (1.0f / MBFI->getEntryFreq());
   SmallVector<float, 8> GapWeight;
 
-  auto Advance = [this, Uses](unsigned &I) {
+  auto Advance = [this, Uses](unsigned I) {
     while (++I < Uses.size())
       if (!Indexes->getInstructionFromIndex(Uses[I])->isGCFrame())
-        return;
+        break;
+    return I;
   };
 
   Order.rewind();
@@ -2371,7 +2372,7 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
       // Try to shrink.
       if (Shrink) {
-        Advance(SplitBefore);
+        SplitBefore = Advance(SplitBefore);
         if (SplitBefore < SplitAfter) {
           LLVM_DEBUG(dbgs() << " shrink\n");
           // Recompute the max when necessary.
@@ -2393,7 +2394,7 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
       LLVM_DEBUG(dbgs() << " extend\n");
       MaxGap = std::max(MaxGap, GapWeight[SplitAfter]);
-      Advance(SplitAfter);
+      SplitAfter = Advance(SplitAfter);
     }
   }
 
@@ -2464,32 +2465,6 @@ unsigned RAGreedy::trySplit(LiveInterval &VirtReg, AllocationOrder &Order,
 
   NamedRegionTimer T("global_split", "Global Splitting", TimerGroupName,
                      TimerGroupDescription, TimePassesIsEnabled);
-
-  // Do not split if the virt reg is used in a GC frame.
-  bool isGCRoot = false;
-  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
-    if (RI->isGCFrame()) {
-      isGCRoot = true;
-    }
-  }
-
-  if (isGCRoot) {// && shouldUse(MF->getName())) {
-    NamedRegionTimer T(
-        "GC spill",
-        "GC Spiller",
-        TimerGroupName,
-        TimerGroupDescription,
-        TimePassesIsEnabled
-    );
-    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
-    spiller().spill(LRE);
-    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
-
-    if (VerifyEnabled) {
-      MF->verify(this, "After spilling");
-    }
-    return 0;
-  }
 
   SA->analyze(&VirtReg);
 
@@ -3279,7 +3254,6 @@ bool RAGreedy::runOnMachineFunction(MachineFunction &mf) {
 
   postOptimization();
   reportNumberOfSplillsReloads();
-
   releaseMemory();
   return true;
 }
