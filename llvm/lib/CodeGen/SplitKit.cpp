@@ -212,13 +212,16 @@ bool SplitAnalysis::calcLiveBlockInfo() {
   LiveInterval::const_iterator LVI = CurLI->begin();
   LiveInterval::const_iterator LVE = CurLI->end();
 
+  auto IsGCFrame = [this](SlotIndex Index) {
+    return LIS.getSlotIndexes()->getInstructionFromIndex(Index)->isGCFrame();
+  };
+
   SmallVectorImpl<SlotIndex>::const_iterator UseI, UseE;
   UseI = UseSlots.begin();
   UseE = UseSlots.end();
 
   // Loop over basic blocks where CurLI is live.
-  MachineFunction::iterator MFI =
-      LIS.getMBBFromIndex(LVI->start)->getIterator();
+  auto MFI = LIS.getMBBFromIndex(LVI->start)->getIterator();
   while (true) {
     BlockInfo BI;
     BI.MBB = &*MFI;
@@ -236,61 +239,76 @@ bool SplitAnalysis::calcLiveBlockInfo() {
       if (LVI->end < Stop)
         return false;
     } else {
-      // This block has uses. Find the first and last uses in the block.
-      BI.FirstInstr = *UseI;
-      assert(BI.FirstInstr >= Start);
-      do ++UseI;
-      while (UseI != UseE && *UseI < Stop);
-      BI.LastInstr = UseI[-1];
-      assert(BI.LastInstr < Stop);
-
-      // LVI is the first live segment overlapping MBB.
-      BI.LiveIn = LVI->start <= Start;
-
-      // When not live in, the first use should be a def.
-      if (!BI.LiveIn) {
-        assert(LVI->start == LVI->valno->def && "Dangling Segment start");
-        assert(LVI->start == BI.FirstInstr && "First instr should be a def");
-        BI.FirstDef = BI.FirstInstr;
-      }
-
-      // Look for gaps in the live range.
-      BI.LiveOut = true;
-      while (LVI->end < Stop) {
-        SlotIndex LastStop = LVI->end;
-        if (++LVI == LVE || LVI->start >= Stop) {
-          BI.LiveOut = false;
-          BI.LastInstr = LastStop;
+      while (UseI != UseE && *UseI < Stop && IsGCFrame(*UseI)) ++UseI;
+      if (UseI == UseE || *UseI >= Stop) {
+        ++NumThroughBlocks;
+        ThroughBlocks.set(BI.MBB->getNumber());
+        while (LVI->end < Stop) {
+          if (++LVI == LVE || LVI->start >= Stop)
+            break;
+        }
+        if (LVI == LVE)
           break;
+      } else {
+        // This block has uses. Find the first and last uses in the block.
+        BI.FirstInstr = *UseI;
+        assert(BI.FirstInstr >= Start);
+        do {
+          if (!IsGCFrame(*UseI))
+            BI.LastInstr = *UseI;
+          ++UseI;
+        } while (UseI != UseE && *UseI < Stop);
+        assert(BI.LastInstr < Stop);
+        assert(BI.FirstInstr <= BI.LastInstr);
+
+        // LVI is the first live segment overlapping MBB.
+        BI.LiveIn = LVI->start <= Start;
+
+        // When not live in, the first use should be a def.
+        if (!BI.LiveIn) {
+          assert(LVI->start == LVI->valno->def && "Dangling Segment start");
+          assert(LVI->start == BI.FirstInstr && "First instr should be a def");
+          BI.FirstDef = BI.FirstInstr;
         }
 
-        if (LastStop < LVI->start) {
-          // There is a gap in the live range. Create duplicate entries for the
-          // live-in snippet and the live-out snippet.
-          ++NumGapBlocks;
+        // Look for gaps in the live range.
+        BI.LiveOut = true;
+        while (LVI->end < Stop) {
+          SlotIndex LastStop = LVI->end;
+          if (++LVI == LVE || LVI->start >= Stop) {
+            BI.LiveOut = false;
+            BI.LastInstr = LastStop;
+            break;
+          }
 
-          // Push the Live-in part.
-          BI.LiveOut = false;
-          UseBlocks.push_back(BI);
-          UseBlocks.back().LastInstr = LastStop;
+          if (LastStop < LVI->start) {
+            // There is a gap in the live range. Create duplicate entries for the
+            // live-in snippet and the live-out snippet.
+            ++NumGapBlocks;
 
-          // Set up BI for the live-out part.
-          BI.LiveIn = false;
-          BI.LiveOut = true;
-          BI.FirstInstr = BI.FirstDef = LVI->start;
+            // Push the Live-in part.
+            BI.LiveOut = false;
+            UseBlocks.push_back(BI);
+            UseBlocks.back().LastInstr = LastStop;
+
+            // Set up BI for the live-out part.
+            BI.LiveIn = false;
+            BI.LiveOut = true;
+            BI.FirstInstr = BI.FirstDef = LVI->start;
+          }
+
+          // A Segment that starts in the middle of the block must be a def.
+          assert(LVI->start == LVI->valno->def && "Dangling Segment start");
+          if (!BI.FirstDef)
+            BI.FirstDef = LVI->start;
         }
 
-        // A Segment that starts in the middle of the block must be a def.
-        assert(LVI->start == LVI->valno->def && "Dangling Segment start");
-        if (!BI.FirstDef)
-          BI.FirstDef = LVI->start;
+        UseBlocks.push_back(BI);
+
+        // LVI is now at LVE or LVI->end >= Stop.
+        if (LVI == LVE)
+          break;
       }
-
-      UseBlocks.push_back(BI);
-
-      // LVI is now at LVE or LVI->end >= Stop.
-      if (LVI == LVE)
-        break;
     }
 
     // Live segment ends exactly at Stop. Move to the next segment.
@@ -541,6 +559,8 @@ SlotIndex SplitEditor::buildSingleSubRegCopy(unsigned FromReg, unsigned ToReg,
 SlotIndex SplitEditor::buildCopy(unsigned FromReg, unsigned ToReg,
     LaneBitmask LaneMask, MachineBasicBlock &MBB,
     MachineBasicBlock::iterator InsertBefore, bool Late, unsigned RegIdx) {
+  assert((InsertBefore == MBB.end() || !InsertBefore->isGCFrame()) &&
+         "cannot insert before a GC frame");
   const MCInstrDesc &Desc = TII.get(TargetOpcode::COPY);
   if (LaneMask.all() || LaneMask == MRI.getMaxLaneMaskForVReg(FromReg)) {
     // The full vreg is copied.
@@ -871,7 +891,7 @@ void SplitEditor::removeBackCopies(SmallVectorImpl<VNInfo*> &Copies) {
     MachineBasicBlock::iterator MBBI(MI);
     bool AtBegin;
     do AtBegin = MBBI == MBB->begin();
-    while (!AtBegin && ((--MBBI)->isDebugInstr()/* || MBBI->isGCFrame()*/));
+    while (!AtBegin && ((--MBBI)->isDebugInstr()));
 
     LLVM_DEBUG(dbgs() << "Removing " << Def << '\t' << *MI);
     LIS.removeVRegDefAt(*LI, Def);
@@ -1323,7 +1343,7 @@ void SplitEditor::rewriteAssigned(bool ExtendRanges) {
   };
 
   SmallVector<ExtPoint,4> ExtPoints;
-
+  SmallVector<MachineInstr *, 8> GCFrames;
   for (MachineRegisterInfo::reg_iterator RI = MRI.reg_begin(Edit->getReg()),
        RE = MRI.reg_end(); RI != RE;) {
     MachineOperand &MO = *RI;
@@ -1346,7 +1366,13 @@ void SplitEditor::rewriteAssigned(bool ExtendRanges) {
     // Rewrite to the mapped register at Idx.
     unsigned RegIdx = RegAssign.lookup(Idx);
     LiveInterval &LI = LIS.getInterval(Edit->get(RegIdx));
-    MO.setReg(LI.reg());
+    if (MI->isGCFrame()) {
+      MO.setReg(0);
+      GCFrames.push_back(MI);
+    } else {
+      MO.setReg(LI.reg);
+    }
+
     LLVM_DEBUG(dbgs() << "  rewr " << printMBBReference(*MI->getParent())
                       << '\t' << Idx << ':' << RegIdx << '\t' << *MI);
 
@@ -1413,6 +1439,26 @@ void SplitEditor::rewriteAssigned(bool ExtendRanges) {
     LI.clear();
     LI.removeEmptySubRanges();
     LIS.constructMainRangeFromSubranges(LI);
+  }
+
+  for (MachineInstr *MI : GCFrames) {
+    for (unsigned I = 0, N = MI->getNumOperands(); I < N; ) {
+      auto &MO = MI->getOperand(I);
+      if (!MO.isReg() || MO.getReg() != 0) {
+        ++I;
+        continue;
+      }
+      MI->RemoveOperand(I);
+      --N;
+    }
+
+    SlotIndex Idx = LIS.getInstructionIndex(*MI);
+    for (unsigned R : *Edit) {
+      LiveInterval &LI = LIS.getInterval(R);
+      if (LI.liveAt(Idx)) {
+        MI->addOperand(MachineOperand::CreateReg(LI.reg, false));
+      }
+    }
   }
 }
 
@@ -1590,7 +1636,7 @@ void SplitEditor::splitSingleBlock(const SplitAnalysis::BlockInfo &BI) {
   if (!BI.LiveOut || BI.LastInstr < LastSplitPoint) {
     useIntv(SegStart, leaveIntvAfter(BI.LastInstr));
   } else {
-      // The last use is after the last valid split point.
+    // The last use is after the last valid split point.
     SlotIndex SegStop = leaveIntvBefore(LastSplitPoint);
     useIntv(SegStart, SegStop);
     overlapIntv(SegStop, BI.LastInstr);

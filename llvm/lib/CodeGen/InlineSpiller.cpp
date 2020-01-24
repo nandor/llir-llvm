@@ -96,6 +96,7 @@ class HoistSpillHelper : private LiveRangeEdit::Delegate {
   const TargetInstrInfo &TII;
   const TargetRegisterInfo &TRI;
   const MachineBlockFrequencyInfo &MBFI;
+  llvm::DenseMap<unsigned, bool> IsGCSpillCache;
 
   InsertPointAnalysis IPA;
 
@@ -155,6 +156,30 @@ public:
   bool rmFromMergeableSpills(MachineInstr &Spill, int StackSlot);
   void hoistAllSpills();
   void LRE_DidCloneVirtReg(Register, Register) override;
+
+  bool IsGCSlot(unsigned Slot) {
+    auto it = IsGCSpillCache.find(Slot);
+    if (it != IsGCSpillCache.end())
+      return it->second;
+
+    for (auto &MBB : MF) {
+      for (auto &MI : MBB) {
+        if (!MI.isGCFrame())
+          continue;
+
+        for (auto *MOP : MI.memoperands()) {
+          if (auto *Stk = llvm::dyn_cast_or_null<llvm::FixedStackPseudoSourceValue>(MOP->getPseudoValue())) {
+            if (Slot == Stk->getFrameIndex()) {
+              IsGCSpillCache[Slot] = true;
+              return true;
+            }
+          }
+        }
+      }
+    }
+    IsGCSpillCache[Slot] = false;
+    return false;
+  }
 };
 
 class InlineSpiller : public Spiller {
@@ -995,6 +1020,14 @@ void InlineSpiller::spillAroundUses(Register Reg) {
   LLVM_DEBUG(dbgs() << "spillAroundUses " << printReg(Reg) << '\n');
   LiveInterval &OldLI = LIS.getInterval(Reg);
 
+  bool IsGCSlot = false;
+  for (auto RegI = MRI.reg_bundle_begin(Reg), E = MRI.reg_bundle_end(); RegI != E; RegI++) {
+    if (RegI->isGCFrame()) {
+      IsGCSlot = true;
+      break;
+    }
+  }
+
   // Iterate over instructions using Reg.
   for (MachineRegisterInfo::reg_bundle_iterator
        RegI = MRI.reg_bundle_begin(Reg), E = MRI.reg_bundle_end();
@@ -1039,7 +1072,7 @@ void InlineSpiller::spillAroundUses(Register Reg) {
 
     // Check for a sibling copy.
     Register SibReg = isFullCopyOf(*MI, Reg);
-    if (SibReg && isSibling(SibReg)) {
+    if (SibReg && isSibling(SibReg) && !IsGCSlot) {
       // This may actually be a copy between snippets.
       if (isRegToSpill(SibReg)) {
         LLVM_DEBUG(dbgs() << "Found new snippet copy: " << *MI);
@@ -1065,7 +1098,6 @@ void InlineSpiller::spillAroundUses(Register Reg) {
       // GC_FRAMES are always folded.
       MachineFrameInfo &MFI = MF.getFrameInfo();
       for (auto &Op : Ops) {
-
         Op.first->RemoveOperand(Op.second);
         Op.first->addMemOperand(MF, MF.getMachineMemOperand(
             MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
@@ -1511,6 +1543,9 @@ void HoistSpillHelper::hoistAllSpills() {
   // Each entry in MergeableSpills contains a spill set with equal values.
   for (auto &Ent : MergeableSpills) {
     int Slot = Ent.first.first;
+    if (IsGCSlot(Slot))
+      continue;
+
     LiveInterval &OrigLI = *StackSlotToOrigLI[Slot];
     VNInfo *OrigVNI = Ent.first.second;
     SmallPtrSet<MachineInstr *, 16> &EqValSpills = Ent.second;
