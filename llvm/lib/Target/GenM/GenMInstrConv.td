@@ -13,37 +13,51 @@
 ///
 //===----------------------------------------------------------------------===//
 
-def TRUNC_I64_I32 : I
-  < (outs I32:$dst)
-  , (ins I64:$src)
-  , [(set I32:$dst, (trunc I64:$src))]
-  , "trunc.i32\t$dst, $src"
-  , 0xE0
-  >;
+class Conv
+  < GenMRegClass oc
+  , GenMRegClass ic
+  , SDNode node
+  , string name
+  , string type
+  , bits<32> op
+  >
+  : I
+    < (outs oc:$dst)
+    , (ins ic:$src)
+    , [(set oc:$dst, (node ic:$src))]
+    , !strconcat(name, !strconcat(".", !strconcat(type, "\t$dst, $src")))
+    , op
+    >
+{
+}
 
-def XEXT_I32_I64 : I
-  < (outs I64:$dst)
-  , (ins I32:$src)
-  , [(set I64:$dst, (anyext I32:$src))]
-  , "zext.i64\t$dst, $src"
-  , 0xE1
-  >;
+def TRUNC_I16_I8  : Conv<I8,  I16, trunc,  "trunc", "i8",  0x00>;
+def TRUNC_I32_I8  : Conv<I8,  I32, trunc,  "trunc", "i8",  0x00>;
+def TRUNC_I64_I8  : Conv<I8,  I64, trunc,  "trunc", "i8",  0x00>;
+def TRUNC_I32_I16 : Conv<I16, I32, trunc,  "trunc", "i16", 0x00>;
+def TRUNC_I64_I16 : Conv<I16, I64, trunc,  "trunc", "i16", 0x00>;
+def TRUNC_I64_I32 : Conv<I32, I64, trunc,  "trunc", "i32", 0x00>;
 
-def SEXT_I32_I64 : I
-  < (outs I64:$dst)
-  , (ins I32:$src)
-  , [(set I64:$dst, (sext I32:$src))]
-  , "sext.i64\t$dst, $src"
-  , 0xE2
-  >;
+def XEXT_I8_I16   : Conv<I16, I8,  anyext, "zext",  "i16", 0x00>;
+def XEXT_I8_I32   : Conv<I32, I8,  anyext, "zext",  "i32", 0x00>;
+def XEXT_I16_I32  : Conv<I32, I16, anyext, "zext",  "i32", 0x00>;
+def XEXT_I8_I64   : Conv<I64, I8,  anyext, "zext",  "i64", 0x00>;
+def XEXT_I16_I64  : Conv<I64, I16, anyext, "zext",  "i64", 0x00>;
+def XEXT_I32_I64  : Conv<I64, I32, anyext, "zext",  "i64", 0x00>;
 
-def ZEXT_I32_I64 : I
-  < (outs I64:$dst)
-  , (ins I32:$src)
-  , [(set I64:$dst, (zext I32:$src))]
-  , "zext.i64\t$dst, $src"
-  , 0xE3
-  >;
+def SEXT_I8_I16   : Conv<I16, I8,  sext,   "sext",  "i16", 0x00>;
+def SEXT_I8_I32   : Conv<I32, I8,  sext,   "sext",  "i32", 0x00>;
+def SEXT_I16_I32  : Conv<I32, I16, sext,   "sext",  "i32", 0x00>;
+def SEXT_I8_I64   : Conv<I64, I8,  sext,   "sext",  "i64", 0x00>;
+def SEXT_I16_I64  : Conv<I64, I16, sext,   "sext",  "i64", 0x00>;
+def SEXT_I32_I64  : Conv<I64, I32, sext,   "sext",  "i64", 0x00>;
+
+def ZEXT_I8_I16   : Conv<I16, I8,  zext,   "zext",  "i16", 0x00>;
+def ZEXT_I8_I32   : Conv<I32, I8,  zext,   "zext",  "i32", 0x00>;
+def ZEXT_I16_I32  : Conv<I32, I16, zext,   "zext",  "i32", 0x00>;
+def ZEXT_I8_I64   : Conv<I64, I8,  zext,   "zext",  "i64", 0x00>;
+def ZEXT_I16_I64  : Conv<I64, I16, zext,   "zext",  "i64", 0x00>;
+def ZEXT_I32_I64  : Conv<I64, I32, zext,   "zext",  "i64", 0x00>;
 
 class FConv
   < GenMRegClass oc

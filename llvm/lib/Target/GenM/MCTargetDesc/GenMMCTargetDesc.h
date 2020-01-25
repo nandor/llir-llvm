@@ -50,6 +50,10 @@ namespace GenM {
   enum OperandType {
     // Basic block address.
     OPERAND_BASIC_BLOCK = MCOI::OPERAND_FIRST_TARGET,
+    // 8-bit integer immediate.
+    OPERAND_I8IMM,
+    // 16-bit integer immediate.
+    OPERAND_I16IMM,
     // 32-bit integer immediate.
     OPERAND_I32IMM,
     // 64-bit integer immediate.

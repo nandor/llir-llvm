@@ -42,6 +42,8 @@ void GenMMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
   for (const auto &VT : params) {
     OS << ", ";
     switch (VT.SimpleTy) {
+      case MVT::i8:  OS << "i8";  break;
+      case MVT::i16: OS << "i16"; break;
       case MVT::i32: OS << "i32"; break;
       case MVT::i64: OS << "i64"; break;
       case MVT::f32: OS << "f32"; break;

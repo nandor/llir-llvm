@@ -80,6 +80,7 @@ class GenMOperand<ValueType ty, string type> : Operand<ty>
 
 def bb_op      : GenMOperand<OtherVT, "OPERAND_BASIC_BLOCK">;
 def i8imm_op   : GenMOperand<i8,  "OPERAND_I8IMM">;
+def i16imm_op  : GenMOperand<i16, "OPERAND_I16IMM">;
 def i32imm_op  : GenMOperand<i32, "OPERAND_I32IMM">;
 def i64imm_op  : GenMOperand<i64, "OPERAND_I64IMM">;
 def i32off_op  : GenMOperand<i32, "OPERAND_I32OFF">;
@@ -111,6 +112,22 @@ def VASTART : I
 
 let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 {
+  def MOV_I8 : I
+    < (outs I8:$dst)
+    , (ins I8:$src)
+    , []
+    , "mov.i8\t$dst, $src"
+    , 0x09
+    >;
+
+  def MOV_I16 : I
+    < (outs I16:$dst)
+    , (ins I16:$src)
+    , []
+    , "mov.i16\t$dst, $src"
+    , 0x09
+    >;
+
   def MOV_I32 : I
     < (outs I32:$dst)
     , (ins I32:$src)

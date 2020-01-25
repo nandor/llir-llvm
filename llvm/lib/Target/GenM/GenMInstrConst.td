@@ -45,6 +45,8 @@ class GenMFConst
   let isReMaterializable = 1;
 }
 
+def CONST_I8  : GenMIConst<I8,  "i8",  i8imm_op,  0x05>;
+def CONST_I16 : GenMIConst<I16, "i16", i16imm_op, 0x05>;
 def CONST_I32 : GenMIConst<I32, "i32", i32imm_op, 0x05>;
 def CONST_I64 : GenMIConst<I64, "i64", i64imm_op, 0x06>;
 def CONST_F32 : GenMFConst<F32, "f32", f32imm_op, 0x07>;

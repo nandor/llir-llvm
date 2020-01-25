@@ -99,26 +99,26 @@ multiclass CmpFloat
   >
 {
   def _F32 : I
-    < (outs I32:$dst)
+    < (outs I8:$dst)
     , (ins F32:$lhs, F32:$rhs)
-    , [(set I32:$dst, (setcc F32:$lhs, F32:$rhs, cond))]
-    , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
+    , [(set I8:$dst, (setcc F32:$lhs, F32:$rhs, cond))]
+    , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
     , Op32
     >;
 
   def _F64 : I
-    < (outs I32:$dst)
+    < (outs I8:$dst)
     , (ins F64:$lhs, F64:$rhs)
-    , [(set I32:$dst, (setcc F64:$lhs, F64:$rhs, cond))]
-    , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
+    , [(set I8:$dst, (setcc F64:$lhs, F64:$rhs, cond))]
+    , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
     , Op64
     >;
 
   def _F80 : I
-    < (outs I32:$dst)
+    < (outs I8:$dst)
     , (ins F80:$lhs, F80:$rhs)
-    , [(set I32:$dst, (setcc F80:$lhs, F80:$rhs, cond))]
-    , !strconcat("cmp.", !strconcat(name, ".i32\t$dst, $lhs, $rhs"))
+    , [(set I8:$dst, (setcc F80:$lhs, F80:$rhs, cond))]
+    , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
     , Op80
     >;
 }
@@ -145,24 +145,24 @@ multiclass TernaryFloat
 {
   def _F32 : I
     < (outs F32:$dst)
-    , (ins I32:$op, F32:$lhs, F32:$rhs)
-    , [(set F32:$dst, (node I32:$op, F32:$lhs, F32:$rhs))]
+    , (ins I8:$op, F32:$lhs, F32:$rhs)
+    , [(set F32:$dst, (node I8:$op, F32:$lhs, F32:$rhs))]
     , !strconcat(name, ".f32\t$dst, $op, $lhs, $rhs")
     , Op32
     >;
 
   def _F64 : I
     < (outs F64:$dst)
-    , (ins I32:$op, F64:$lhs, F64:$rhs)
-    , [(set F64:$dst, (node I32:$op, F64:$lhs, F64:$rhs))]
+    , (ins I8:$op, F64:$lhs, F64:$rhs)
+    , [(set F64:$dst, (node I8:$op, F64:$lhs, F64:$rhs))]
     , !strconcat(name, ".f64\t$dst, $op, $lhs, $rhs")
     , Op64
     >;
 
   def _F80 : I
     < (outs F80:$dst)
-    , (ins I32:$op, F80:$lhs, F80:$rhs)
-    , [(set F80:$dst, (node I32:$op, F80:$lhs, F80:$rhs))]
+    , (ins I8:$op, F80:$lhs, F80:$rhs)
+    , [(set F80:$dst, (node I8:$op, F80:$lhs, F80:$rhs))]
     , !strconcat(name, ".f80\t$dst, $op, $lhs, $rhs")
     , Op80
     >;
@@ -215,28 +215,28 @@ defm GE : CmpFloat<SETGE, "ge", 0x60, 0x00, 0x00>;
 defm SELECT : TernaryFloat<select, "select", 0xB0, 0xB1, 0xB2>;
 
 def : Pat
-  < (select (i32 (setne I32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_F32 I32:$cond, F32:$lhs, F32:$rhs)
+  < (select (i8 (setne I8:$cond, 0)), F32:$lhs, F32:$rhs)
+  , (SELECT_F32 I8:$cond, F32:$lhs, F32:$rhs)
   >;
 def : Pat
-  < (select (i32 (setne I32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_F64 I32:$cond, F64:$lhs, F64:$rhs)
+  < (select (i8 (setne I8:$cond, 0)), F64:$lhs, F64:$rhs)
+  , (SELECT_F64 I8:$cond, F64:$lhs, F64:$rhs)
   >;
 def : Pat
-  < (select (i32 (setne I32:$cond, 0)), F80:$lhs, F80:$rhs)
-  , (SELECT_F80 I32:$cond, F80:$lhs, F80:$rhs)
+  < (select (i8 (setne I8:$cond, 0)), F80:$lhs, F80:$rhs)
+  , (SELECT_F80 I8:$cond, F80:$lhs, F80:$rhs)
   >;
 
 def : Pat
-  < (select (i32 (seteq I32:$cond, 0)), F32:$lhs, F32:$rhs)
-  , (SELECT_F32 I32:$cond, F32:$rhs, F32:$lhs)
+  < (select (i8 (seteq I8:$cond, 0)), F32:$lhs, F32:$rhs)
+  , (SELECT_F32 I8:$cond, F32:$rhs, F32:$lhs)
   >;
 def : Pat
-  < (select (i32 (seteq I32:$cond, 0)), F64:$lhs, F64:$rhs)
-  , (SELECT_F64 I32:$cond, F64:$rhs, F64:$lhs)
+  < (select (i8 (seteq I8:$cond, 0)), F64:$lhs, F64:$rhs)
+  , (SELECT_F64 I8:$cond, F64:$rhs, F64:$lhs)
   >;
 def : Pat
-  < (select (i32 (seteq I32:$cond, 0)), F80:$lhs, F80:$rhs)
-  , (SELECT_F80 I32:$cond, F80:$rhs, F80:$lhs)
+  < (select (i8 (seteq I8:$cond, 0)), F80:$lhs, F80:$rhs)
+  , (SELECT_F80 I8:$cond, F80:$rhs, F80:$lhs)
   >;
 
