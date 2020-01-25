@@ -60,6 +60,8 @@ GenMTargetLowering::GenMTargetLowering(
   setSchedulingPreference(Sched::RegPressure);
   setMaxAtomicSizeInBitsSupported(64);
 
+  addRegisterClass(MVT::i8, &GenM::I8RegClass);
+  addRegisterClass(MVT::i16, &GenM::I16RegClass);
   addRegisterClass(MVT::i32, &GenM::I32RegClass);
   addRegisterClass(MVT::i64, &GenM::I64RegClass);
   addRegisterClass(MVT::f32, &GenM::F32RegClass);
@@ -92,7 +94,7 @@ GenMTargetLowering::GenMTargetLowering(
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
-  for (auto T : { MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80 }) {
+  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80 }) {
     for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
       setOperationAction(Op, T, Expand);
     }
@@ -117,7 +119,7 @@ GenMTargetLowering::GenMTargetLowering(
   }
 
   // Disable some integer operations.
-  for (auto T : {MVT::i32, MVT::i64}) {
+  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
     // Custom lowering for some actions.
     setOperationAction(ISD::SADDO, T, Custom);
     setOperationAction(ISD::UADDO, T, Custom);
@@ -345,12 +347,15 @@ SDValue GenMTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
     SDLoc DL(Op);
 
     EVT VT = Src.getValueType();
-    SDValue Copy(DAG.getMachineNode(
-        VT == MVT::i32 ? GenM::MOV_I32 : GenM::MOV_I64,
-        DL,
-        VT,
-        Src
-    ), 0);
+
+    unsigned MovOp;
+    if (VT == MVT::i8) MovOp = GenM::MOV_I8;
+    else if (VT == MVT::i16) MovOp = GenM::MOV_I16;
+    else if (VT == MVT::i32) MovOp = GenM::MOV_I32;
+    else if (VT == MVT::i64) MovOp = GenM::MOV_I64;
+    else llvm_unreachable("invalid copy type");
+
+    SDValue Copy(DAG.getMachineNode(MovOp, DL, VT, Src), 0);
 
     unsigned Reg = cast<RegisterSDNode>(Op.getOperand(1))->getReg();
     if (Op.getNode()->getNumValues() == 1) {
@@ -465,7 +470,7 @@ MVT GenMTargetLowering::getScalarShiftAmountTy(
     const DataLayout &DL,
     EVT VT) const
 {
-  return VT.getSizeInBits() <= 32 ? MVT::i32 : MVT::i64;
+  return MVT::i8;
 }
 
 EVT GenMTargetLowering::getSetCCResultType(
@@ -474,10 +479,9 @@ EVT GenMTargetLowering::getSetCCResultType(
     EVT VT) const
 {
   if (!VT.isVector()) {
-    return MVT::i32;
-  } else {
-    llvm_unreachable("getSetCCResultType");
+    return MVT::i8;
   }
+  llvm_unreachable("getSetCCResultType");
 }
 
 static bool isCallingConvSupported(CallingConv::ID ID)

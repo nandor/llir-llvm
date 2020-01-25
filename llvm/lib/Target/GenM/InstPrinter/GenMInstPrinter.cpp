@@ -102,6 +102,10 @@ void GenMInstPrinter::printInst(
     const MCSubtargetInfo &STI)
 {
   switch (MI->getOpcode()) {
+    case GenM::CALL_I8:       printCall("call.i8",   OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_I8_VA:    printCall("call.i8",   OS, MI, STI, 0, 1, 0); break;
+    case GenM::CALL_I16:      printCall("call.i16",  OS, MI, STI, 0, 0, 0); break;
+    case GenM::CALL_I16_VA:   printCall("call.i16",  OS, MI, STI, 0, 1, 0); break;
     case GenM::CALL_I32:      printCall("call.i32",  OS, MI, STI, 0, 0, 0); break;
     case GenM::CALL_I32_VA:   printCall("call.i32",  OS, MI, STI, 0, 1, 0); break;
     case GenM::CALL_F32:      printCall("call.f32",  OS, MI, STI, 0, 0, 0); break;
@@ -115,6 +119,10 @@ void GenMInstPrinter::printInst(
     case GenM::CALL_VOID:     printCall("call",      OS, MI, STI, 1, 0, 0); break;
     case GenM::CALL_VOID_VA:  printCall("call",      OS, MI, STI, 1, 1, 0); break;
 
+    case GenM::TCALL_I8:      printCall("tcall.i8",  OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_I8_VA:   printCall("tcall.i8",  OS, MI, STI, 0, 1, 1); break;
+    case GenM::TCALL_I16:     printCall("tcall.i16", OS, MI, STI, 0, 0, 1); break;
+    case GenM::TCALL_I16_VA:  printCall("tcall.i16", OS, MI, STI, 0, 1, 1); break;
     case GenM::TCALL_I32:     printCall("tcall.i32", OS, MI, STI, 0, 0, 1); break;
     case GenM::TCALL_I32_VA:  printCall("tcall.i32", OS, MI, STI, 0, 1, 1); break;
     case GenM::TCALL_F32:     printCall("tcall.f32", OS, MI, STI, 0, 0, 1); break;

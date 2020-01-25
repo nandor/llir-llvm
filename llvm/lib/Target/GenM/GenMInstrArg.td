@@ -24,6 +24,8 @@ class GenMArg
   let Uses = [ARGUMENTS];
 }
 
+def ARG_I8  : GenMArg<I8,  "i8",  0x1>;
+def ARG_I16 : GenMArg<I16, "i16", 0x1>;
 def ARG_I32 : GenMArg<I32, "i32", 0x1>;
 def ARG_I64 : GenMArg<I64, "i64", 0x2>;
 def ARG_F32 : GenMArg<F32, "f32", 0x3>;
