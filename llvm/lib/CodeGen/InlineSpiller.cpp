@@ -476,7 +476,7 @@ void InlineSpiller::eliminateRedundantSpills(LiveInterval &SLI, VNInfo *VNI) {
          UI = MRI.use_instr_nodbg_begin(Reg), E = MRI.use_instr_nodbg_end();
          UI != E; ) {
       MachineInstr &MI = *UI++;
-      if (!MI.isCopy() && !MI.mayStore())
+      if (!MI.isCopy() && !MI.mayStore() && !MI.isGCFrame())
         continue;
       SlotIndex Idx = LIS.getInstructionIndex(MI);
       if (LI->getVNInfoAt(Idx) != VNI)
@@ -491,6 +491,18 @@ void InlineSpiller::eliminateRedundantSpills(LiveInterval &SLI, VNInfo *VNI) {
            assert(DstVNI->def == Idx.getRegSlot() && "Wrong copy def slot");
            WorkList.push_back(std::make_pair(&DstLI, DstVNI));
         }
+        continue;
+      }
+
+      // Add the slot to any GC frames.
+      if (MI.isGCFrame()) {
+        MachineFrameInfo &MFI = MF.getFrameInfo();
+        MI.addMemOperand(MF, MF.getMachineMemOperand(
+            MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
+            MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
+            MFI.getObjectSize(StackSlot),
+            MFI.getObjectAlignment(StackSlot)
+        ));
         continue;
       }
 
@@ -1020,14 +1032,6 @@ void InlineSpiller::spillAroundUses(Register Reg) {
   LLVM_DEBUG(dbgs() << "spillAroundUses " << printReg(Reg) << '\n');
   LiveInterval &OldLI = LIS.getInterval(Reg);
 
-  bool IsGCSlot = false;
-  for (auto RegI = MRI.reg_bundle_begin(Reg), E = MRI.reg_bundle_end(); RegI != E; RegI++) {
-    if (RegI->isGCFrame()) {
-      IsGCSlot = true;
-      break;
-    }
-  }
-
   // Iterate over instructions using Reg.
   for (MachineRegisterInfo::reg_bundle_iterator
        RegI = MRI.reg_bundle_begin(Reg), E = MRI.reg_bundle_end();
@@ -1072,7 +1076,7 @@ void InlineSpiller::spillAroundUses(Register Reg) {
 
     // Check for a sibling copy.
     Register SibReg = isFullCopyOf(*MI, Reg);
-    if (SibReg && isSibling(SibReg) && !IsGCSlot) {
+    if (SibReg && isSibling(SibReg)) {
       // This may actually be a copy between snippets.
       if (isRegToSpill(SibReg)) {
         LLVM_DEBUG(dbgs() << "Found new snippet copy: " << *MI);

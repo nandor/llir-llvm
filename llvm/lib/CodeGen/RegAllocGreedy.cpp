@@ -139,22 +139,6 @@ static cl::opt<bool> ConsiderLocalIntervalCost(
 static RegisterRegAlloc greedyRegAlloc("greedy", "greedy register allocator",
                                        createGreedyRegisterAllocator);
 
-#include <set>
-#include <fstream>
-std::set<std::string> toUse;
-static bool shouldUse(const std::string &name) {
-  static bool loaded;
-  if (!loaded) {
-    loaded = true;
-    std::ifstream is("/home/nand/Downloads/funcs.log");
-    std::string line;
-    while (std::getline(is, line)) {
-      toUse.insert(line);
-    }
-  }
-  return toUse.count(name);
-}
-
 namespace {
 
 class RAGreedy : public MachineFunctionPass,
@@ -2493,32 +2477,6 @@ unsigned RAGreedy::trySplit(LiveInterval &VirtReg, AllocationOrder &Order,
     return tryInstructionSplit(VirtReg, Order, NewVRegs);
   }
 
-  // Do not split if the virt reg is used in a GC frame.
-  bool isGCRoot = false;
-  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
-    if (RI->isGCFrame()) {
-      isGCRoot = true;
-    }
-  }
-
-  if (isGCRoot) {//} && shouldUse(MF->getName())) {
-    NamedRegionTimer T(
-        "GC spill",
-        "GC Spiller",
-        TimerGroupName,
-        TimerGroupDescription,
-        TimePassesIsEnabled
-    );
-    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
-    spiller().spill(LRE);
-    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
-
-    if (VerifyEnabled) {
-      MF->verify(this, "After spilling");
-    }
-    return 0;
-  }
-
   NamedRegionTimer T("global_split", "Global Splitting", TimerGroupName,
                      TimerGroupDescription, TimePassesIsEnabled);
 
@@ -3126,31 +3084,6 @@ MCRegister RAGreedy::selectOrSplitImpl(LiveInterval &VirtReg,
       LastEvicted.clearEvicteeInfo(VirtReg.reg());
       return PhysReg;
     }
-
-  // Do not split if the virt reg is used in a GC frame.
-  bool isGCRoot = false;
-  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
-    if (RI->isGCFrame()) {
-      isGCRoot = true;
-    }
-  }
-  if (isGCRoot) {
-    NamedRegionTimer T(
-        "GC spill",
-        "GC Spiller",
-        TimerGroupName,
-        TimerGroupDescription,
-        TimePassesIsEnabled
-    );
-    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
-    spiller().spill(LRE);
-    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
-
-    if (VerifyEnabled) {
-      MF->verify(this, "After spilling");
-    }
-    return 0;
-  }
 
   assert((NewVRegs.empty() || Depth) && "Cannot append to existing NewVRegs");
 
