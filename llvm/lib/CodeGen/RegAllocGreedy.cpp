@@ -139,6 +139,22 @@ static cl::opt<bool> ConsiderLocalIntervalCost(
 static RegisterRegAlloc greedyRegAlloc("greedy", "greedy register allocator",
                                        createGreedyRegisterAllocator);
 
+#include <set>
+#include <fstream>
+std::set<std::string> toUse;
+static bool shouldUse(const std::string &name) {
+  static bool loaded;
+  if (!loaded) {
+    loaded = true;
+    std::ifstream is("/home/nand/Downloads/funcs.log");
+    std::string line;
+    while (std::getline(is, line)) {
+      toUse.insert(line);
+    }
+  }
+  return toUse.count(name);
+}
+
 namespace {
 
 class RAGreedy : public MachineFunctionPass,
@@ -2405,6 +2421,10 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
       LLVM_DEBUG(dbgs() << " extend\n");
       MaxGap = std::max(MaxGap, GapWeight[SplitAfter]);
       SplitAfter = Advance(SplitAfter);
+      if (SplitAfter >= Uses.size()) {
+        LLVM_DEBUG(dbgs() << " end\n");
+        break;
+      }
     }
   }
 
@@ -2471,6 +2491,32 @@ unsigned RAGreedy::trySplit(LiveInterval &VirtReg, AllocationOrder &Order,
     if (PhysReg || !NewVRegs.empty())
       return PhysReg;
     return tryInstructionSplit(VirtReg, Order, NewVRegs);
+  }
+
+  // Do not split if the virt reg is used in a GC frame.
+  bool isGCRoot = false;
+  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
+    if (RI->isGCFrame()) {
+      isGCRoot = true;
+    }
+  }
+
+  if (isGCRoot) {//} && shouldUse(MF->getName())) {
+    NamedRegionTimer T(
+        "GC spill",
+        "GC Spiller",
+        TimerGroupName,
+        TimerGroupDescription,
+        TimePassesIsEnabled
+    );
+    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
+    spiller().spill(LRE);
+    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
+
+    if (VerifyEnabled) {
+      MF->verify(this, "After spilling");
+    }
+    return 0;
   }
 
   NamedRegionTimer T("global_split", "Global Splitting", TimerGroupName,
@@ -3081,6 +3127,31 @@ MCRegister RAGreedy::selectOrSplitImpl(LiveInterval &VirtReg,
       return PhysReg;
     }
 
+  // Do not split if the virt reg is used in a GC frame.
+  bool isGCRoot = false;
+  for (auto RI = MRI->reg_instr_begin(VirtReg.reg), E = MRI->reg_instr_end(); RI != E; RI++) {
+    if (RI->isGCFrame()) {
+      isGCRoot = true;
+    }
+  }
+  if (isGCRoot) {
+    NamedRegionTimer T(
+        "GC spill",
+        "GC Spiller",
+        TimerGroupName,
+        TimerGroupDescription,
+        TimePassesIsEnabled
+    );
+    LiveRangeEdit LRE(&VirtReg, NewVRegs, *MF, *LIS, VRM, this, &DeadRemats);
+    spiller().spill(LRE);
+    setStage(NewVRegs.begin(), NewVRegs.end(), RS_Done);
+
+    if (VerifyEnabled) {
+      MF->verify(this, "After spilling");
+    }
+    return 0;
+  }
+
   assert((NewVRegs.empty() || Depth) && "Cannot append to existing NewVRegs");
 
   // The first time we see a live range, don't try to split or spill.
@@ -3216,7 +3287,13 @@ void RAGreedy::reportNumberOfSplillsReloads(MachineLoop *L, unsigned &Reloads,
 bool RAGreedy::runOnMachineFunction(MachineFunction &mf) {
   LLVM_DEBUG(dbgs() << "********** GREEDY REGISTER ALLOCATION **********\n"
                     << "********** Function: " << mf.getName() << '\n');
-
+  /*
+  unsigned Size = 0;
+  for (auto &mbb : mf) {
+    Size += mbb.size();
+  }
+  llvm::errs() << Size << " " << mf.getName() << "\n";
+  */
   MF = &mf;
   TRI = MF->getSubtarget().getRegisterInfo();
   TII = MF->getSubtarget().getInstrInfo();

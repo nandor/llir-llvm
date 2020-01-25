@@ -397,7 +397,12 @@ SDValue GenMTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DA
 SDValue GenMTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const {
   switch (cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue()) {
   case llvm::Intrinsic::x86_rdtsc: {
-    return DAG.getNode(GenMISD::RDTSC, SDLoc(Op), MVT::i64, Op.getOperand(0));
+    return DAG.getNode(
+        GenMISD::RDTSC,
+        SDLoc(Op),
+        DAG.getVTList(MVT::i64, MVT::Other),
+        Op.getOperand(0)
+    );
   }
   }
   llvm_unreachable("invalid intrinsic");

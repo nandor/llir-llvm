@@ -648,6 +648,17 @@ void MachineCopyPropagation::ForwardCopyPropagateBlock(MachineBasicBlock &MBB) {
       continue;
     }
 
+    if (MI->isGCFrame()) {
+      for (const MachineOperand &MO : MI->operands()) {
+        if (MO.isReg()) {
+          unsigned Reg = MO.getReg();
+          ReadRegister(Reg);
+          Tracker.clobberRegister(MO.getReg(), *TRI);
+        }
+      }
+      continue;
+    }
+
     // Clobber any earlyclobber regs first.
     for (const MachineOperand &MO : MI->operands())
       if (MO.isReg() && MO.isEarlyClobber()) {
