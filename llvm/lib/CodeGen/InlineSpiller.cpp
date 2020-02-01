@@ -333,6 +333,10 @@ bool InlineSpiller::isSnippet(const LiveInterval &SnipLI) {
     if (SnipLI.reg() == TII.isStoreToStackSlot(MI, FI) && FI == StackSlot)
       continue;
 
+    // Allow GC frames.
+    if (MI.isGCFrame())
+      continue;
+
     // Allow a single additional instruction.
     if (UseMI && &MI != UseMI)
       return false;
