@@ -3220,13 +3220,6 @@ void RAGreedy::reportNumberOfSplillsReloads(MachineLoop *L, unsigned &Reloads,
 bool RAGreedy::runOnMachineFunction(MachineFunction &mf) {
   LLVM_DEBUG(dbgs() << "********** GREEDY REGISTER ALLOCATION **********\n"
                     << "********** Function: " << mf.getName() << '\n');
-  /*
-  unsigned Size = 0;
-  for (auto &mbb : mf) {
-    Size += mbb.size();
-  }
-  llvm::errs() << Size << " " << mf.getName() << "\n";
-  */
   MF = &mf;
   TRI = MF->getSubtarget().getRegisterInfo();
   TII = MF->getSubtarget().getInstrInfo();
