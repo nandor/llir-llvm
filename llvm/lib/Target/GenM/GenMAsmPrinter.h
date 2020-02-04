@@ -33,6 +33,7 @@ public:
   void EmitGlobalVariable(const GlobalVariable *GV) override;
   void EmitFunctionBodyStart() override;
   void EmitInstruction(const MachineInstr *MI) override;
+  void EmitJumpTableInfo() override;
 
   bool PrintAsmOperand(
       const MachineInstr *MI,
