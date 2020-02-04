@@ -86,6 +86,10 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
   AsmPrinter::EmitFunctionBodyStart();
 }
 
+void GenMAsmPrinter::EmitJumpTableInfo() {
+  // Nothing to do; jump tables are incorporated into the instruction stream.
+}
+
 bool GenMAsmPrinter::PrintAsmOperand(
     const MachineInstr *MI,
     unsigned OpNo,
