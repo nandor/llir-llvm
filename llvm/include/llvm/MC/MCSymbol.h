@@ -49,7 +49,7 @@ protected:
     SymbolKindMachO,
     SymbolKindWasm,
     SymbolKindXCOFF,
-    SymbolKindGenM,
+    SymbolKindLLIR,
   };
 
   /// A symbol can contain an Offset, or Value, or be Common, but never more
@@ -282,7 +282,7 @@ public:
 
   bool isXCOFF() const { return Kind == SymbolKindXCOFF; }
 
-  bool isGenM() const { return Kind == SymbolKindGenM; }
+  bool isLLIR() const { return Kind == SymbolKindLLIR; }
 
   /// @}
   /// \name Variable Symbols

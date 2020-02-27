@@ -59,7 +59,7 @@ class raw_pwrite_stream;
 class TargetMachine;
 class TargetOptions;
 
-extern bool IsGenM;
+extern bool IsLLIR;
 
 MCStreamer *createNullStreamer(MCContext &Ctx);
 // Takes ownership of \p TAB and \p CE.
@@ -107,6 +107,11 @@ MCStreamer *createXCOFFStreamer(MCContext &Ctx,
                                 std::unique_ptr<MCObjectWriter> &&OW,
                                 std::unique_ptr<MCCodeEmitter> &&CE,
                                 bool RelaxAll);
+MCStreamer *createLLIRStreamer(MCContext &Ctx,
+                               std::unique_ptr<MCAsmBackend> &&TAB,
+                               std::unique_ptr<MCObjectWriter> &&OW,
+                               std::unique_ptr<MCCodeEmitter> &&CE,
+                               bool RelaxAll);
 
 MCRelocationInfo *createMCRelocationInfo(const Triple &TT, MCContext &Ctx);
 
@@ -185,7 +190,7 @@ public:
                       std::unique_ptr<MCAsmBackend> &&TAB,
                       std::unique_ptr<MCObjectWriter> &&OW,
                       std::unique_ptr<MCCodeEmitter> &&Emitter, bool RelaxAll);
-  using GenMStreamerCtorTy =
+  using LLIRStreamerCtorTy =
       MCStreamer *(*)(const Triple &T, MCContext &Ctx,
                       std::unique_ptr<MCAsmBackend> &&TAB,
                       std::unique_ptr<MCObjectWriter> &&OW,
@@ -277,7 +282,7 @@ private:
   MachOStreamerCtorTy MachOStreamerCtorFn = nullptr;
   ELFStreamerCtorTy ELFStreamerCtorFn = nullptr;
   WasmStreamerCtorTy WasmStreamerCtorFn = nullptr;
-  GenMStreamerCtorTy GenMStreamerCtorFn = nullptr;
+  LLIRStreamerCtorTy LLIRStreamerCtorFn = nullptr;
 
   /// Construction function for this target's null TargetStreamer, if
   /// registered (default = nullptr).
@@ -482,6 +487,15 @@ public:
                                      const MCSubtargetInfo &STI, bool RelaxAll,
                                      bool IncrementalLinkerCompatible,
                                      bool DWARFMustBeAtTheEnd) const {
+  MCStreamer *S;
+  if (IsLLIR) {
+    if (LLIRStreamerCtorFn)
+      S = LLIRStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
+                             std::move(Emitter), RelaxAll);
+    else
+      S = createLLIRStreamer(Ctx, std::move(TAB), std::move(OW),
+                             std::move(Emitter), RelaxAll);
+  } else {
     MCStreamer *S = nullptr;
     switch (T.getObjectFormat()) {
     case Triple::UnknownObjectFormat:
@@ -524,12 +538,12 @@ public:
       S = createXCOFFStreamer(Ctx, std::move(TAB), std::move(OW),
                               std::move(Emitter), RelaxAll);
       break;
-    case Triple::GenM:
-      if (GenMStreamerCtorFn)
-        S = GenMStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
+    case Triple::LLIR:
+      if (LLIRStreamerCtorFn)
+        S = LLIRStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
                                std::move(Emitter), RelaxAll);
       else
-        S = createGenMStreamer(Ctx, std::move(TAB), std::move(OW),
+        S = createLLIRStreamer(Ctx, std::move(TAB), std::move(OW),
                                std::move(Emitter), RelaxAll);
       break;
     }
@@ -879,8 +893,8 @@ struct TargetRegistry {
     T.WasmStreamerCtorFn = Fn;
   }
 
-  static void RegisterGenMStreamer(Target &T, Target::GenMStreamerCtorTy Fn) {
-    T.GenMStreamerCtorFn = Fn;
+  static void RegisterLLIRStreamer(Target &T, Target::LLIRStreamerCtorTy Fn) {
+    T.LLIRStreamerCtorFn = Fn;
   }
 
   static void RegisterNullTargetStreamer(Target &T,

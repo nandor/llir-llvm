@@ -15,14 +15,14 @@
 #include <vector>
 using namespace llvm;
 
-bool llvm::IsGenM = false;
+bool llvm::IsLLIR = false;
 
 static cl::opt<bool, true>
-EnableGenM(
-    "genm",
-    cl::desc("Generate GenM intermediate output"),
+EnableLLIR(
+    "llir",
+    cl::desc("Generate LLIR intermediate output"),
     cl::Hidden,
-    cl::location(IsGenM)
+    cl::location(IsLLIR)
 );
 
 // Clients are responsible for avoid race conditions in registration.
@@ -41,8 +41,8 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
   const Target *TheTarget = nullptr;
   if (!ArchName.empty()) {
     auto I = find_if(targets(), [&](const Target &T) {
-      if (EnableGenM) {
-        return T.ArchMatchFn(Triple::genm);
+      if (EnableLLIR) {
+        return T.ArchMatchFn(Triple::llir);
       } else {
         return T.getName() == ArchName;
       }
@@ -57,8 +57,8 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
 
     // Adjust the triple to match (if known), otherwise stick with the
     // given triple.
-    if (EnableGenM) {
-      TheTriple.setArch(Triple::genm);
+    if (EnableLLIR) {
+      TheTriple.setArch(Triple::llir);
     } else {
       Triple::ArchType Type = Triple::getArchTypeForLLVMName(ArchName);
       if (Type != Triple::UnknownArch) {
@@ -89,9 +89,9 @@ const Target *TargetRegistry::lookupTarget(const std::string &TT,
     return nullptr;
   }
   Triple::ArchType Arch = Triple(TT).getArch();
-  // If GenM is enabled, replace the architecture.
-  if (EnableGenM) {
-    Arch = Triple::genm;
+  // If LLIR is enabled, replace the architecture.
+  if (EnableLLIR) {
+    Arch = Triple::llir;
   }
 
   auto ArchMatch = [&](const Target &T) { return T.ArchMatchFn(Arch); };

@@ -75,7 +75,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case x86:            return "i386";
   case x86_64:         return "x86_64";
   case xcore:          return "xcore";
-  case genm:           return "genm";
+  case llir:           return "llir";
   }
 
   llvm_unreachable("Invalid ArchType!");
@@ -320,7 +320,7 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("renderscript32", renderscript32)
     .Case("renderscript64", renderscript64)
     .Case("ve", ve)
-    .Case("genm", genm)
+    .Case("llir", llir)
     .Default(UnknownArch);
 }
 
@@ -450,7 +450,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("ve", Triple::ve)
     .Case("wasm32", Triple::wasm32)
     .Case("wasm64", Triple::wasm64)
-    .Case("genm", Triple::genm)
+    .Case("llir", Triple::llir)
     .Default(Triple::UnknownArch);
 
   // Some architectures require special parsing logic just to compute the
@@ -560,7 +560,7 @@ static Triple::ObjectFormatType parseFormat(StringRef EnvironmentName) {
     .EndsWith("goff", Triple::GOFF)
     .EndsWith("macho", Triple::MachO)
     .EndsWith("wasm", Triple::Wasm)
-    .EndsWith("genm", Triple::GenM)
+    .EndsWith("llir", Triple::LLIR)
     .Default(Triple::UnknownObjectFormat);
 }
 
@@ -654,7 +654,7 @@ static StringRef getObjectFormatTypeName(Triple::ObjectFormatType Kind) {
   case Triple::MachO: return "macho";
   case Triple::Wasm:  return "wasm";
   case Triple::XCOFF: return "xcoff";
-  case Triple::GenM: return "genm";
+  case Triple::LLIR:  return "llir";
   }
   llvm_unreachable("unknown object format type");
 }
@@ -730,8 +730,8 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::wasm32:
   case Triple::wasm64:
     return Triple::Wasm;
-  case Triple::genm:
-    return Triple::GenM;
+  case Triple::llir:
+    return Triple::LLIR;
   }
   llvm_unreachable("unknown architecture");
 }
@@ -1304,7 +1304,7 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::ve:
   case llvm::Triple::wasm64:
   case llvm::Triple::x86_64:
-  case llvm::Triple::genm:
+  case llvm::Triple::llir:
     return 64;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1334,7 +1334,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::ppc64le:
   case Triple::systemz:
   case Triple::ve:
-  case Triple::genm:
+  case Triple::llir:
     T.setArch(UnknownArch);
     break;
 
@@ -1428,7 +1428,7 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::ve:
   case Triple::wasm64:
   case Triple::x86_64:
-  case Triple::genm:
+  case Triple::llir:
     // Already 64-bit.
     break;
 
@@ -1729,12 +1729,12 @@ StringRef Triple::getARMCPUForArch(StringRef MArch) const {
 }
 
 namespace llvm {
-extern bool IsGenM;
+extern bool IsLLIR;
 }
 
 Triple::ObjectFormatType Triple::getObjectFormat() const
 {
-  return IsGenM ? Triple::GenM : ObjectFormat;
+  return IsLLIR ? Triple::LLIR : ObjectFormat;
 }
 
 VersionTuple Triple::getCanonicalVersionForOS(OSType OSKind,

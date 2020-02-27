@@ -1,0 +1,21 @@
+diff a/lib/Target/LLIR/LLIRAsmPrinter.cpp b/lib/Target/LLIR/LLIRAsmPrinter.cpp (rejected hunks)
+@@ -84,16 +84,16 @@ void GenMAsmPrinter::EmitFunctionBodyStart()
+   Streamer.emitCallingConv(MF->getFunction().getCallingConv());
+ }
+
+-void GenMAsmPrinter::EmitFunctionBodyEnd()
++void LLIRAsmPrinter::EmitFunctionBodyEnd()
+ {
+   getTargetStreamer().emitEnd();
+ }
+
+-void GenMAsmPrinter::EmitJumpTableInfo() {
++void LLIRAsmPrinter::EmitJumpTableInfo() {
+   // Nothing to do; jump tables are incorporated into the instruction stream.
+ }
+
+-bool GenMAsmPrinter::PrintAsmOperand(
++bool LLIRAsmPrinter::PrintAsmOperand(
+     const MachineInstr *MI,
+     unsigned OpNo,
+     unsigned AsmVariant,

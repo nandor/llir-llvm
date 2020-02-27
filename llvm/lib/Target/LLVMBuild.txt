@@ -24,7 +24,7 @@ subdirectories =
  ARM
  AVR
  BPF
- GenM
+ LLIR
  Hexagon
  Lanai
  MSP430
