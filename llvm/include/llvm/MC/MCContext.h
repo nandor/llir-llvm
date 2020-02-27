@@ -98,7 +98,7 @@ namespace llvm {
     SpecificBumpPtrAllocator<MCSectionWasm> WasmAllocator;
     SpecificBumpPtrAllocator<MCSectionXCOFF> XCOFFAllocator;
     SpecificBumpPtrAllocator<MCInst> MCInstAllocator;
-    SpecificBumpPtrAllocator<MCSectionGenM> GenMAllocator;
+    SpecificBumpPtrAllocator<MCSectionLLIR> LLIRAllocator;
 
     /// Bindings of names to symbols.
     SymbolTable Symbols;
@@ -285,7 +285,7 @@ namespace llvm {
     std::map<COFFSectionKey, MCSectionCOFF *> COFFUniquingMap;
     std::map<WasmSectionKey, MCSectionWasm *> WasmUniquingMap;
     std::map<XCOFFSectionKey, MCSectionXCOFF *> XCOFFUniquingMap;
-    StringMap<MCSectionGenM *> GenMUniquingMap;
+    StringMap<MCSectionLLIR *> LLIRUniquingMap;
     StringMap<bool> RelSecNames;
 
     SpecificBumpPtrAllocator<MCSubtargetInfo> MCSubtargetAllocator;
@@ -570,11 +570,11 @@ namespace llvm {
                                     bool MultiSymbolsAllowed = false,
                                     const char *BeginSymName = nullptr);
 
-    MCSectionGenM *getGenMSection(StringRef Section, SectionKind K,
+    MCSectionLLIR *getLLIRSection(StringRef Section, SectionKind K,
                                   const char *BeginSymName);
 
-    MCSectionGenM *getGenMSection(StringRef Section, SectionKind K) {
-      return getGenMSection(Section, K, nullptr);
+    MCSectionLLIR *getLLIRSection(StringRef Section, SectionKind K) {
+      return getLLIRSection(Section, K, nullptr);
     }
 
     // Create and save a copy of STI and return a reference to the copy.

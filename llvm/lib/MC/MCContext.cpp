@@ -192,8 +192,8 @@ MCSymbol *MCContext::createSymbolImpl(const StringMapEntry<bool> *Name,
       return new (Name, *this) MCSymbolWasm(Name, IsTemporary);
     case MCObjectFileInfo::IsXCOFF:
       return createXCOFFSymbolImpl(Name, IsTemporary);
-    case MCObjectFileInfo::IsGenM:
-      return new (Name, *this) MCSymbolGenM(Name, IsTemporary);
+    case MCObjectFileInfo::IsLLIR:
+      return new (Name, *this) MCSymbolLLIR(Name, IsTemporary);
     }
   }
   return new (Name, *this) MCSymbol(MCSymbol::SymbolKindUnset, Name,
@@ -703,13 +703,13 @@ MCContext::getXCOFFSection(StringRef Section, XCOFF::StorageMappingClass SMC,
   return Result;
 }
 
-MCSectionGenM *MCContext::getGenMSection(
+MCSectionLLIR *MCContext::getLLIRSection(
     StringRef Section,
     SectionKind Kind,
     const char *BeginSymName)
 {
   // Do the lookup, if we have a hit, return it.
-  MCSectionGenM *&Entry = GenMUniquingMap[Section];
+  MCSectionLLIR *&Entry = LLIRUniquingMap[Section];
   if (Entry)
     return Entry;
 
@@ -719,7 +719,7 @@ MCSectionGenM *MCContext::getGenMSection(
   }
 
   // Otherwise, return a new section.
-  return Entry = new (GenMAllocator.Allocate()) MCSectionGenM(
+  return Entry = new (LLIRAllocator.Allocate()) MCSectionLLIR(
       Section,
       Kind,
       Begin

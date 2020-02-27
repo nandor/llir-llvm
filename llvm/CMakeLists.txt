@@ -299,7 +299,7 @@ set(LLVM_ALL_TARGETS
   ARM
   AVR
   BPF
-  GenM
+  LLIR
   Hexagon
   Lanai
   Mips
@@ -1159,8 +1159,8 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN "*.td"
     PATTERN "*LICENSE.TXT"
     )
-  add_llvm_tool_symlink(genm-gcc clang)
-  add_llvm_tool_symlink(genm-g++ clang)
+  add_llvm_tool_symlink(llir-gcc clang)
+  add_llvm_tool_symlink(llir-g++ clang)
 
   install(DIRECTORY ${LLVM_INCLUDE_DIR}/llvm ${LLVM_INCLUDE_DIR}/llvm-c
     DESTINATION include

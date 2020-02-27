@@ -99,7 +99,7 @@ public:
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
     ve,             // NEC SX-Aurora Vector Engine
-    genm,           // GenericMachine
+    llir,           // LLIR
     LastArchType = ve
   };
   enum SubArchType {
@@ -231,7 +231,7 @@ public:
     MachO,
     Wasm,
     XCOFF,
-    GenM,
+    LLIR,
   };
 
 private:
@@ -415,8 +415,8 @@ public:
   /// Note that this tests for 16-bit pointer width, and nothing else.
   bool isArch16Bit() const;
 
-  /// Test whether the architecture is GenM.
-  bool isArchGenM() const { return getArch() == genm; }
+  /// Test whether the architecture is LLIR.
+  bool isArchLLIR() const { return getArch() == llir; }
 
   /// isOSVersionLT - Helper function for doing comparisons against version
   /// numbers included in the target triple.
@@ -654,9 +654,9 @@ public:
     return getObjectFormat() == Triple::XCOFF;
   }
 
-  /// Tests whether the OS uses the GenM binary format.
-  bool isOSBinFormatGenM() const {
-    return getObjectFormat() == Triple::GenM;
+  /// Tests whether the OS uses the LLIR binary format.
+  bool isOSBinFormatLLIR() const {
+    return getObjectFormat() == Triple::LLIR;
   }
 
   /// Tests whether the target is the PS4 CPU

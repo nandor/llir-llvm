@@ -509,7 +509,7 @@ Error DataLayout::parseSpecifier(StringRef Desc) {
         ManglingMode = MM_XCOFF;
         break;
       case 'g':
-        ManglingMode = MM_GenM;
+        ManglingMode = MM_LLIR;
         break;
       }
       break;

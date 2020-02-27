@@ -747,7 +747,7 @@ public:
                    getRegister(Reg, N.getValueType()), N);
   }
 
-  // GenM frame for garbage collection metadata.
+  // LLIR frame for garbage collection metadata.
   SDValue getGCFrame(
       const SDLoc &dl,
       ISD::FrameType type,

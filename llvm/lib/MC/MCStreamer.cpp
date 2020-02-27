@@ -1230,8 +1230,8 @@ getMachoBuildVersionPlatformType(const Triple &Target) {
 
 void MCStreamer::emitVersionForTarget(const Triple &Target,
                                       const VersionTuple &SDKVersion) {
-  // Do not emit version for GenM.
-  if (IsGenM) {
+  // Do not emit version for LLIR.
+  if (IsLLIR) {
     return;
   }
   // Only emit version for MachO on darwin.

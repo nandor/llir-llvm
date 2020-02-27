@@ -904,7 +904,7 @@ enum NodeType {
   /// INLINEASM_BR - Branching version of inline asm. Used by asm-goto.
   INLINEASM_BR,
 
-  /// GC_FRAME - Represents a label used by GenM to emit effective GC frames.
+  /// GC_FRAME - Represents a label used by LLIR to emit effective GC frames.
   GC_FRAME,
 
   /// GC_ARG - Represents an argument captured by a GC frame.
@@ -1242,7 +1242,7 @@ static const int LAST_LOADEXT_TYPE = ZEXTLOAD + 1;
 NodeType getExtForLoadExtType(bool IsFP, LoadExtType);
 
 //===--------------------------------------------------------------------===//
-/// ISD::FrameType enum - kind of frame for GenM metadata.
+/// ISD::FrameType enum - kind of frame for LLIR metadata.
 enum FrameType {
   ROOT,
   CALL,

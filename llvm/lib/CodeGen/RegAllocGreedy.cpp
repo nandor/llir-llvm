@@ -3268,6 +3268,7 @@ bool RAGreedy::runOnMachineFunction(MachineFunction &mf) {
   GlobalCand.resize(32);  // This will grow as needed.
   SetOfBrokenHints.clear();
   LastEvicted.clear();
+
   allocatePhysRegs();
   tryHintsRecoloring();
 

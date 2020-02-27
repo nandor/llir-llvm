@@ -118,7 +118,7 @@ class SubtargetEmitter {
   void EmitSchedModelHelpers(const std::string &ClassName, raw_ostream &OS);
   void emitSchedModelHelpersImpl(raw_ostream &OS,
                                  bool OnlyExpandMCInstPredicates = false);
-  void emitGenMCSubtargetInfo(raw_ostream &OS);
+  void emitLLIRCSubtargetInfo(raw_ostream &OS);
   void EmitMCInstrAnalysisPredicateFunctions(raw_ostream &OS);
 
   void EmitSchedModel(raw_ostream &OS);
@@ -1731,7 +1731,7 @@ void SubtargetEmitter::ParseFeaturesFunction(raw_ostream &OS,
   OS << "}\n";
 }
 
-void SubtargetEmitter::emitGenMCSubtargetInfo(raw_ostream &OS) {
+void SubtargetEmitter::emitLLIRCSubtargetInfo(raw_ostream &OS) {
   OS << "namespace " << Target << "_MC {\n"
      << "unsigned resolveVariantSchedClassImpl(unsigned SchedClass,\n"
      << "    const MCInst *MI, const MCInstrInfo *MCII, unsigned CPUID) {\n";
@@ -1740,8 +1740,8 @@ void SubtargetEmitter::emitGenMCSubtargetInfo(raw_ostream &OS) {
   OS << "} // end namespace " << Target << "_MC\n\n";
 
   OS << "struct " << Target
-     << "GenMCSubtargetInfo : public MCSubtargetInfo {\n";
-  OS << "  " << Target << "GenMCSubtargetInfo(const Triple &TT,\n"
+     << "LLIRCSubtargetInfo : public MCSubtargetInfo {\n";
+  OS << "  " << Target << "LLIRCSubtargetInfo(const Triple &TT, \n"
      << "    StringRef CPU, StringRef TuneCPU, StringRef FS,\n"
      << "    ArrayRef<SubtargetFeatureKV> PF,\n"
      << "    ArrayRef<SubtargetSubTypeKV> PD,\n"
@@ -1822,13 +1822,13 @@ void SubtargetEmitter::run(raw_ostream &OS) {
 #endif
 
   // MCInstrInfo initialization routine.
-  emitGenMCSubtargetInfo(OS);
+  emitLLIRCSubtargetInfo(OS);
 
   OS << "\nstatic inline MCSubtargetInfo *create" << Target
      << "MCSubtargetInfoImpl("
      << "const Triple &TT, StringRef CPU, StringRef TuneCPU, StringRef FS) {\n";
   OS << "  return new " << Target
-     << "GenMCSubtargetInfo(TT, CPU, TuneCPU, FS, ";
+     << "LLIRSubtargetInfo(TT, CPU, TuneCPU, FS, ";
   if (NumFeatures)
     OS << Target << "FeatureKV, ";
   else

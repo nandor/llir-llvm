@@ -280,8 +280,8 @@ namespace llvm {
     /// Emit address-significance table.
     unsigned EmitAddrsig : 1;
 
-    /// Emit GenM output.
-    unsigned EmitGenM : 1;
+    /// Emit LLIR output.
+    unsigned EmitLLIR : 1;
 
     /// Emit basic blocks into separate sections.
     BasicBlockSection BBSections = BasicBlockSection::None;
