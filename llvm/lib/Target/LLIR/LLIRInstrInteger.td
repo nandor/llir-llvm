@@ -310,6 +310,7 @@ defm SRL  : ShiftInt<srl,  "srl",  "i", 0xA5>;
 defm SHL  : ShiftInt<shl,  "sll",  "i", 0xA6>;
 defm SRA  : ShiftInt<sra,  "sra",  "i", 0xA7>;
 defm ROTL : ShiftInt<rotl, "rotl", "i", 0xA8>;
+defm ROTR : ShiftInt<rotr, "rotr", "i", 0xA9>;
 
 defm EQ : CommCmpInt<SETEQ, "eq",  0x46>;
 defm NE : CommCmpInt<SETNE, "ne", 0x47>;

@@ -208,6 +208,22 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x0F
     >;
 
+  def UNDEF_I8 : I
+      < (outs I8:$res)
+      , (ins)
+      , [(set I8:$res, undef)]
+      , "undef.i8\t$res"
+      , 0x11
+      >;
+
+  def UNDEF_I16 : I
+      < (outs I16:$res)
+      , (ins)
+      , [(set I16:$res, undef)]
+      , "undef.i16\t$res"
+      , 0x11
+      >;
+
   def UNDEF_I32 : I
       < (outs I32:$res)
       , (ins)
