@@ -77,7 +77,14 @@ bool LLIRDAGToDAGISel::SelectInlineAsmMemoryOperand(
     unsigned ConstraintID,
     std::vector<SDValue> &OutOps)
 {
-  llvm_unreachable("not implemented");
+  switch (ConstraintID) {
+  default:
+    return true;
+  case InlineAsm::Constraint_i:
+  case InlineAsm::Constraint_m: // memory
+    OutOps.push_back(Op);
+    return false;
+  }
 }
 
 FunctionPass *llvm::createLLIRISelDag(LLIRTargetMachine &TM) {
