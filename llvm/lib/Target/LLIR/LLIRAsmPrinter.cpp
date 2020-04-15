@@ -107,7 +107,19 @@ bool LLIRAsmPrinter::PrintAsmMemoryOperand(
     const char *ExtraCode,
     raw_ostream &O)
 {
-  return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, AsmVariant, ExtraCode, O);
+  if (AsmVariant != 0)
+    report_fatal_error("There are no defined alternate asm variants");
+
+  if (ExtraCode)
+    llvm_unreachable("not implemented");
+
+  const MachineOperand &MO = MI->getOperand(OpNo);
+  assert(MO.getType() == MachineOperand::MO_Register && "register expected");
+  unsigned RegNo = MO.getReg();
+  assert(RegNo >= LLIR::NUM_TARGET_REGS);
+
+  O << "$" << (RegNo - LLIR::NUM_TARGET_REGS);
+  return false;
 }
 
 LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer()

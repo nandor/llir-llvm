@@ -455,10 +455,7 @@ LLIRTargetLowering::getRegForInlineAsmConstraint(
     StringRef Constraint,
     MVT VT) const
 {
-  if (!Constraint.empty()) {
-    llvm_unreachable("not implemented");
-  }
-  return TargetLowering::getRegForInlineAsmConstraint(TRI, Constraint, VT);
+  llvm_unreachable("not implemented");
 }
 
 bool LLIRTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
