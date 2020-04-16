@@ -131,6 +131,12 @@ def F32_CONVERT_S_I64 : FConv<F32, I64, "sext.f32", sint_to_fp, 0xE8>;
 def F64_CONVERT_S_I64 : FConv<F64, I64, "sext.f64", sint_to_fp, 0xEA>;
 def F80_CONVERT_S_I64 : FConv<F80, I64, "sext.f80", sint_to_fp, 0xEA>;
 
+def F32_CONVERT_U_I8  : FConv<F32,  I8, "zext.f32", uint_to_fp, 0xE5>;
+def F64_CONVERT_U_I8  : FConv<F64,  I8, "zext.f64", uint_to_fp, 0xE7>;
+def F80_CONVERT_U_I8  : FConv<F80,  I8, "zext.f80", uint_to_fp, 0xE7>;
+def F32_CONVERT_U_I16 : FConv<F32, I16, "zext.f32", uint_to_fp, 0xE5>;
+def F64_CONVERT_U_I16 : FConv<F64, I16, "zext.f64", uint_to_fp, 0xE7>;
+def F80_CONVERT_U_I16 : FConv<F80, I16, "zext.f80", uint_to_fp, 0xE7>;
 def F32_CONVERT_U_I32 : FConv<F32, I32, "zext.f32", uint_to_fp, 0xE5>;
 def F64_CONVERT_U_I32 : FConv<F64, I32, "zext.f64", uint_to_fp, 0xE7>;
 def F80_CONVERT_U_I32 : FConv<F80, I32, "zext.f80", uint_to_fp, 0xE7>;
@@ -171,6 +177,14 @@ def F32_DEMOTE_F64 : I
   < (outs F32:$dst)
   , (ins F64:$src)
   , [(set F32:$dst, (fpround F64:$src))]
+  , "trunc.f32\t$dst, $src"
+  , 0xb6
+  >;
+
+def F32_DEMOTE_F80 : I
+  < (outs F32:$dst)
+  , (ins F80:$src)
+  , [(set F32:$dst, (fpround F80:$src))]
   , "trunc.f32\t$dst, $src"
   , 0xb6
   >;
