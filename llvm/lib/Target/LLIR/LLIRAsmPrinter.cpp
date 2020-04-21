@@ -17,6 +17,7 @@
 #include "LLIRMCInstLower.h"
 #include "LLIRInstrInfo.h"
 #include "LLIRTargetMachine.h"
+#include "LLIRMachineFunctionInfo.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
 #include "MCTargetDesc/LLIRMCTargetStreamer.h"
 #include "llvm/CodeGen/AsmPrinter.h"
@@ -115,10 +116,8 @@ bool LLIRAsmPrinter::PrintAsmMemoryOperand(
 
   const MachineOperand &MO = MI->getOperand(OpNo);
   assert(MO.getType() == MachineOperand::MO_Register && "register expected");
-  unsigned RegNo = MO.getReg();
-  assert(RegNo >= LLIR::NUM_TARGET_REGS);
-
-  O << "$" << (RegNo - LLIR::NUM_TARGET_REGS);
+  auto &MFI = *MI->getParent()->getParent()->getInfo<LLIRMachineFunctionInfo>();
+  O << "$" << MFI.getGMReg(MO.getReg());
   return false;
 }
 
