@@ -781,6 +781,8 @@ namespace llvm {
 
     // Store FP control world into i16 memory.
     FNSTCW16m,
+    // Load FP control word from i16 memory.
+    FLDCW16m,
 
     /// This instruction implements FP_TO_SINT with the
     /// integer destination in memory and a FP reg source.  This corresponds
