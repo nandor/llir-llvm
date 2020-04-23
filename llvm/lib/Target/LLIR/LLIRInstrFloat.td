@@ -187,8 +187,8 @@ defm FMUL : CommBinaryFloat<fmul, "mul",  0x90, 0x90, 0x00>;
 
 defm COPYSIGN : BinaryFloat<fcopysign, "copysign", 0x98, 0xa6, 0x00>;
 defm FSUB     : BinaryFloat<fsub, "sub", 0xA0, 0xA1, 0x00>;
-defm FDIV     : BinaryFloat<fdiv, "div", 0xA1, 0xA2, 0x00>;
-defm FREM     : BinaryFloat<frem, "rem", 0xA3, 0xA2, 0x00>;
+defm FDIV     : BinaryFloat<fdiv, "sdiv", 0xA1, 0xA2, 0x00>;
+defm FREM     : BinaryFloat<frem, "srem", 0xA3, 0xA2, 0x00>;
 defm FPOW     : BinaryFloat<fpow, "pow", 0xA4, 0xA5, 0x00>;
 
 defm OEQ : CmpFloat<SETOEQ, "oeq", 0x5b, 0x00, 0x00>;

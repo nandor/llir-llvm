@@ -74,7 +74,7 @@ define void @dynamic_alloca_nouse(i32 %alloc) noredzone {
 
 ; CHECK-LABEL: copytoreg_fi:
 ; CHECK-NEXT: .stack_object 0, 4, 4
-; CHECK-NEXT: .args 0, i32, i64
+; CHECK-NEXT: .args 0, i8, i64
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @copytoreg_fi(i1 %cond, i32* %b) {
