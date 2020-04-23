@@ -38,12 +38,12 @@ def TRUNC_I32_I16 : Conv<I16, I32, trunc,  "trunc", "i16", 0x00>;
 def TRUNC_I64_I16 : Conv<I16, I64, trunc,  "trunc", "i16", 0x00>;
 def TRUNC_I64_I32 : Conv<I32, I64, trunc,  "trunc", "i32", 0x00>;
 
-def XEXT_I8_I16   : Conv<I16, I8,  anyext, "zext",  "i16", 0x00>;
-def XEXT_I8_I32   : Conv<I32, I8,  anyext, "zext",  "i32", 0x00>;
-def XEXT_I16_I32  : Conv<I32, I16, anyext, "zext",  "i32", 0x00>;
-def XEXT_I8_I64   : Conv<I64, I8,  anyext, "zext",  "i64", 0x00>;
-def XEXT_I16_I64  : Conv<I64, I16, anyext, "zext",  "i64", 0x00>;
-def XEXT_I32_I64  : Conv<I64, I32, anyext, "zext",  "i64", 0x00>;
+def XEXT_I8_I16   : Conv<I16, I8,  anyext, "xext",  "i16", 0x00>;
+def XEXT_I8_I32   : Conv<I32, I8,  anyext, "xext",  "i32", 0x00>;
+def XEXT_I16_I32  : Conv<I32, I16, anyext, "xext",  "i32", 0x00>;
+def XEXT_I8_I64   : Conv<I64, I8,  anyext, "xext",  "i64", 0x00>;
+def XEXT_I16_I64  : Conv<I64, I16, anyext, "xext",  "i64", 0x00>;
+def XEXT_I32_I64  : Conv<I64, I32, anyext, "xext",  "i64", 0x00>;
 
 def SEXT_I8_I16   : Conv<I16, I8,  sext,   "sext",  "i16", 0x00>;
 def SEXT_I8_I32   : Conv<I32, I8,  sext,   "sext",  "i32", 0x00>;
@@ -76,22 +76,38 @@ class FConv
 {
 }
 
-class FTrunc
-  < LLIRRegClass oc
-  , LLIRRegClass ic
-  , string type
-  , SDNode node
-  , bits<32> op
-  >
-  : I
-    < (outs oc:$dst)
-    , (ins ic:$src)
-    , [(set oc:$dst, (node ic:$src))]
-    , !strconcat("trunc.", !strconcat(type, "\t$dst, $src"))
-    , op
-    >
-{
-}
+def I32_TRUNC_S_F32   : Conv<I32, F32, fp_to_sint, "zext", "i32", 0xF0>;
+def I64_TRUNC_S_F32   : Conv<I64, F32, fp_to_sint, "zext", "i64", 0xF0>;
+def I32_TRUNC_S_F64   : Conv<I32, F64, fp_to_sint, "zext", "i32", 0xF0>;
+def I64_TRUNC_S_F64   : Conv<I64, F64, fp_to_sint, "zext", "i64", 0xF0>;
+def I32_TRUNC_S_F80   : Conv<I32, F80, fp_to_sint, "zext", "i32", 0xF0>;
+def I64_TRUNC_S_F80   : Conv<I64, F80, fp_to_sint, "zext", "i64", 0xF0>;
+
+def I32_TRUNC_U_F32   : Conv<I32, F32, fp_to_uint, "sext", "i32", 0xF0>;
+def I64_TRUNC_U_F32   : Conv<I64, F32, fp_to_uint, "sext", "i64", 0xF0>;
+def I32_TRUNC_U_F64   : Conv<I32, F64, fp_to_uint, "sext", "i32", 0xF0>;
+def I64_TRUNC_U_F64   : Conv<I64, F64, fp_to_uint, "sext", "i64", 0xF0>;
+def I32_TRUNC_U_F80   : Conv<I32, F80, fp_to_uint, "sext", "i32", 0xF0>;
+def I64_TRUNC_U_F80   : Conv<I64, F80, fp_to_uint, "sext", "i64", 0xF0>;
+
+def F32_CONVERT_S_I32 : Conv<F32, I32, sint_to_fp, "sext", "f32", 0xE4>;
+def F64_CONVERT_S_I32 : Conv<F64, I32, sint_to_fp, "sext", "f64", 0xE6>;
+def F80_CONVERT_S_I32 : Conv<F80, I32, sint_to_fp, "sext", "f80", 0xE6>;
+def F32_CONVERT_S_I64 : Conv<F32, I64, sint_to_fp, "sext", "f32", 0xE8>;
+def F64_CONVERT_S_I64 : Conv<F64, I64, sint_to_fp, "sext", "f64", 0xEA>;
+def F80_CONVERT_S_I64 : Conv<F80, I64, sint_to_fp, "sext", "f80", 0xEA>;
+def F32_CONVERT_U_I8  : Conv<F32,  I8, uint_to_fp, "zext", "f32", 0xE5>;
+def F64_CONVERT_U_I8  : Conv<F64,  I8, uint_to_fp, "zext", "f64", 0xE7>;
+def F80_CONVERT_U_I8  : Conv<F80,  I8, uint_to_fp, "zext", "f80", 0xE7>;
+def F32_CONVERT_U_I16 : Conv<F32, I16, uint_to_fp, "zext", "f32", 0xE5>;
+def F64_CONVERT_U_I16 : Conv<F64, I16, uint_to_fp, "zext", "f64", 0xE7>;
+def F80_CONVERT_U_I16 : Conv<F80, I16, uint_to_fp, "zext", "f80", 0xE7>;
+def F32_CONVERT_U_I32 : Conv<F32, I32, uint_to_fp, "zext", "f32", 0xE5>;
+def F64_CONVERT_U_I32 : Conv<F64, I32, uint_to_fp, "zext", "f64", 0xE7>;
+def F80_CONVERT_U_I32 : Conv<F80, I32, uint_to_fp, "zext", "f80", 0xE7>;
+def F32_CONVERT_U_I64 : Conv<F32, I64, uint_to_fp, "zext", "f32", 0xE9>;
+def F64_CONVERT_U_I64 : Conv<F64, I64, uint_to_fp, "zext", "f64", 0xEB>;
+def F80_CONVERT_U_I64 : Conv<F80, I64, uint_to_fp, "zext", "f80", 0xEB>;
 
 class FMov
   < LLIRRegClass oc
@@ -108,41 +124,6 @@ class FMov
     >
 {
 }
-
-def I32_TRUNC_S_F32 : FTrunc<I32, F32, "i32", fp_to_sint, 0xF0>;
-def I64_TRUNC_S_F32 : FTrunc<I64, F32, "i64", fp_to_sint, 0xF0>;
-def I32_TRUNC_S_F64 : FTrunc<I32, F64, "i32", fp_to_sint, 0xF0>;
-def I64_TRUNC_S_F64 : FTrunc<I64, F64, "i64", fp_to_sint, 0xF0>;
-def I32_TRUNC_S_F80 : FTrunc<I32, F80, "i32", fp_to_sint, 0xF0>;
-def I64_TRUNC_S_F80 : FTrunc<I64, F80, "i64", fp_to_sint, 0xF0>;
-
-
-def I32_TRUNC_U_F32 : FTrunc<I32, F32, "u32", fp_to_uint, 0xF0>;
-def I64_TRUNC_U_F32 : FTrunc<I64, F32, "u64", fp_to_uint, 0xF0>;
-def I32_TRUNC_U_F64 : FTrunc<I32, F64, "u32", fp_to_uint, 0xF0>;
-def I64_TRUNC_U_F64 : FTrunc<I64, F64, "u64", fp_to_uint, 0xF0>;
-def I32_TRUNC_U_F80 : FTrunc<I32, F80, "u32", fp_to_uint, 0xF0>;
-def I64_TRUNC_U_F80 : FTrunc<I64, F80, "u64", fp_to_uint, 0xF0>;
-
-def F32_CONVERT_S_I32 : FConv<F32, I32, "sext.f32", sint_to_fp, 0xE4>;
-def F64_CONVERT_S_I32 : FConv<F64, I32, "sext.f64", sint_to_fp, 0xE6>;
-def F80_CONVERT_S_I32 : FConv<F80, I32, "sext.f80", sint_to_fp, 0xE6>;
-def F32_CONVERT_S_I64 : FConv<F32, I64, "sext.f32", sint_to_fp, 0xE8>;
-def F64_CONVERT_S_I64 : FConv<F64, I64, "sext.f64", sint_to_fp, 0xEA>;
-def F80_CONVERT_S_I64 : FConv<F80, I64, "sext.f80", sint_to_fp, 0xEA>;
-
-def F32_CONVERT_U_I8  : FConv<F32,  I8, "zext.f32", uint_to_fp, 0xE5>;
-def F64_CONVERT_U_I8  : FConv<F64,  I8, "zext.f64", uint_to_fp, 0xE7>;
-def F80_CONVERT_U_I8  : FConv<F80,  I8, "zext.f80", uint_to_fp, 0xE7>;
-def F32_CONVERT_U_I16 : FConv<F32, I16, "zext.f32", uint_to_fp, 0xE5>;
-def F64_CONVERT_U_I16 : FConv<F64, I16, "zext.f64", uint_to_fp, 0xE7>;
-def F80_CONVERT_U_I16 : FConv<F80, I16, "zext.f80", uint_to_fp, 0xE7>;
-def F32_CONVERT_U_I32 : FConv<F32, I32, "zext.f32", uint_to_fp, 0xE5>;
-def F64_CONVERT_U_I32 : FConv<F64, I32, "zext.f64", uint_to_fp, 0xE7>;
-def F80_CONVERT_U_I32 : FConv<F80, I32, "zext.f80", uint_to_fp, 0xE7>;
-def F32_CONVERT_U_I64 : FConv<F32, I64, "zext.f32", uint_to_fp, 0xE9>;
-def F64_CONVERT_U_I64 : FConv<F64, I64, "zext.f64", uint_to_fp, 0xEB>;
-def F80_CONVERT_U_I64 : FConv<F80, I64, "zext.f80", uint_to_fp, 0xEB>;
 
 def I32_BITCAST_F32 : FMov<I32, F32, "i32", 0xbc>;
 def F32_BITCAST_I32 : FMov<F32, I32, "f32", 0xbe>;
