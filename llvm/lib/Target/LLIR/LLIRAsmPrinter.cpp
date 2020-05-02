@@ -98,16 +98,6 @@ bool GenMAsmPrinter::PrintAsmOperand(
     const char *ExtraCode,
     raw_ostream &O)
 {
-  return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, AsmVariant, ExtraCode, O);
-}
-
-bool LLIRAsmPrinter::PrintAsmMemoryOperand(
-    const MachineInstr *MI,
-    unsigned OpNo,
-    unsigned AsmVariant,
-    const char *ExtraCode,
-    raw_ostream &O)
-{
   if (AsmVariant != 0)
     report_fatal_error("There are no defined alternate asm variants");
 
@@ -119,6 +109,16 @@ bool LLIRAsmPrinter::PrintAsmMemoryOperand(
   auto &MFI = *MI->getParent()->getParent()->getInfo<LLIRMachineFunctionInfo>();
   O << "$" << MFI.getGMReg(MO.getReg());
   return false;
+}
+
+bool LLIRAsmPrinter::PrintAsmMemoryOperand(
+    const MachineInstr *MI,
+    unsigned OpNo,
+    unsigned AsmVariant,
+    const char *ExtraCode,
+    raw_ostream &O)
+{
+  return PrintAsmOperand(MI, OpNo, AsmVariant, ExtraCode, O);
 }
 
 LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer()
