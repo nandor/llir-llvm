@@ -256,6 +256,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , 0x14
       >;
 
+  def UNDEF_F80 : I
+      < (outs F80:$res)
+      , (ins)
+      , [(set F80:$res, undef)]
+      , "undef.f80\t$res"
+      , 0x14
+      >;
+
   def RDTSC_I64 : I
       < (outs I64:$res)
       , (ins)
