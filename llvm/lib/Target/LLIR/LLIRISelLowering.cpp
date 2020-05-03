@@ -460,7 +460,15 @@ LLIRTargetLowering::getRegForInlineAsmConstraint(
     default:
       break;
     case 'r':
-      return std::make_pair(0U, &LLIR::I64RegClass);
+      if (VT.getSizeInBits() == 8)
+        return std::make_pair(0U, &LLIR::I8RegClass);
+      if (VT.getSizeInBits() == 16)
+        return std::make_pair(0U, &LLIR::I16RegClass);
+      if (VT.getSizeInBits() == 32)
+        return std::make_pair(0U, &LLIR::I32RegClass);
+      if (VT.getSizeInBits() == 64)
+        return std::make_pair(0U, &LLIR::I64RegClass);
+      break;
     }
   }
 

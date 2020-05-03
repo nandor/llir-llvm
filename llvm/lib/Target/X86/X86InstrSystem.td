@@ -58,8 +58,10 @@ let SchedRW = [WriteSystem] in {
 def INT : Ii8<0xcd, RawFrm, (outs), (ins u8imm:$trap), "int\t$trap",
               [(int_x86_int timm:$trap)]>;
 
-
+let Defs = [RAX, RCX, R11] in {
 def SYSCALL  : I<0x05, RawFrm, (outs), (ins), "syscall", []>, TB;
+}
+
 def SYSRET   : I<0x07, RawFrm, (outs), (ins), "sysret{l}", []>, TB;
 def SYSRET64 :RI<0x07, RawFrm, (outs), (ins), "sysretq", []>, TB,
                Requires<[In64BitMode]>;

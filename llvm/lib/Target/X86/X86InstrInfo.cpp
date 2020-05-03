@@ -3446,6 +3446,8 @@ void X86InstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   bool HasAVX = Subtarget.hasAVX();
   bool HasVLX = Subtarget.hasVLX();
   unsigned Opc = 0;
+  if (SrcReg == X86::FS)
+    Opc = X86::MOV64rr;
   if (X86::GR64RegClass.contains(DestReg, SrcReg))
     Opc = X86::MOV64rr;
   else if (X86::GR32RegClass.contains(DestReg, SrcReg))
