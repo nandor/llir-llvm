@@ -2133,6 +2133,7 @@ bool LLParser::parseOptionalCallingConv(unsigned &CC) {
   case lltok::kw_hhvmcc:         CC = CallingConv::HHVM; break;
   case lltok::kw_hhvm_ccc:       CC = CallingConv::HHVM_C; break;
   case lltok::kw_cxx_fast_tlscc: CC = CallingConv::CXX_FAST_TLS; break;
+  case lltok::kw_llir_setjmp:    CC = CallingConv::LLIR_SETJMP; break;
   case lltok::kw_amdgpu_vs:      CC = CallingConv::AMDGPU_VS; break;
   case lltok::kw_amdgpu_gfx:     CC = CallingConv::AMDGPU_Gfx; break;
   case lltok::kw_amdgpu_ls:      CC = CallingConv::AMDGPU_LS; break;

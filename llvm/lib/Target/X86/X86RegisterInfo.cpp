@@ -370,16 +370,16 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
         return CSR_32_AllRegs_SSE_SaveList;
       return CSR_32_AllRegs_SaveList;
     }
-  case CallingConv::CAML:
-    return CSR_64_Caml_SaveList;
-  case CallingConv::CAML_EXT:
-    return CSR_64_Caml_Ext_SaveList;
-  case CallingConv::CAML_ALLOC:
-    return CSR_64_Caml_Alloc_SaveList;
-  case CallingConv::CAML_GC:
-    return CSR_64_Caml_Gc_SaveList;
-  case CallingConv::CAML_RAISE:
-    return CSR_64_Caml_Raise_SaveList;
+  case CallingConv::LLIR_CAML:
+    return CSR_LLIR_Caml_SaveList;
+  case CallingConv::LLIR_CAML_EXT:
+    return CSR_LLIR_Caml_Ext_SaveList;
+  case CallingConv::LLIR_CAML_ALLOC:
+    return CSR_LLIR_Caml_Alloc_SaveList;
+  case CallingConv::LLIR_CAML_GC:
+    return CSR_LLIR_Caml_Gc_SaveList;
+  case CallingConv::LLIR_CAML_RAISE:
+    return CSR_LLIR_Caml_Raise_SaveList;
   default:
     break;
   }
@@ -494,16 +494,16 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
         return CSR_32_AllRegs_SSE_RegMask;
       return CSR_32_AllRegs_RegMask;
     }
-  case CallingConv::CAML:
-    return CSR_64_Caml_RegMask;
-  case CallingConv::CAML_EXT:
-    return CSR_64_Caml_Ext_RegMask;
-  case CallingConv::CAML_ALLOC:
-    return CSR_64_Caml_Alloc_RegMask;
-  case CallingConv::CAML_GC:
-    return CSR_64_Caml_Gc_RegMask;
-  case CallingConv::CAML_RAISE:
-    return CSR_64_Caml_Raise_RegMask;
+  case CallingConv::LLIR_CAML:
+    return CSR_LLIR_Caml_RegMask;
+  case CallingConv::LLIR_CAML_EXT:
+    return CSR_LLIR_Caml_Ext_RegMask;
+  case CallingConv::LLIR_CAML_ALLOC:
+    return CSR_LLIR_Caml_Alloc_RegMask;
+  case CallingConv::LLIR_CAML_GC:
+    return CSR_LLIR_Caml_Gc_RegMask;
+  case CallingConv::LLIR_CAML_RAISE:
+    return CSR_LLIR_Caml_Raise_RegMask;
   default:
     break;
   }
