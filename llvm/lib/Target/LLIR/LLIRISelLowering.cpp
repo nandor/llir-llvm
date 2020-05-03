@@ -501,9 +501,12 @@ EVT LLIRTargetLowering::getSetCCResultType(
 static bool isCallingConvSupported(CallingConv::ID ID)
 {
   switch (ID) {
-    case CallingConv::C:    return true;
-    case CallingConv::Fast: return true;
-    default: return false;
+    case CallingConv::C:
+    case CallingConv::Fast:
+    case CallingConv::LLIR_SETJMP:
+      return true;
+    default:
+      return false;
   }
 }
 

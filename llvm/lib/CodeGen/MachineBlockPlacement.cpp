@@ -3293,7 +3293,7 @@ bool MachineBlockPlacement::runOnMachineFunction(MachineFunction &MF) {
   if (skipFunction(MF.getFunction()))
     return false;
 
-  if (MF.getFunction().getCallingConv() == CallingConv::CAML)
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML)
     return false;
 
   // Check for single-block functions and skip them.

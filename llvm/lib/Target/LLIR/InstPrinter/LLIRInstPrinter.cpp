@@ -59,8 +59,9 @@ void LLIRInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const
 static void printCallingConv(llvm::raw_ostream &OS, unsigned CallConv)
 {
   switch (static_cast<CallingConv::ID>(CallConv)) {
-    case CallingConv::C:    OS << "c"; break;
-    case CallingConv::Fast: OS << "fast"; break;
+    case CallingConv::C:           OS << "c"; break;
+    case CallingConv::Fast:        OS << "fast"; break;
+    case CallingConv::LLIR_SETJMP: OS << "setjmp"; break;
     default: llvm_unreachable("not implemented");
   }
 }
