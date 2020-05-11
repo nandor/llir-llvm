@@ -1163,6 +1163,8 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     )
   add_llvm_tool_symlink(llir-gcc clang)
   add_llvm_tool_symlink(llir-g++ clang)
+  add_llvm_tool_symlink(llir-clang clang)
+  add_llvm_tool_symlink(llir-clang++ clang)
 
   install(DIRECTORY ${LLVM_INCLUDE_DIR}/llvm ${LLVM_INCLUDE_DIR}/llvm-c
     DESTINATION include
