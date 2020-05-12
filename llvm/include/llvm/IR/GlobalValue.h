@@ -80,14 +80,14 @@ protected:
         UnnamedAddrVal(unsigned(UnnamedAddr::None)),
         DllStorageClass(DefaultStorageClass), ThreadLocal(NotThreadLocal),
         HasLLVMReservedName(false), IsDSOLocal(false), HasPartition(false),
-        IntID((Intrinsic::ID)0U), Parent(nullptr) {
+        IsNoDeadStrip(false), IntID((Intrinsic::ID)0U), Parent(nullptr) {
     setLinkage(Linkage);
     setName(Name);
   }
 
   Type *ValueType;
 
-  static const unsigned GlobalValueSubClassDataBits = 16;
+  static const unsigned GlobalValueSubClassDataBits = 15;
 
   // All bitfields use unsigned as the underlying type so that MSVC will pack
   // them.
@@ -111,6 +111,7 @@ protected:
   /// True if this symbol has a partition name assigned (see
   /// https://lld.llvm.org/Partitions.html).
   unsigned HasPartition : 1;
+  unsigned IsNoDeadStrip : 1;
 
 private:
   // Give subclasses access to what otherwise would be wasted padding.
@@ -263,6 +264,9 @@ public:
     return DllStorageClass == DLLExportStorageClass;
   }
   void setDLLStorageClass(DLLStorageClassTypes C) { DllStorageClass = C; }
+
+  bool isNoDeadStrip() const { return IsNoDeadStrip; }
+  void setNoDeadStrip(bool NoDeadStrip) { IsNoDeadStrip = NoDeadStrip; }
 
   bool hasSection() const { return !getSection().empty(); }
   StringRef getSection() const;
