@@ -26,6 +26,7 @@ LLIRELFMCAsmInfo::LLIRELFMCAsmInfo(const Triple &TheTriple) {
   Data64bitsDirective = "\t.quad\t";
   HasFunctionAlignment = false;
   HasDotTypeDotSizeDirective = false;
+  HasNoDeadStrip = true;
 }
 
 const MCExpr* LLIRELFMCAsmInfo::getExprForPersonalitySymbol(

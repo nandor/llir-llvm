@@ -397,6 +397,9 @@ static bool canBeHidden(const GlobalValue *GV, const MCAsmInfo &MAI) {
 }
 
 void AsmPrinter::emitLinkage(const GlobalValue *GV, MCSymbol *GVSym) const {
+  if (GV->isNoDeadStrip()) {
+    OutStreamer->EmitSymbolAttribute(GVSym, MCSA_NoDeadStrip);
+  }
   GlobalValue::LinkageTypes Linkage = GV->getLinkage();
   switch (Linkage) {
   case GlobalValue::CommonLinkage:
