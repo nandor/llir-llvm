@@ -397,9 +397,6 @@ static bool canBeHidden(const GlobalValue *GV, const MCAsmInfo &MAI) {
 }
 
 void AsmPrinter::emitLinkage(const GlobalValue *GV, MCSymbol *GVSym) const {
-  if (GV->isNoDeadStrip()) {
-    OutStreamer->EmitSymbolAttribute(GVSym, MCSA_NoDeadStrip);
-  }
   GlobalValue::LinkageTypes Linkage = GV->getLinkage();
   switch (Linkage) {
   case GlobalValue::CommonLinkage:
@@ -504,6 +501,9 @@ void AsmPrinter::emitGlobalVariable(const GlobalVariable *GV) {
   // attributes.
   // GV's or GVSym's attributes will be used for the EmittedSym.
   emitVisibility(EmittedSym, GV->getVisibility(), !GV->isDeclaration());
+  if (GV->isNoDeadStrip()) {
+    OutStreamer->EmitSymbolAttribute(EmittedSym, MCSA_NoDeadStrip);
+  }
 
   if (!GV->hasInitializer())   // External globals require no extra code.
     return;
@@ -688,6 +688,9 @@ void AsmPrinter::emitFunctionHeader() {
   // Print the 'header' of function.
   MF->setSection(getObjFileLowering().SectionForGlobal(&F, TM));
   OutStreamer->SwitchSection(MF->getSection());
+  if (F.isNoDeadStrip()) {
+    OutStreamer->EmitSymbolAttribute(CurrentFnSym, MCSA_NoDeadStrip);
+  }
 
   if (!MAI->hasVisibilityOnlyWithLinkage())
     emitVisibility(CurrentFnSym, F.getVisibility());
