@@ -60,7 +60,7 @@ static void printCallingConv(llvm::raw_ostream &OS, unsigned CallConv)
 {
   switch (static_cast<CallingConv::ID>(CallConv)) {
     case CallingConv::C:           OS << "c"; break;
-    case CallingConv::Fast:        OS << "fast"; break;
+    case CallingConv::Fast:        OS << "c"; break;
     case CallingConv::LLIR_SETJMP: OS << "setjmp"; break;
     default: llvm_unreachable("not implemented");
   }

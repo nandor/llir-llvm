@@ -58,8 +58,8 @@ void LLIRMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
 void LLIRMCTargetAsmStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
   switch (CallConv) {
-    case CallingConv::C:    OS << "\t.call c\n";    break;
-    case CallingConv::Fast: OS << "\t.call fast\n"; break;
+    case CallingConv::C:    OS << "\t.call c\n"; break;
+    case CallingConv::Fast: OS << "\t.call c\n"; break;
     default: llvm_unreachable("not implemented");
   }
 }
