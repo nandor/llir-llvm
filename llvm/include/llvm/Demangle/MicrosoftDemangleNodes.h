@@ -15,6 +15,7 @@
 
 #include "llvm/Demangle/DemangleConfig.h"
 #include "llvm/Demangle/StringView.h"
+#include <cstdint>
 #include <array>
 #include <cstdint>
 #include <string>
