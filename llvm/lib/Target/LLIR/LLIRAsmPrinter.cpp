@@ -76,12 +76,15 @@ void LLIRAsmPrinter::EmitFunctionBodyStart()
   if (F.hasFnAttribute(Attribute::NoInline)) {
     Streamer.emitNoInline();
   }
+  if (MF->getFunction().isVarArg()) {
+    Streamer.emitVarArg();
+  }
 
   auto &Params = FuncInfo->getParams();
-  bool IsVA = MF->getFunction().isVarArg();
-  if (!Params.empty() || IsVA) {
-    Streamer.emitParams(Params, IsVA);
+  if (!Params.empty()) {
+    Streamer.emitParams(Params);
   }
+
   Streamer.emitCallingConv(MF->getFunction().getCallingConv());
 
   AsmPrinter::EmitFunctionBodyStart();
