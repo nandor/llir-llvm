@@ -16,12 +16,17 @@
 
 using namespace llvm;
 
-// pin vtable to this file
+
+
 LLIRMCTargetStreamer::LLIRMCTargetStreamer(MCStreamer &S)
   : MCTargetStreamer(S)
 {
 
 }
+
+//===----------------------------------------------------------------------===//
+// LLIRMCTargetAsmStreamer
+//===----------------------------------------------------------------------===//
 
 LLIRMCTargetAsmStreamer::LLIRMCTargetAsmStreamer(
     MCStreamer &S,
@@ -36,21 +41,32 @@ void LLIRMCTargetAsmStreamer::emitStackObject(int Offset, int Size, int Align)
   OS << "\t.stack_object\t" << Offset << ", " << Size << ", " << Align << "\n";
 }
 
-void LLIRMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
+static StringRef LLIRTypeName(MVT VT)
 {
-  OS << "\t.args\t" << IsVA;
-  for (const auto &VT : params) {
-    OS << ", ";
-    switch (VT.SimpleTy) {
-      case MVT::i8:  OS << "i8";  break;
-      case MVT::i16: OS << "i16"; break;
-      case MVT::i32: OS << "i32"; break;
-      case MVT::i64: OS << "i64"; break;
-      case MVT::f32: OS << "f32"; break;
-      case MVT::f64: OS << "f64"; break;
-      case MVT::f80: OS << "f80"; break;
-      default: llvm_unreachable("not implemented");
-    }
+  switch (VT.SimpleTy) {
+    case MVT::i8:  return "i8";
+    case MVT::i16: return "i16";
+    case MVT::i32: return "i32";
+    case MVT::i64: return "i64";
+    case MVT::f32: return "f32";
+    case MVT::f64: return "f64";
+    case MVT::f80: return "f80";
+    default: llvm_unreachable("not implemented");
+  }
+}
+
+void LLIRMCTargetAsmStreamer::emitVarArg()
+{
+  OS << "\t.vararg\n";
+}
+
+void LLIRMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params)
+{
+  OS << "\t.args\t";
+  for (unsigned i = 0, n = params.size(); i < n; ++i) {
+    if (i != 0)
+      OS << ", ";
+    OS << LLIRTypeName(params[i]);
   }
   OS << "\n";
 }
@@ -81,25 +97,30 @@ LLIRMCTargetLLIRStreamer::LLIRMCTargetLLIRStreamer(MCStreamer &S)
 
 void LLIRMCTargetLLIRStreamer::emitStackObject(int Offset, int Size, int Align)
 {
-  llvm::errs() << "LLIRMCTargetLLIRStreamer::emitStackSize\n";
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitStackSize");
 }
 
-void LLIRMCTargetLLIRStreamer::emitParams(ArrayRef<MVT> params, bool IsVA)
+void LLIRMCTargetLLIRStreamer::emitVarArg()
 {
-  llvm::errs() << "LLIRMCTargetLLIRStreamer::emitParams\n";
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitVarArg");
+}
+
+void LLIRMCTargetLLIRStreamer::emitParams(ArrayRef<MVT> params)
+{
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitParams");
 }
 
 void LLIRMCTargetLLIRStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
-  llvm::errs() << "LLIRMCTargetLLIRStreamer::emitCallingConv\n";
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitCallingConv");
 }
 
 void LLIRMCTargetLLIRStreamer::emitEnd()
 {
-  llvm::errs() << "LLIRMCTargetLLIRStreamer::emitEnd\n";
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitEnd");
 }
 
 void LLIRMCTargetLLIRStreamer::emitNoInline()
 {
-  llvm::errs() << "LLIRMCTargetLLIRStreamer::emitNoInline\n";
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitNoInline");
 }

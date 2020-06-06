@@ -22,8 +22,10 @@ public:
 
   /// .stack_obj
   virtual void emitStackObject(int Offset, int Size, int Align) = 0;
+  /// .vararg
+  virtual void emitVarArg() = 0;
   /// .args
-  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) = 0;
+  virtual void emitParams(ArrayRef<MVT> params) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
   /// .end
@@ -38,7 +40,8 @@ public:
   LLIRMCTargetAsmStreamer(MCStreamer &S, formatted_raw_ostream &OS);
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
-  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
+  virtual void emitVarArg() override;
+  virtual void emitParams(ArrayRef<MVT> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
@@ -53,7 +56,8 @@ public:
   LLIRMCTargetLLIRStreamer(MCStreamer &S);
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
-  virtual void emitParams(ArrayRef<MVT> params, bool IsVA) override;
+  virtual void emitVarArg() override;
+  virtual void emitParams(ArrayRef<MVT> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
