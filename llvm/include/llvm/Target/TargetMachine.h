@@ -395,9 +395,18 @@ public:
   /// EXPENSIVE_CHECKS is enabled.
   virtual bool isMachineVerifierClean() const { return true; }
 
+  /// Creates an AsmPrinter pass that prints assembly or machine code from
+  /// the MI representation.
+  AsmPrinter *createAsmPrinter(
+      raw_pwrite_stream &Out,
+      raw_pwrite_stream *DwoOut,
+      CodeGenFileType FileType,
+      MCContext &Context
+  );
+
   /// Adds an AsmPrinter pass to the pipeline that prints assembly or
   /// machine code from the MI representation.
-  AsmPrinter *addAsmPrinter(
+  bool addAsmPrinter(
       PassManagerBase &PM,
       raw_pwrite_stream &Out,
       raw_pwrite_stream *DwoOut,

@@ -652,7 +652,7 @@ void MachineCopyPropagation::ForwardCopyPropagateBlock(MachineBasicBlock &MBB) {
       for (const MachineOperand &MO : MI->operands()) {
         if (MO.isReg()) {
           unsigned Reg = MO.getReg();
-          ReadRegister(Reg);
+          ReadRegister(Reg, *MI, RegularUse);
           Tracker.clobberRegister(MO.getReg(), *TRI);
         }
       }

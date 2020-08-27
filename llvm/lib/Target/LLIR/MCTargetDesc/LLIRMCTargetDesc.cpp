@@ -12,8 +12,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "LLIRMCTargetDesc.h"
+
 #include "LLIRMCAsmInfo.h"
-#include "InstPrinter/LLIRInstPrinter.h"
+#include "MCTargetDesc/LLIRInstPrinter.h"
 #include "MCTargetDesc/LLIRMCTargetStreamer.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -32,42 +33,33 @@ using namespace llvm;
 #define GET_REGINFO_MC_DESC
 #include "LLIRGenRegisterInfo.inc"
 
-static MCAsmInfo *createLLIRMCAsmInfo(
-    const MCRegisterInfo &MRI,
-    const Triple &TT)
-{
+static MCAsmInfo *createLLIRMCAsmInfo(const MCRegisterInfo &MRI,
+                                      const Triple &TT,
+                                      const MCTargetOptions &TO) {
   return new LLIRELFMCAsmInfo(TT);
 }
 
-
-static MCInstPrinter *createLLIRMCInstPrinter(
-    const Triple &T,
-    unsigned SyntaxVariant,
-    const MCAsmInfo &MAI,
-    const MCInstrInfo &MII,
-    const MCRegisterInfo &MRI)
-{
+static MCInstPrinter *createLLIRMCInstPrinter(const Triple &T,
+                                              unsigned SyntaxVariant,
+                                              const MCAsmInfo &MAI,
+                                              const MCInstrInfo &MII,
+                                              const MCRegisterInfo &MRI) {
   return new LLIRInstPrinter(MAI, MII, MRI);
 }
 
 static MCTargetStreamer *createObjectTargetStreamer(
-    MCStreamer &S,
-    const MCSubtargetInfo &STI)
-{
+    MCStreamer &S, const MCSubtargetInfo &STI) {
   return new LLIRMCTargetLLIRStreamer(S);
 }
 
-static MCTargetStreamer *createAsmTargetStreamer(
-    MCStreamer &S,
-    formatted_raw_ostream &OS,
-    MCInstPrinter *InstPrinter,
-    bool isVerboseAsm)
-{
+static MCTargetStreamer *createAsmTargetStreamer(MCStreamer &S,
+                                                 formatted_raw_ostream &OS,
+                                                 MCInstPrinter *InstPrinter,
+                                                 bool isVerboseAsm) {
   return new LLIRMCTargetAsmStreamer(S, OS);
 }
 
-extern "C" void LLVMInitializeLLIRTargetMC()
-{
+extern "C" void LLVMInitializeLLIRTargetMC() {
   // Register the MC asm info.
   RegisterMCAsmInfoFn X(getTheLLIRTarget(), createLLIRMCAsmInfo);
 
@@ -76,7 +68,8 @@ extern "C" void LLVMInitializeLLIRTargetMC()
     TargetRegistry::RegisterMCInstPrinter(*T, createLLIRMCInstPrinter);
     TargetRegistry::RegisterMCCodeEmitter(*T, createLLIRMCCodeEmitter);
     TargetRegistry::RegisterMCAsmBackend(*T, createLLIRAsmBackend);
-    TargetRegistry::RegisterObjectTargetStreamer(*T, createObjectTargetStreamer);
+    TargetRegistry::RegisterObjectTargetStreamer(*T,
+                                                 createObjectTargetStreamer);
     TargetRegistry::RegisterAsmTargetStreamer(*T, createAsmTargetStreamer);
   }
 }

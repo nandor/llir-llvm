@@ -19,5 +19,5 @@
 type = Library
 name = LLIRDesc
 parent = LLIR
-required_libraries = MC Support LLIRAsmPrinter LLIRInfo
+required_libraries = MC Support LLIRInfo
 add_to_library_groups = LLIR

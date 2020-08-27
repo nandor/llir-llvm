@@ -74,7 +74,7 @@ bool LLIRRegisterNumbering::runOnMachineFunction(MachineFunction &MF) {
   unsigned CurReg = 1;
   const unsigned NumVRegs = MF.getRegInfo().getNumVirtRegs();
   for (unsigned VRegIdx = 0; VRegIdx < NumVRegs; ++VRegIdx) {
-    const unsigned VReg = TargetRegisterInfo::index2VirtReg(VRegIdx);
+    const unsigned VReg = Register::index2VirtReg(VRegIdx);
     if (MRI.def_begin(VReg) == MRI.def_end()) {
       /// Value not defined - map to undefined reg.
       MFI.setGMReg(VReg, 0);

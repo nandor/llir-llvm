@@ -95,8 +95,9 @@ InsertPointAnalysis::computeLastInsertPoint(const LiveInterval &CurLI,
     if (ExceptionalSuccessors.empty())
       return LIP.first;
     for (auto I = MBB.rbegin(), E = MBB.rend(); I != E; ++I) {
-      if ((EHPadSuccessor && I->isCall()) || !I->isGCFrame()
-          I->getOpcode() == TargetOpcode::INLINEASM_BR) {
+      if (((EHPadSuccessor && I->isCall()) ||
+           I->getOpcode() == TargetOpcode::INLINEASM_BR) &&
+          !I->isGCFrame()) {
         LIP.second = LIS.getInstructionIndex(*I);
         break;
       }

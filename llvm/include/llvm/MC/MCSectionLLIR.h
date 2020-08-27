@@ -28,10 +28,10 @@ class MCSymbol;
 class MCSectionLLIR final : public MCSection {
   friend class MCContext;
   MCSectionLLIR(
-      StringRef Section,
+      StringRef Name,
       SectionKind K,
       MCSymbol *Begin)
-    : MCSection(SV_LLIR, K, Begin)
+    : MCSection(SV_LLIR, Name, K, Begin)
   {
   }
 

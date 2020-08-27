@@ -454,7 +454,7 @@ public:
   }
 
   /// Return the alignment of the specified object.
-  unsigned getAnyObjectAlignment(int ObjectIdx) const {
+  Align getAnyObjectAlign(int ObjectIdx) const {
     assert(unsigned(ObjectIdx) < Objects.size() && "Invalid Object Idx!");
     return Objects[ObjectIdx].Alignment;
   }

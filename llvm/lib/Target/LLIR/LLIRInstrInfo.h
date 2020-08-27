@@ -25,64 +25,41 @@ namespace llvm {
 class LLIRSubtarget;
 
 class LLIRInstrInfo : public LLIRGenInstrInfo {
-public:
+ public:
   explicit LLIRInstrInfo(LLIRSubtarget &ST);
 
-  bool analyzeBranch(
-      MachineBasicBlock &MBB,
-      MachineBasicBlock *&TBB,
-      MachineBasicBlock *&FBB,
-      SmallVectorImpl<MachineOperand> &Cond,
-      bool AllowModify = false
-  ) const override;
+  bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                     MachineBasicBlock *&FBB,
+                     SmallVectorImpl<MachineOperand> &Cond,
+                     bool AllowModify = false) const override;
 
-  unsigned removeBranch(
-      MachineBasicBlock &MBB,
-      int *BytesRemoved = nullptr
-  ) const override;
+  unsigned removeBranch(MachineBasicBlock &MBB,
+                        int *BytesRemoved = nullptr) const override;
 
-  unsigned insertBranch(
-      MachineBasicBlock &MBB,
-      MachineBasicBlock *TBB,
-      MachineBasicBlock *FBB,
-      ArrayRef<MachineOperand> Cond,
-      const DebugLoc &DL,
-      int *BytesAdded = nullptr
-  ) const override;
+  unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                        const DebugLoc &DL,
+                        int *BytesAdded = nullptr) const override;
 
   bool reverseBranchCondition(
-      SmallVectorImpl<MachineOperand> &Cond
-  ) const override;
+      SmallVectorImpl<MachineOperand> &Cond) const override;
 
-  void copyPhysReg(
-      MachineBasicBlock &MBB,
-      MachineBasicBlock::iterator I,
-      const DebugLoc &DL,
-      unsigned DestReg,
-      unsigned SrcReg,
-      bool KillSrc
-  ) const override;
+  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                   bool KillSrc) const override;
 
-  void storeRegToStackSlot(
-      MachineBasicBlock &MBB,
-      MachineBasicBlock::iterator MBBI,
-      unsigned SrcReg,
-      bool isKill,
-      int FrameIndex,
-      const TargetRegisterClass *RC,
-      const TargetRegisterInfo *TRI
-  ) const override;
+  void storeRegToStackSlot(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MBBI, Register SrcReg,
+                           bool isKill, int FrameIndex,
+                           const TargetRegisterClass *RC,
+                           const TargetRegisterInfo *TRI) const override;
 
-  void loadRegFromStackSlot(
-      MachineBasicBlock &MBB,
-      MachineBasicBlock::iterator MBBI,
-      unsigned DestReg,
-      int FrameIndex,
-      const TargetRegisterClass *RC,
-      const TargetRegisterInfo *TRI
-  ) const override;
+  void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI, Register DestReg,
+                            int FrameIndex, const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI) const override;
 };
 
-}
+}  // namespace llvm
 
 #endif

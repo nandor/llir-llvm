@@ -36,16 +36,16 @@ public:
     return nullptr;
   }
 
+  void addIRPasses() override {
+    TargetPassConfig::addIRPasses();
+  }
+
   bool addInstSelector() override
   {
     TargetPassConfig::addInstSelector();
     addPass(createLLIRISelDag(getLLIRTargetMachine()));
     addPass(createLLIRArgumentMove());
     return false;
-  }
-
-  void addIRPasses() override {
-    TargetPassConfig::addIRPasses();
   }
 
   void addPostRegAlloc() override {
@@ -61,10 +61,18 @@ public:
     TargetPassConfig::addPostRegAlloc();
   }
 
+  bool addGCPasses() override { return false; }
+
   void addPreEmitPass() override {
     TargetPassConfig::addPreEmitPass();
     addPass(createLLIRRegisterNumbering());
   }
+
+  // No reg alloc
+  bool addRegAssignmentFast() override { return false; }
+
+  // No reg alloc
+  bool addRegAssignmentOptimized() override { return false; }
 };
 
 } // namespace
@@ -111,7 +119,7 @@ LLIRTargetMachine::LLIRTargetMachine(
         CodeModel::Large,
         OL
     ),
-    TLOF(make_unique<LLIRTargetObjectFile>())
+    TLOF(std::make_unique<LLIRTargetObjectFile>())
 {
   this->Options.TrapUnreachable = true;
   this->Options.NoTrapAfterNoreturn = false;
@@ -141,11 +149,11 @@ LLIRTargetMachine::getSubtargetImpl(const Function &F) const
     // creation will depend on the TM and the code generation flags on the
     // function that reside in TargetOptions.
     resetTargetOptions(F);
-    I = llvm::make_unique<LLIRSubtarget>(
+    I = std::make_unique<LLIRSubtarget>(
         TargetTriple,
         CPU,
         FS,
-        *this
+      *this
     );
   }
   return I.get();
@@ -164,9 +172,4 @@ TargetLoweringObjectFile *LLIRTargetMachine::getObjFileLowering() const
 bool LLIRTargetMachine::isMachineVerifierClean() const
 {
   llvm_unreachable("isMachineVerifierClean");
-}
-
-bool LLIRTargetMachine::usesPhysRegsForPEI() const
-{
-  return false;
 }

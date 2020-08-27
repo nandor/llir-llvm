@@ -25,7 +25,7 @@ void LLIRMachineFunctionInfo::setGMReg(unsigned VReg, unsigned GMReg) {
   }
 
   assert(GMReg != UnusedReg);
-  const auto I = TargetRegisterInfo::virtReg2Index(VReg);
+  const auto I = Register::virtReg2Index(VReg);
   assert(I < GMRegs.size());
   GMRegs[I] = GMReg;
 }
@@ -35,7 +35,7 @@ unsigned LLIRMachineFunctionInfo::getGMReg(unsigned VReg) const {
     GMRegs.resize(MF.getRegInfo().getNumVirtRegs(), UnusedReg);
   }
 
-  const auto I = TargetRegisterInfo::virtReg2Index(VReg);
+  const auto I = Register::virtReg2Index(VReg);
   assert(I < GMRegs.size());
   const auto R = GMRegs[I];
   assert(R != UnusedReg && "Invalid register");
@@ -47,7 +47,7 @@ bool LLIRMachineFunctionInfo::hasGMReg(unsigned VReg) const {
     GMRegs.resize(MF.getRegInfo().getNumVirtRegs(), UnusedReg);
   }
 
-  const auto I = TargetRegisterInfo::virtReg2Index(VReg);
+  const auto I = Register::virtReg2Index(VReg);
   assert(I < GMRegs.size());
   return GMRegs[I] != UnusedReg;
 }

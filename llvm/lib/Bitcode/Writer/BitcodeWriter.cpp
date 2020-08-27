@@ -4810,6 +4810,9 @@ static const char *getSectionNameForBitcode(const Triple &T) {
   case Triple::XCOFF:
     llvm_unreachable("XCOFF is not yet implemented");
     break;
+  case Triple::LLIR:
+    llvm_unreachable("LLIR is not yet implemented");
+    break;
   }
   llvm_unreachable("Unimplemented ObjectFormatType");
 }
@@ -4828,6 +4831,9 @@ static const char *getSectionNameForCommandline(const Triple &T) {
     break;
   case Triple::XCOFF:
     llvm_unreachable("XCOFF is not yet implemented");
+    break;
+  case Triple::LLIR:
+    llvm_unreachable("LLIR is not yet implemented");
     break;
   }
   llvm_unreachable("Unimplemented ObjectFormatType");

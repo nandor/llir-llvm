@@ -245,16 +245,22 @@ namespace CallingConv {
     AMDGPU_Gfx = 100,
 
     /// Calling convention to call OCaml functions.
-    CAML = 101,
+    LLIR_CAML = 101,
 
     /// Calling convention for C from OCaml.
-    CAML_EXT = 102,
+    LLIR_CAML_EXT = 102,
 
     /// Calling convention of the OCaml allocation function.
-    CAML_ALLOC = 103,
+    LLIR_CAML_ALLOC = 103,
 
     /// Calling convention for the OCaml gc trampoline.
-    CAML_GC = 104,
+    LLIR_CAML_GC = 104,
+
+    /// Calling convention for the OCaml gc trampoline.
+    LLIR_CAML_RAISE = 105,
+
+    /// Calling convention for LLIR setjmp.
+    LLIR_SETJMP = 106,
 
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023

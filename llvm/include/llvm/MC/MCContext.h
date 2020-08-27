@@ -53,11 +53,13 @@ namespace llvm {
   class MCSectionMachO;
   class MCSectionWasm;
   class MCSectionXCOFF;
+  class MCSectionLLIR;
   class MCStreamer;
   class MCSymbol;
   class MCSymbolELF;
   class MCSymbolWasm;
   class MCSymbolXCOFF;
+  class MCSymbolLLIR;
   class SMLoc;
   class SourceMgr;
 

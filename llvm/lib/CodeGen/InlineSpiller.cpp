@@ -164,19 +164,20 @@ public:
 
     for (auto &MBB : MF) {
       for (auto &MI : MBB) {
-        if (!MI.isGCFrame())
-          continue;
+        if (!MI.isGCFrame()) continue;
 
         for (auto *MOP : MI.memoperands()) {
-          if (auto *Stk = llvm::dyn_cast_or_null<llvm::FixedStackPseudoSourceValue>(MOP->getPseudoValue())) {
-            if (Slot == Stk->getFrameIndex()) {
-              IsGCSpillCache[Slot] = true;
-              return true;
-            }
+          auto *Stk = llvm::dyn_cast_or_null<llvm::FixedStackPseudoSourceValue>(
+              MOP->getPseudoValue());
+          int Index = Stk->getFrameIndex();
+          if (Stk && Index > 0 && Slot == (unsigned)Index) {
+            IsGCSpillCache[Slot] = true;
+            return true;
           }
         }
       }
     }
+
     IsGCSpillCache[Slot] = false;
     return false;
   }
@@ -505,7 +506,7 @@ void InlineSpiller::eliminateRedundantSpills(LiveInterval &SLI, VNInfo *VNI) {
             MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
             MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
             MFI.getObjectSize(StackSlot),
-            MFI.getObjectAlignment(StackSlot)
+            MFI.getObjectAlign(StackSlot)
         ));
         continue;
       }
@@ -1066,7 +1067,7 @@ void InlineSpiller::spillAroundUses(Register Reg) {
     // Analyze instruction.
     using OpsElem = std::pair<MachineInstr*, unsigned>;
     SmallVector<OpsElem, 8> Ops;
-    auto RI = MIBundleOperands(*MI).analyzeVirtReg(Reg, &Ops);
+    VirtRegInfo RI = AnalyzeVirtRegInBundle(*MI, Reg, &Ops);
     std::sort(Ops.begin(), Ops.end(), [](const OpsElem &a, const OpsElem &b) {
       return b.second < a.second;
     });
@@ -1111,7 +1112,7 @@ void InlineSpiller::spillAroundUses(Register Reg) {
             MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
             MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
             MFI.getObjectSize(StackSlot),
-            MFI.getObjectAlignment(StackSlot)
+            MFI.getObjectAlign(StackSlot)
         ));
       }
       continue;

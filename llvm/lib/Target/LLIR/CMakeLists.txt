@@ -25,6 +25,5 @@ add_llvm_target(LLIRCodeGen
   LLIRTargetObjectFile.cpp
 )
 
-add_subdirectory(InstPrinter)
 add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)
