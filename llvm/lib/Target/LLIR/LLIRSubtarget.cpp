@@ -30,13 +30,13 @@ LLIRSubtarget::LLIRSubtarget(
     const std::string &CPU,
     const std::string &FS,
     const TargetMachine &TM)
-  : LLIRGenSubtargetInfo(TT, CPU, FS)
+  : LLIRGenSubtargetInfo(TT, CPU, /*TrueCPU*/CPU, FS)
   , TargetTriple(TT)
   , InstrInfo(*this)
   , TargetLowering(TM, *this)
   , FrameLowering(*this)
 {
-  ParseSubtargetFeatures(CPU, FS);
+  ParseSubtargetFeatures(CPU, /*TrueCPU*/CPU, FS);
 }
 
 bool LLIRSubtarget::enableMachineScheduler() const

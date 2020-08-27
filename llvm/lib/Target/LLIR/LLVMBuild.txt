@@ -16,7 +16,7 @@
 ;===------------------------------------------------------------------------===;
 
 [common]
-subdirectories = InstPrinter MCTargetDesc TargetInfo
+subdirectories = MCTargetDesc TargetInfo
 
 [component_0]
 type = TargetGroup
@@ -28,5 +28,5 @@ has_asmprinter = 1
 type = Library
 name = LLIRCodeGen
 parent = LLIR
-required_libraries = AsmPrinter CodeGen Core MC SelectionDAG Support Target LLIRAsmPrinter LLIRDesc LLIRInfo
+required_libraries = AsmPrinter CodeGen Core MC SelectionDAG Support Target LLIRDesc LLIRInfo
 add_to_library_groups = LLIR

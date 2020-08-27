@@ -11,6 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include <cassert>
+#include <cstdint>
+
 #include "LLIRMCTargetDesc.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
@@ -30,8 +33,6 @@
 #include "llvm/Support/EndianStream.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
-#include <cassert>
-#include <cstdint>
 
 using namespace llvm;
 
@@ -40,94 +41,64 @@ using namespace llvm;
 namespace {
 
 class LLIRMCCodeEmitter : public MCCodeEmitter {
-public:
+ public:
   LLIRMCCodeEmitter(const MCInstrInfo &MCII, MCContext &Ctx)
-    : MCII(MCII)
-    , Ctx(Ctx)
-  {
-  }
+      : MCII(MCII), Ctx(Ctx) {}
 
   ~LLIRMCCodeEmitter() override = default;
 
-  void encodeInstruction(
-      const MCInst &MI,
-      raw_ostream &OS,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const override;
+  void encodeInstruction(const MCInst &MI, raw_ostream &OS,
+                         SmallVectorImpl<MCFixup> &Fixups,
+                         const MCSubtargetInfo &STI) const override;
 
-  uint64_t getBinaryCodeForInstr(
-      const MCInst &MI,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  uint64_t getBinaryCodeForInstr(const MCInst &MI,
+                                 SmallVectorImpl<MCFixup> &Fixups,
+                                 const MCSubtargetInfo &STI) const;
 
-  unsigned getMachineOpValue(
-      const MCInst &MI,
-      const MCOperand &MO,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  unsigned getMachineOpValue(const MCInst &MI, const MCOperand &MO,
+                             SmallVectorImpl<MCFixup> &Fixups,
+                             const MCSubtargetInfo &STI) const;
 
-  unsigned getCallTargetOpValue(
-      const MCInst &MI,
-      unsigned OpNo,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  unsigned getCallTargetOpValue(const MCInst &MI, unsigned OpNo,
+                                SmallVectorImpl<MCFixup> &Fixups,
+                                const MCSubtargetInfo &STI) const;
 
-  unsigned getBranchTargetOpValue(
-      const MCInst &MI,
-      unsigned OpNo,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  unsigned getBranchTargetOpValue(const MCInst &MI, unsigned OpNo,
+                                  SmallVectorImpl<MCFixup> &Fixups,
+                                  const MCSubtargetInfo &STI) const;
 
-  unsigned getBranchPredTargetOpValue(
-      const MCInst &MI,
-      unsigned OpNo,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  unsigned getBranchPredTargetOpValue(const MCInst &MI, unsigned OpNo,
+                                      SmallVectorImpl<MCFixup> &Fixups,
+                                      const MCSubtargetInfo &STI) const;
 
-  unsigned getBranchOnRegTargetOpValue(
-      const MCInst &MI,
-      unsigned OpNo,
-      SmallVectorImpl<MCFixup> &Fixups,
-      const MCSubtargetInfo &STI
-  ) const;
+  unsigned getBranchOnRegTargetOpValue(const MCInst &MI, unsigned OpNo,
+                                       SmallVectorImpl<MCFixup> &Fixups,
+                                       const MCSubtargetInfo &STI) const;
 
-private:
-  uint64_t computeAvailableFeatures(const FeatureBitset &FB) const;
+ private:
+  FeatureBitset computeAvailableFeatures(const FeatureBitset &FB) const;
 
   void verifyInstructionPredicates(
-      const MCInst &MI,
-      uint64_t AvailableFeatures
-  ) const;
+      const MCInst &MI, const FeatureBitset &AvailableFeatures) const;
 
-private:
+ private:
   const MCInstrInfo &MCII;
   MCContext &Ctx;
 };
 
-} // end anonymous namespace
+}  // end anonymous namespace
 
-void LLIRMCCodeEmitter::encodeInstruction(
-    const MCInst &MI,
-    raw_ostream &OS,
-    SmallVectorImpl<MCFixup> &Fixups,
-    const MCSubtargetInfo &STI) const
-{
-    llvm_unreachable("encodeInstruction() unimplemented");
+void LLIRMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
+                                          SmallVectorImpl<MCFixup> &Fixups,
+                                          const MCSubtargetInfo &STI) const {
+  llvm_unreachable("encodeInstruction() unimplemented");
 }
 
 #define ENABLE_INSTR_PREDICATE_VERIFIER
 #include "LLIRLLIRCCodeEmitter.inc"
 
-MCCodeEmitter *llvm::createLLIRMCCodeEmitter(
-    const MCInstrInfo &MCII,
-    const MCRegisterInfo &MRI,
-    MCContext &Ctx)
-{
+MCCodeEmitter *llvm::createLLIRMCCodeEmitter(const MCInstrInfo &MCII,
+                                             const MCRegisterInfo &MRI,
+                                             MCContext &Ctx) {
   return new LLIRMCCodeEmitter(MCII, Ctx);
 }

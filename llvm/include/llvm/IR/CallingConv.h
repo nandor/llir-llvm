@@ -242,16 +242,22 @@ namespace CallingConv {
     WASM_EmscriptenInvoke = 99,
 
     /// Calling convention to call OCaml functions.
-    CAML = 98,
+    LLIR_CAML = 100,
 
     /// Calling convention for C from OCaml.
-    CAML_EXT = 99,
+    LLIR_CAML_EXT = 101,
 
     /// Calling convention of the OCaml allocation function.
-    CAML_ALLOC = 100,
+    LLIR_CAML_ALLOC = 102,
 
     /// Calling convention for the OCaml gc trampoline.
-    CAML_GC = 101,
+    LLIR_CAML_GC = 103,
+
+    /// Calling convention for the OCaml gc trampoline.
+    LLIR_CAML_RAISE = 104,
+
+    /// Calling convention for LLIR setjmp.
+    LLIR_SETJMP = 105,
 
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023

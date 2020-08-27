@@ -27,23 +27,18 @@ struct LLIRRegisterInfo : public LLIRGenRegisterInfo {
 
   BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-  void eliminateFrameIndex(
-      MachineBasicBlock::iterator II,
-      int SPAdj,
-      unsigned FIOperandNum,
-      RegScavenger *RS = nullptr
-  ) const override;
+  void eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
-  unsigned getFrameRegister(const MachineFunction &MF) const override;
+  Register getFrameRegister(const MachineFunction &MF) const override;
 
   const TargetRegisterClass *getPointerRegClass(
-      const MachineFunction &MF,
-      unsigned Kind = 0
-  ) const override;
+      const MachineFunction &MF, unsigned Kind = 0) const override;
 
   const uint32_t *getNoPreservedMask() const override { return nullptr; }
 };
 
-} // end namespace llvm
+}  // end namespace llvm
 
 #endif

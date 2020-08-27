@@ -30,15 +30,14 @@ public:
 
   StringRef getPassName() const override { return "LLIR Assembly Printer"; }
 
-  void EmitGlobalVariable(const GlobalVariable *GV) override;
-  void EmitFunctionBodyStart() override;
-  void EmitInstruction(const MachineInstr *MI) override;
-  void EmitJumpTableInfo() override;
+  void emitGlobalVariable(const GlobalVariable *GV) override;
+  void emitFunctionBodyStart() override;
+  void emitInstruction(const MachineInstr *MI) override;
+  void emitJumpTableInfo() override;
 
   bool PrintAsmOperand(
       const MachineInstr *MI,
       unsigned OpNo,
-      unsigned AsmVariant,
       const char *ExtraCode,
       raw_ostream &O
   ) override;
@@ -46,7 +45,6 @@ public:
   bool PrintAsmMemoryOperand(
       const MachineInstr *MI,
       unsigned OpNo,
-      unsigned AsmVariant,
       const char *ExtraCode,
       raw_ostream &O
   ) override;

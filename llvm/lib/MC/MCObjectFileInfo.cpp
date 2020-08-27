@@ -19,7 +19,7 @@
 #include "llvm/MC/MCSectionMachO.h"
 #include "llvm/MC/MCSectionWasm.h"
 #include "llvm/MC/MCSectionXCOFF.h"
-#include "llvm/MC/MCSectionlLLIR.h"
+#include "llvm/MC/MCSectionLLIR.h"
 
 using namespace llvm;
 
@@ -970,7 +970,7 @@ MCSection *MCObjectFileInfo::getDwarfComdatSection(const char *Name,
   case Triple::Wasm:
   case Triple::GOFF:
   case Triple::XCOFF:
-  case Triple::lLLIR:
+  case Triple::LLIR:
   case Triple::UnknownObjectFormat:
     report_fatal_error("Cannot get DWARF comdat section for this object file "
                        "format: not implemented.");

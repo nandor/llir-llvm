@@ -40,7 +40,7 @@ public:
   int getFrameIndexReference(
       const MachineFunction &MF,
       int FI,
-      unsigned &FrameReg
+      Register &FrameReg
   ) const override;
 
   bool targetHandlesStackFrameRounding() const override { return true; }

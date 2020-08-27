@@ -38,7 +38,7 @@ using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
 
-void LLIRAsmPrinter::EmitInstruction(const MachineInstr *MI)
+void LLIRAsmPrinter::emitInstruction(const MachineInstr *MI)
 {
   LLVM_DEBUG(dbgs() << "EmitInstruction: " << *MI << '\n');
   auto &MF = *MI->getParent()->getParent();
@@ -49,13 +49,13 @@ void LLIRAsmPrinter::EmitInstruction(const MachineInstr *MI)
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
-void LLIRAsmPrinter::EmitGlobalVariable(const GlobalVariable *GV)
+void LLIRAsmPrinter::emitGlobalVariable(const GlobalVariable *GV)
 {
-  AsmPrinter::EmitGlobalVariable(GV);
+  AsmPrinter::emitGlobalVariable(GV);
   getTargetStreamer().emitEnd();
 }
 
-void LLIRAsmPrinter::EmitFunctionBodyStart()
+void LLIRAsmPrinter::emitFunctionBodyStart()
 {
   MachineFrameInfo &MFI = MF->getFrameInfo();
   auto *FuncInfo = MF->getInfo<LLIRMachineFunctionInfo>();
@@ -68,7 +68,7 @@ void LLIRAsmPrinter::EmitFunctionBodyStart()
       Streamer.emitStackObject(
           I,
           Size,
-          MFI.getAnyObjectAlignment(I)
+          MFI.getAnyObjectAlign(I).value()
       );
     }
   }
@@ -87,23 +87,19 @@ void LLIRAsmPrinter::EmitFunctionBodyStart()
 
   Streamer.emitCallingConv(MF->getFunction().getCallingConv());
 
-  AsmPrinter::EmitFunctionBodyStart();
+  AsmPrinter::emitFunctionBodyStart();
 }
 
-void GenMAsmPrinter::EmitJumpTableInfo() {
+void LLIRAsmPrinter::emitJumpTableInfo() {
   // Nothing to do; jump tables are incorporated into the instruction stream.
 }
 
-bool GenMAsmPrinter::PrintAsmOperand(
+bool LLIRAsmPrinter::PrintAsmOperand(
     const MachineInstr *MI,
     unsigned OpNo,
-    unsigned AsmVariant,
     const char *ExtraCode,
     raw_ostream &O)
 {
-  if (AsmVariant != 0)
-    report_fatal_error("There are no defined alternate asm variants");
-
   if (ExtraCode)
     llvm_unreachable("not implemented");
 
@@ -117,11 +113,10 @@ bool GenMAsmPrinter::PrintAsmOperand(
 bool LLIRAsmPrinter::PrintAsmMemoryOperand(
     const MachineInstr *MI,
     unsigned OpNo,
-    unsigned AsmVariant,
     const char *ExtraCode,
     raw_ostream &O)
 {
-  return PrintAsmOperand(MI, OpNo, AsmVariant, ExtraCode, O);
+  return PrintAsmOperand(MI, OpNo, ExtraCode, O);
 }
 
 LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer()

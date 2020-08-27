@@ -22,89 +22,62 @@ using namespace llvm;
 namespace {
 
 class LLIRAsmBackend : public MCAsmBackend {
-protected:
+ protected:
   const Target &TheTarget;
 
-public:
+ public:
   LLIRAsmBackend(const Target &T)
-      : MCAsmBackend(support::little)
-      , TheTarget(T)
-  {
-  }
+      : MCAsmBackend(support::little), TheTarget(T) {}
 
-  unsigned getNumFixupKinds() const override
-  {
-    return 0;
-  }
+  unsigned getNumFixupKinds() const override { return 0; }
 
-  void applyFixup(
-      const MCAssembler &Asm,
-      const MCFixup &Fixup,
-      const MCValue &Target,
-      MutableArrayRef<char> Data,
-      uint64_t Value,
-      bool IsResolved,
-      const MCSubtargetInfo *STI) const override
-  {
+  void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
+                  const MCValue &Target, MutableArrayRef<char> Data,
+                  uint64_t Value, bool IsResolved,
+                  const MCSubtargetInfo *STI) const override {
     llvm_unreachable("applyFixup() unimplemented");
   }
 
-  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override
-  {
+  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override {
     llvm_unreachable("getFixupKindInfo() unimplemented");
   }
 
-  bool shouldForceRelocation(
-      const MCAssembler &Asm,
-      const MCFixup &Fixup,
-      const MCValue &Target) override
-  {
+  bool shouldForceRelocation(const MCAssembler &Asm, const MCFixup &Fixup,
+                             const MCValue &Target) override {
     llvm_unreachable("shouldForceRelocation() unimplemented");
   }
 
-  bool mayNeedRelaxation(
-      const MCInst &Inst,
-      const MCSubtargetInfo &STI) const override
-  {
+  bool mayNeedRelaxation(const MCInst &Inst,
+                         const MCSubtargetInfo &STI) const override {
     llvm_unreachable("mayNeedRelaxation() unimplemented");
   }
 
-  bool fixupNeedsRelaxation(
-      const MCFixup &Fixup,
-      uint64_t Value,
-      const MCRelaxableFragment *DF,
-      const MCAsmLayout &Layout) const override
-  {
+  bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value,
+                            const MCRelaxableFragment *DF,
+                            const MCAsmLayout &Layout) const override {
     llvm_unreachable("fixupNeedsRelaxation() unimplemented");
   }
 
-  void relaxInstruction(
-      const MCInst &Inst,
-      const MCSubtargetInfo &STI,
-      MCInst &Res) const override
-  {
+  void relaxInstruction(MCInst &Inst,
+                        const MCSubtargetInfo &STI) const override {
     llvm_unreachable("relaxInstruction() unimplemented");
   }
 
-  bool writeNopData(raw_ostream &OS, uint64_t Count) const override
-  {
+  bool writeNopData(raw_ostream &OS, uint64_t Count) const override {
     llvm_unreachable("writeNopData() unimplemented");
   }
 
-  std::unique_ptr<MCObjectTargetWriter>
-  createObjectTargetWriter() const override
-  {
+  std::unique_ptr<MCObjectTargetWriter> createObjectTargetWriter()
+      const override {
     return createLLIRObjectWriter();
   }
 };
 
-} // end anonymous namespace
+}  // end anonymous namespace
 
-MCAsmBackend *llvm::createLLIRAsmBackend(
-    const Target &T,
-    const MCSubtargetInfo &STI,
-    const MCRegisterInfo &MRI,
-    const MCTargetOptions &Options)
-{
+MCAsmBackend *llvm::createLLIRAsmBackend(const Target &T,
+                                         const MCSubtargetInfo &STI,
+                                         const MCRegisterInfo &MRI,
+                                         const MCTargetOptions &Options) {
   return new LLIRAsmBackend(T);
 }

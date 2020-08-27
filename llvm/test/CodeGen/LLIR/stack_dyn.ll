@@ -6,7 +6,7 @@ declare void @use_i8_star(i8*)
 declare i8* @llvm.frameaddress(i32)
 
 ; CHECK-LABEL: dynamic_alloca:
-; CHECK-NEXT: .args 0, i32
+; CHECK-NEXT: .args i32
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca(i32 %alloc) {
@@ -14,10 +14,9 @@ define void @dynamic_alloca(i32 %alloc) {
  call void @ext_func_i32(i32* %r)
  ret void
 }
-; CHECK: .end
 
 ; CHECK-LABEL: dynamic_alloca_redzone:
-; CHECK-NEXT: .args 0, i32
+; CHECK-NEXT: .args i32
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca_redzone(i32 %alloc) {
@@ -25,11 +24,10 @@ define void @dynamic_alloca_redzone(i32 %alloc) {
  store i32 0, i32* %r
  ret void
 }
-; CHECK: .end
 
 ; CHECK-LABEL: dynamic_static_alloca:
 ; CHECK-NEXT: .stack_object 0, 4, 4
-; CHECK-NEXT: .args 0, i32
+; CHECK-NEXT: .args i32
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_static_alloca(i32 %alloc) noredzone {
@@ -44,14 +42,13 @@ define void @dynamic_static_alloca(i32 %alloc) noredzone {
  store volatile i32 106, i32* %dynamic.2
  ret void
 }
-; CHECK: .end
 
 
 declare i8* @llvm.stacksave()
 declare void @llvm.stackrestore(i8*)
 
 ; CHECK-LABEL: llvm_stack_builtins:
-; CHECK-NEXT: .args 0, i32
+; CHECK-NEXT: .args i32
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @llvm_stack_builtins(i32 %alloc) noredzone {
@@ -60,21 +57,19 @@ define void @llvm_stack_builtins(i32 %alloc) noredzone {
  call void @llvm.stackrestore(i8* %stack)
  ret void
 }
-; CHECK: .end
 
 ; CHECK-LABEL: dynamic_alloca_nouse:
-; CHECK-NEXT: .args 0, i32
+; CHECK-NEXT: .args i32
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @dynamic_alloca_nouse(i32 %alloc) noredzone {
  %dynamic = alloca i32, i32 %alloc
  ret void
 }
-; CHECK: .end
 
 ; CHECK-LABEL: copytoreg_fi:
 ; CHECK-NEXT: .stack_object 0, 4, 4
-; CHECK-NEXT: .args 0, i8, i64
+; CHECK-NEXT: .args i8, i64
 ; CHECK-NEXT: .call c
 ; CHECK-NEXT: # %bb.0:
 define void @copytoreg_fi(i1 %cond, i32* %b) {
@@ -88,7 +83,6 @@ body:
 exit:
  ret void
 }
-; CHECK: .end
 
 
 ; CHECK-LABEL: frameaddress_0:
@@ -99,7 +93,6 @@ define void @frameaddress_0() {
   call void @use_i8_star(i8* %t)
   ret void
 }
-; CHECK: .end
 
 ; CHECK-LABEL: frameaddress_1:
 ; CHECK-NEXT: .call c
@@ -109,5 +102,4 @@ define void @frameaddress_1() {
   call void @use_i8_star(i8* %t)
   ret void
 }
-; CHECK: .end
 

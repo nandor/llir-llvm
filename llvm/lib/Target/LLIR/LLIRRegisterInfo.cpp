@@ -72,7 +72,7 @@ void LLIRRegisterInfo::eliminateFrameIndex(
   MI.getOperand(FIOperandNum).ChangeToRegister(TempReg, false);
 }
 
-unsigned LLIRRegisterInfo::getFrameRegister(const MachineFunction &MF) const
+Register LLIRRegisterInfo::getFrameRegister(const MachineFunction &MF) const
 {
   return LLIR::NUM_TARGET_REGS;
 }

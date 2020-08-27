@@ -49,5 +49,5 @@ namespace {
 
 std::unique_ptr<MCObjectTargetWriter> llvm::createLLIRObjectWriter()
 {
-  return llvm::make_unique<LLIRObjectWriter>();
+  return std::make_unique<LLIRObjectWriter>();
 }

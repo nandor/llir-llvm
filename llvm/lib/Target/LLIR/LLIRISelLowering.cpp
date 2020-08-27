@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "LLIRISelLowering.h"
+
 #include "LLIRMachineFunctionInfo.h"
 #include "LLIRRegisterInfo.h"
 #include "LLIRTargetMachine.h"
@@ -33,30 +34,23 @@
 #include "llvm/IR/DiagnosticPrinter.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Intrinsics.h"
+#include "llvm/IR/IntrinsicsX86.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
 using namespace llvm;
 
-static void Fail(const SDLoc &DL, SelectionDAG &DAG, const char *msg)
-{
+static void Fail(const SDLoc &DL, SelectionDAG &DAG, const char *msg) {
   DAG.getContext()->diagnose(DiagnosticInfoUnsupported(
-      DAG.getMachineFunction().getFunction(),
-      msg,
-      DL.getDebugLoc()
-  ));
+      DAG.getMachineFunction().getFunction(), msg, DL.getDebugLoc()));
 }
 
-LLIRTargetLowering::LLIRTargetLowering(
-    const TargetMachine &TM,
-    const LLIRSubtarget &STI)
-  : TargetLowering(TM)
-  , Subtarget(&STI)
-{
+LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
+                                       const LLIRSubtarget &STI)
+    : TargetLowering(TM), Subtarget(&STI) {
   auto MVTPtr = MVT::i64;
 
   setBooleanContents(ZeroOrOneBooleanContent);
-  setHasFloatingPointExceptions(false);
   setSchedulingPreference(Sched::RegPressure);
   setMaxAtomicSizeInBitsSupported(64);
 
@@ -94,23 +88,24 @@ LLIRTargetLowering::LLIRTargetLowering(
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Expand conditional branches and selects.
-  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80 }) {
+  for (auto T :
+       {MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80}) {
     for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
       setOperationAction(Op, T, Expand);
     }
   }
 
   // Deal with floating point operations.
-  for (auto T : { MVT::f32, MVT::f64, MVT::f80 }) {
+  for (auto T : {MVT::f32, MVT::f64, MVT::f80}) {
     setOperationAction(ISD::ConstantFP, T, Legal);
-    setOperationAction(ISD::FEXP,   T, Legal);
-    setOperationAction(ISD::FEXP2,  T, Legal);
-    setOperationAction(ISD::FLOG,   T, Legal);
-    setOperationAction(ISD::FLOG2,  T, Legal);
+    setOperationAction(ISD::FEXP, T, Legal);
+    setOperationAction(ISD::FEXP2, T, Legal);
+    setOperationAction(ISD::FLOG, T, Legal);
+    setOperationAction(ISD::FLOG2, T, Legal);
     setOperationAction(ISD::FLOG10, T, Legal);
 
     // Expand floating-point comparisons.
-    for (auto CC : { ISD::SETO, ISD::SETUO }) {
+    for (auto CC : {ISD::SETO, ISD::SETUO}) {
       setCondCodeAction(CC, T, Expand);
     }
 
@@ -119,7 +114,7 @@ LLIRTargetLowering::LLIRTargetLowering(
   }
 
   // Disable some integer operations.
-  for (auto T : { MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
+  for (auto T : {MVT::i8, MVT::i16, MVT::i32, MVT::i64}) {
     // Custom lowering for some actions.
     setOperationAction(ISD::SADDO, T, Custom);
     setOperationAction(ISD::UADDO, T, Custom);
@@ -146,7 +141,7 @@ LLIRTargetLowering::LLIRTargetLowering(
   }
 
   // Disable in-register sign extension.
-  for (auto T : { MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::i64 }) {
+  for (auto T : {MVT::i1, MVT::i8, MVT::i16, MVT::i32, MVT::i64}) {
     setOperationAction(ISD::SIGN_EXTEND_INREG, T, Expand);
   }
 
@@ -174,29 +169,49 @@ LLIRTargetLowering::LLIRTargetLowering(
   setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 }
 
-SDValue LLIRTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
+                                           SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
-    case ISD::FRAMEADDR:          return LowerFRAMEADDR(Op, DAG);
-    case ISD::FrameIndex:         return LowerFrameIndex(Op, DAG);
-    case ISD::GlobalAddress:      return LowerGlobalAddress(Op, DAG);
-    case ISD::ExternalSymbol:     return LowerExternalSymbol(Op, DAG);
-    case ISD::JumpTable:          return LowerJumpTable(Op, DAG);
-    case ISD::BR_JT:              return LowerBR_JT(Op, DAG);
-    case ISD::DYNAMIC_STACKALLOC: return LowerDynamicStackalloc(Op, DAG);
-    case ISD::VASTART:            return LowerVASTART(Op, DAG);
-    case ISD::VAARG:              return LowerVAARG(Op, DAG);
-    case ISD::VACOPY:             return LowerVACOPY(Op, DAG);
-    case ISD::CopyToReg:          return LowerCopyToReg(Op, DAG);
-    case ISD::SADDO:              return LowerALUO(Op, DAG);
-    case ISD::UADDO:              return LowerALUO(Op, DAG);
-    case ISD::SSUBO:              return LowerALUO(Op, DAG);
-    case ISD::USUBO:              return LowerALUO(Op, DAG);
-    case ISD::SMULO:              return LowerALUO(Op, DAG);
-    case ISD::UMULO:              return LowerALUO(Op, DAG);
-    case ISD::INTRINSIC_WO_CHAIN: return LowerINTRINSIC_WO_CHAIN(Op, DAG);
-    case ISD::INTRINSIC_W_CHAIN:  return LowerINTRINSIC_W_CHAIN(Op, DAG);
-    case ISD::INTRINSIC_VOID:     return LowerINTRINSIC_VOID(Op, DAG);
+    case ISD::FRAMEADDR:
+      return LowerFRAMEADDR(Op, DAG);
+    case ISD::FrameIndex:
+      return LowerFrameIndex(Op, DAG);
+    case ISD::GlobalAddress:
+      return LowerGlobalAddress(Op, DAG);
+    case ISD::ExternalSymbol:
+      return LowerExternalSymbol(Op, DAG);
+    case ISD::JumpTable:
+      return LowerJumpTable(Op, DAG);
+    case ISD::BR_JT:
+      return LowerBR_JT(Op, DAG);
+    case ISD::DYNAMIC_STACKALLOC:
+      return LowerDynamicStackalloc(Op, DAG);
+    case ISD::VASTART:
+      return LowerVASTART(Op, DAG);
+    case ISD::VAARG:
+      return LowerVAARG(Op, DAG);
+    case ISD::VACOPY:
+      return LowerVACOPY(Op, DAG);
+    case ISD::CopyToReg:
+      return LowerCopyToReg(Op, DAG);
+    case ISD::SADDO:
+      return LowerALUO(Op, DAG);
+    case ISD::UADDO:
+      return LowerALUO(Op, DAG);
+    case ISD::SSUBO:
+      return LowerALUO(Op, DAG);
+    case ISD::USUBO:
+      return LowerALUO(Op, DAG);
+    case ISD::SMULO:
+      return LowerALUO(Op, DAG);
+    case ISD::UMULO:
+      return LowerALUO(Op, DAG);
+    case ISD::INTRINSIC_WO_CHAIN:
+      return LowerINTRINSIC_WO_CHAIN(Op, DAG);
+    case ISD::INTRINSIC_W_CHAIN:
+      return LowerINTRINSIC_W_CHAIN(Op, DAG);
+    case ISD::INTRINSIC_VOID:
+      return LowerINTRINSIC_VOID(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -204,24 +219,20 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
   }
 }
 
-SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op, SelectionDAG &DAG) const
-{
-  return DAG.getCopyFromReg(
-      Op.getOperand(0),
-      SDLoc(Op),
-      LLIR::FRAME_ADDR,
-      MVT::i64
-  );
+SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op,
+                                           SelectionDAG &DAG) const {
+  return DAG.getCopyFromReg(Op.getOperand(0), SDLoc(Op), LLIR::FRAME_ADDR,
+                            MVT::i64);
 }
 
-SDValue LLIRTargetLowering::LowerFrameIndex(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerFrameIndex(SDValue Op,
+                                            SelectionDAG &DAG) const {
   const auto *FI = cast<FrameIndexSDNode>(Op);
   return DAG.getTargetFrameIndex(FI->getIndex(), Op.getValueType());
 }
 
-SDValue LLIRTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerGlobalAddress(SDValue Op,
+                                               SelectionDAG &DAG) const {
   SDLoc DL(Op);
 
   const auto *GA = cast<GlobalAddressSDNode>(Op);
@@ -234,36 +245,23 @@ SDValue LLIRTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) co
 
   EVT VT = Op.getValueType();
   return DAG.getNode(
-      LLIRISD::SYMBOL,
-      DL,
-      VT,
-      DAG.getTargetGlobalAddress(
-          GA->getGlobal(),
-          DL,
-          VT,
-          GA->getOffset()
-      )
-  );
+      LLIRISD::SYMBOL, DL, VT,
+      DAG.getTargetGlobalAddress(GA->getGlobal(), DL, VT, GA->getOffset()));
 }
 
-SDValue LLIRTargetLowering::LowerExternalSymbol(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerExternalSymbol(SDValue Op,
+                                                SelectionDAG &DAG) const {
   SDLoc DL(Op);
   const auto *ES = cast<ExternalSymbolSDNode>(Op);
   EVT VT = Op.getValueType();
   if (ES->getTargetFlags() != 0) {
     Fail(DL, DAG, "Unexpected target flags");
   }
-  return DAG.getNode(
-      LLIRISD::SYMBOL,
-      DL,
-      VT,
-      DAG.getTargetExternalSymbol(ES->getSymbol(), VT)
-  );
+  return DAG.getNode(LLIRISD::SYMBOL, DL, VT,
+                     DAG.getTargetExternalSymbol(ES->getSymbol(), VT));
 }
 
-SDValue LLIRTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
   SDValue Chain = Op.getOperand(0);
 
@@ -284,47 +282,30 @@ SDValue LLIRTargetLowering::LowerBR_JT(SDValue Op, SelectionDAG &DAG) const
   return DAG.getNode(LLIRISD::SWITCH, DL, MVT::Other, Ops);
 }
 
-SDValue LLIRTargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerJumpTable(SDValue Op,
+                                           SelectionDAG &DAG) const {
   const JumpTableSDNode *JT = cast<JumpTableSDNode>(Op);
-  return DAG.getTargetJumpTable(
-      JT->getIndex(),
-      Op.getValueType(),
-      JT->getTargetFlags()
-  );
+  return DAG.getTargetJumpTable(JT->getIndex(), Op.getValueType(),
+                                JT->getTargetFlags());
 }
 
-SDValue LLIRTargetLowering::LowerDynamicStackalloc(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerDynamicStackalloc(SDValue Op,
+                                                   SelectionDAG &DAG) const {
   SDVTList VTs = DAG.getVTList(MVT::i64, MVT::Other);
-  return DAG.getNode(
-      LLIRISD::ALLOCA,
-      SDLoc(Op),
-      VTs,
-      Op.getOperand(0),
-      Op.getOperand(1),
-      Op.getOperand(2)
-  );
+  return DAG.getNode(LLIRISD::ALLOCA, SDLoc(Op), VTs, Op.getOperand(0),
+                     Op.getOperand(1), Op.getOperand(2));
 }
 
-SDValue LLIRTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const
-{
-  return DAG.getNode(
-      LLIRISD::VASTART,
-      SDLoc(Op),
-      MVT::Other,
-      Op.getOperand(0),
-      Op.getOperand(1)
-  );
+SDValue LLIRTargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const {
+  return DAG.getNode(LLIRISD::VASTART, SDLoc(Op), MVT::Other, Op.getOperand(0),
+                     Op.getOperand(1));
 }
 
-SDValue LLIRTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const {
   llvm_unreachable("not implemented");
 }
 
-SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const {
   // See the X86ISelLowering implementation
   SDValue Chain = Op.getOperand(0);
   SDValue DstPtr = Op.getOperand(1);
@@ -333,14 +314,13 @@ SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const
   const Value *SrcSV = cast<SrcValueSDNode>(Op.getOperand(4))->getValue();
   SDLoc DL(Op);
 
-  return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr,
-                       DAG.getIntPtrConstant(24, DL), 8, /*isVolatile*/false,
-                       false, false,
+  return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr, DAG.getIntPtrConstant(24, DL),
+                       Align(8), /*isVolatile*/ false, false, false,
                        MachinePointerInfo(DstSV), MachinePointerInfo(SrcSV));
 }
 
-SDValue LLIRTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerCopyToReg(SDValue Op,
+                                           SelectionDAG &DAG) const {
   SDValue Src = Op.getOperand(2);
   if (isa<FrameIndexSDNode>(Src.getNode())) {
     SDValue Chain = Op.getOperand(0);
@@ -349,11 +329,16 @@ SDValue LLIRTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
     EVT VT = Src.getValueType();
 
     unsigned MovOp;
-    if (VT == MVT::i8) MovOp = LLIR::MOV_I8;
-    else if (VT == MVT::i16) MovOp = LLIR::MOV_I16;
-    else if (VT == MVT::i32) MovOp = LLIR::MOV_I32;
-    else if (VT == MVT::i64) MovOp = LLIR::MOV_I64;
-    else llvm_unreachable("invalid copy type");
+    if (VT == MVT::i8)
+      MovOp = LLIR::MOV_I8;
+    else if (VT == MVT::i16)
+      MovOp = LLIR::MOV_I16;
+    else if (VT == MVT::i32)
+      MovOp = LLIR::MOV_I32;
+    else if (VT == MVT::i64)
+      MovOp = LLIR::MOV_I64;
+    else
+      llvm_unreachable("invalid copy type");
 
     SDValue Copy(DAG.getMachineNode(MovOp, DL, VT, Src), 0);
 
@@ -362,19 +347,14 @@ SDValue LLIRTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const
       return DAG.getCopyToReg(Chain, DL, Reg, Copy);
     } else {
       return DAG.getCopyToReg(
-          Chain,
-          DL,
-          Reg,
-          Copy,
-          Op.getNumOperands() == 4 ? Op.getOperand(3) : SDValue()
-      );
+          Chain, DL, Reg, Copy,
+          Op.getNumOperands() == 4 ? Op.getOperand(3) : SDValue());
     }
   }
   return SDValue();
 }
 
-SDValue LLIRTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue LLIRTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
   SDNode *N = Op.getNode();
   SDValue LHS = N->getOperand(0);
@@ -382,12 +362,30 @@ SDValue LLIRTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
 
   unsigned vop, op;
   switch (Op.getOpcode()) {
-    case ISD::SADDO: vop = ISD::ADD; op = LLIRISD::SADDO; break;
-    case ISD::UADDO: vop = ISD::ADD; op = LLIRISD::UADDO; break;
-    case ISD::SSUBO: vop = ISD::SUB; op = LLIRISD::SSUBO; break;
-    case ISD::USUBO: vop = ISD::SUB; op = LLIRISD::USUBO; break;
-    case ISD::SMULO: vop = ISD::MUL; op = LLIRISD::SMULO; break;
-    case ISD::UMULO: vop = ISD::MUL; op = LLIRISD::UMULO; break;
+    case ISD::SADDO:
+      vop = ISD::ADD;
+      op = LLIRISD::SADDO;
+      break;
+    case ISD::UADDO:
+      vop = ISD::ADD;
+      op = LLIRISD::UADDO;
+      break;
+    case ISD::SSUBO:
+      vop = ISD::SUB;
+      op = LLIRISD::SSUBO;
+      break;
+    case ISD::USUBO:
+      vop = ISD::SUB;
+      op = LLIRISD::USUBO;
+      break;
+    case ISD::SMULO:
+      vop = ISD::MUL;
+      op = LLIRISD::SMULO;
+      break;
+    case ISD::UMULO:
+      vop = ISD::MUL;
+      op = LLIRISD::UMULO;
+      break;
   }
 
   SDValue Result = DAG.getNode(vop, DL, N->getValueType(0), LHS, RHS);
@@ -395,111 +393,117 @@ SDValue LLIRTargetLowering::LowerALUO(SDValue Op, SelectionDAG &DAG) const
   return DAG.getNode(ISD::MERGE_VALUES, DL, N->getVTList(), Result, Flag);
 }
 
-SDValue LLIRTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op, SelectionDAG &DAG) const {
+SDValue LLIRTargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
+                                                    SelectionDAG &DAG) const {
   llvm_unreachable("invalid intrinsic");
 }
 
-SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const {
+SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
+                                                   SelectionDAG &DAG) const {
   switch (cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue()) {
-  case llvm::Intrinsic::x86_rdtsc: {
-    return DAG.getNode(
-        LLIRISD::RDTSC,
-        SDLoc(Op),
-        DAG.getVTList(MVT::i64, MVT::Other),
-        Op.getOperand(0)
-    );
-  }
+    case Intrinsic::x86_rdtsc: {
+      return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
+                         DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
+    }
   }
   llvm_unreachable("invalid intrinsic");
 }
 
-SDValue LLIRTargetLowering::LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const {
+SDValue LLIRTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
+                                                SelectionDAG &DAG) const {
   llvm_unreachable("invalid intrinsic");
 }
 
 MachineBasicBlock *LLIRTargetLowering::EmitInstrWithCustomInserter(
-    MachineInstr &MI,
-    MachineBasicBlock *MBB) const
-{
+    MachineInstr &MI, MachineBasicBlock *MBB) const {
   llvm_unreachable("EmitInstrWithCustomInserter");
 }
 
-const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const
-{
+const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch (static_cast<LLIRISD::NodeType>(Opcode)) {
-  case LLIRISD::FIRST_NUMBER: return nullptr;
-  case LLIRISD::RETURN:       return "LLIRISD::RETURN";
-  case LLIRISD::ARGUMENT:     return "LLIRISD::ARGUMENT";
-  case LLIRISD::CALL:         return "LLIRISD::CALL";
-  case LLIRISD::TCALL:        return "LLIRISD::TCALL";
-  case LLIRISD::VOID:         return "LLIRISD::VOID";
-  case LLIRISD::TVOID:        return "LLIRISD::TVOID";
-  case LLIRISD::SYMBOL:       return "LLIRISD::SYMBOL";
-  case LLIRISD::SWITCH:       return "LLIRISD::SWITCH";
-  case LLIRISD::VASTART:      return "LLIRISD::VASTART";
-  case LLIRISD::SADDO:        return "LLIRISD::SADDO";
-  case LLIRISD::UADDO:        return "LLIRISD::UADDO";
-  case LLIRISD::SSUBO:        return "LLIRISD::SSUBO";
-  case LLIRISD::USUBO:        return "LLIRISD::USUBO";
-  case LLIRISD::SMULO:        return "LLIRISD::SMULO";
-  case LLIRISD::UMULO:        return "LLIRISD::UMULO";
-  case LLIRISD::ALLOCA:       return "LLIRISD::ALLOCA";
-  case LLIRISD::RDTSC:        return "LLIRISD::RDTSC";
+    case LLIRISD::FIRST_NUMBER:
+      return nullptr;
+    case LLIRISD::RETURN:
+      return "LLIRISD::RETURN";
+    case LLIRISD::ARGUMENT:
+      return "LLIRISD::ARGUMENT";
+    case LLIRISD::CALL:
+      return "LLIRISD::CALL";
+    case LLIRISD::TCALL:
+      return "LLIRISD::TCALL";
+    case LLIRISD::VOID:
+      return "LLIRISD::VOID";
+    case LLIRISD::TVOID:
+      return "LLIRISD::TVOID";
+    case LLIRISD::SYMBOL:
+      return "LLIRISD::SYMBOL";
+    case LLIRISD::SWITCH:
+      return "LLIRISD::SWITCH";
+    case LLIRISD::VASTART:
+      return "LLIRISD::VASTART";
+    case LLIRISD::SADDO:
+      return "LLIRISD::SADDO";
+    case LLIRISD::UADDO:
+      return "LLIRISD::UADDO";
+    case LLIRISD::SSUBO:
+      return "LLIRISD::SSUBO";
+    case LLIRISD::USUBO:
+      return "LLIRISD::USUBO";
+    case LLIRISD::SMULO:
+      return "LLIRISD::SMULO";
+    case LLIRISD::UMULO:
+      return "LLIRISD::UMULO";
+    case LLIRISD::ALLOCA:
+      return "LLIRISD::ALLOCA";
+    case LLIRISD::RDTSC:
+      return "LLIRISD::RDTSC";
   }
   llvm_unreachable("invalid opcode");
 }
 
 std::pair<unsigned, const TargetRegisterClass *>
-LLIRTargetLowering::getRegForInlineAsmConstraint(
-    const TargetRegisterInfo *TRI,
-    StringRef Constraint,
-    MVT VT) const
-{
+LLIRTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
+                                                 StringRef Constraint,
+                                                 MVT VT) const {
   if (Constraint.size() == 1) {
     switch (Constraint[0]) {
-    default:
-      break;
-    case 'r':
-      if (VT.getSizeInBits() == 8)
-        return std::make_pair(0U, &LLIR::I8RegClass);
-      if (VT.getSizeInBits() == 16)
-        return std::make_pair(0U, &LLIR::I16RegClass);
-      if (VT.getSizeInBits() == 32)
-        return std::make_pair(0U, &LLIR::I32RegClass);
-      if (VT.getSizeInBits() == 64)
-        return std::make_pair(0U, &LLIR::I64RegClass);
-      break;
+      default:
+        break;
+      case 'r':
+        if (VT.getSizeInBits() == 8)
+          return std::make_pair(0U, &LLIR::I8RegClass);
+        if (VT.getSizeInBits() == 16)
+          return std::make_pair(0U, &LLIR::I16RegClass);
+        if (VT.getSizeInBits() == 32)
+          return std::make_pair(0U, &LLIR::I32RegClass);
+        if (VT.getSizeInBits() == 64)
+          return std::make_pair(0U, &LLIR::I64RegClass);
+        break;
     }
   }
 
   return TargetLowering::getRegForInlineAsmConstraint(TRI, Constraint, VT);
 }
 
-bool LLIRTargetLowering::isOffsetFoldingLegal(const GlobalAddressSDNode *GA) const
-{
+bool LLIRTargetLowering::isOffsetFoldingLegal(
+    const GlobalAddressSDNode *GA) const {
   return true;
 }
 
-MVT LLIRTargetLowering::getScalarShiftAmountTy(
-    const DataLayout &DL,
-    EVT VT) const
-{
+MVT LLIRTargetLowering::getScalarShiftAmountTy(const DataLayout &DL,
+                                               EVT VT) const {
   return MVT::i8;
 }
 
-EVT LLIRTargetLowering::getSetCCResultType(
-    const DataLayout &DL,
-    LLVMContext &Context,
-    EVT VT) const
-{
+EVT LLIRTargetLowering::getSetCCResultType(const DataLayout &DL,
+                                           LLVMContext &Context, EVT VT) const {
   if (!VT.isVector()) {
     return MVT::i8;
   }
   llvm_unreachable("getSetCCResultType");
 }
 
-static bool isCallingConvSupported(CallingConv::ID ID)
-{
+static bool isCallingConvSupported(CallingConv::ID ID) {
   switch (ID) {
     case CallingConv::C:
     case CallingConv::Fast:
@@ -511,14 +515,9 @@ static bool isCallingConvSupported(CallingConv::ID ID)
 }
 
 SDValue LLIRTargetLowering::LowerFormalArguments(
-    SDValue Chain,
-    CallingConv::ID CallConv,
-    bool IsVarArg,
-    const SmallVectorImpl<ISD::InputArg> &Ins,
-    const SDLoc &DL,
-    SelectionDAG &DAG,
-    SmallVectorImpl<SDValue> &InVals) const
-{
+    SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
+    const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
+    SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<LLIRMachineFunctionInfo>();
 
@@ -530,22 +529,17 @@ SDValue LLIRTargetLowering::LowerFormalArguments(
 
   for (const auto &In : Ins) {
     // TODO(nand): check for argument types.
-    InVals.push_back(DAG.getNode(
-        LLIRISD::ARGUMENT,
-        DL,
-        In.VT,
-        DAG.getTargetConstant(InVals.size(), DL, MVT::i32)
-    ));
+    InVals.push_back(
+        DAG.getNode(LLIRISD::ARGUMENT, DL, In.VT,
+                    DAG.getTargetConstant(InVals.size(), DL, MVT::i32)));
     MFI->addParam(In.VT);
   }
 
   return Chain;
 }
 
-SDValue LLIRTargetLowering::LowerCall(
-    TargetLowering::CallLoweringInfo &CLI,
-    SmallVectorImpl<SDValue> &InVals) const
-{
+SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+                                      SmallVectorImpl<SDValue> &InVals) const {
   SelectionDAG &DAG = CLI.DAG;
   SDLoc DL = CLI.DL;
   SDValue Chain = CLI.Chain;
@@ -553,19 +547,11 @@ SDValue LLIRTargetLowering::LowerCall(
   CallingConv::ID CallConv = CLI.CallConv;
 
   MachineFunction &MF = DAG.getMachineFunction();
-  const auto *CI = dyn_cast_or_null<CallInst>(CLI.CS.getInstruction());
-  const Function *Fn = CI ? CI->getCalledFunction() : nullptr;
   const Module *M = MF.getMMI().getModule();
   Metadata *IsCFProtectionSupported = M->getModuleFlag("cf-protection-branch");
 
   if (CLI.Ins.size() > 1) {
     Fail(DL, DAG, "more than 1 return value not supported");
-  }
-
-  bool HasCINSCR = CI && CI->hasFnAttr("no_caller_saved_registers");
-  bool HasFnNSCR = Fn && Fn->hasFnAttribute("no_caller_saved_registers");
-  if (HasCINSCR || HasFnNSCR) {
-    Fail(DL, DAG, "unsupported no_caller_saved_registers");
   }
 
   if (!isCallingConvSupported(CallConv)) {
@@ -589,7 +575,8 @@ SDValue LLIRTargetLowering::LowerCall(
   // Add all arguments to the call.
   Ops.push_back(Chain);
   Ops.push_back(Callee);
-  Ops.push_back(DAG.getTargetConstant(static_cast<int>(CallConv), DL, MVT::i32));
+  Ops.push_back(
+      DAG.getTargetConstant(static_cast<int>(CallConv), DL, MVT::i32));
   if (CLI.IsVarArg) {
     Ops.push_back(DAG.getTargetConstant(NumFixedArgs, DL, MVT::i32));
   }
@@ -605,27 +592,16 @@ SDValue LLIRTargetLowering::LowerCall(
 
   // Construct the call node.
   if (CLI.Ins.empty()) {
-    return DAG.getNode(
-        CLI.IsTailCall ? LLIRISD::TVOID : LLIRISD::VOID,
-        DL,
-        DAG.getVTList(InTys),
-        Ops
-    );
+    return DAG.getNode(CLI.IsTailCall ? LLIRISD::TVOID : LLIRISD::VOID, DL,
+                       DAG.getVTList(InTys), Ops);
   } else {
     if (CLI.IsTailCall) {
-      return DAG.getNode(
-          LLIRISD::TCALL,
-          DL,
-          DAG.getVTList(InTys),
-          Ops
-      ).getValue(1);
+      return DAG.getNode(LLIRISD::TCALL, DL, DAG.getVTList(InTys), Ops)
+          .getValue(1);
     } else {
-      SDValue Call = DAG.getNode(
-          CLI.IsTailCall ? LLIRISD::TCALL : LLIRISD::CALL,
-          DL,
-          DAG.getVTList(InTys),
-          Ops
-      );
+      SDValue Call =
+          DAG.getNode(CLI.IsTailCall ? LLIRISD::TCALL : LLIRISD::CALL, DL,
+                      DAG.getVTList(InTys), Ops);
       InVals.push_back(Call);
       return Call.getValue(1);
     }
@@ -633,24 +609,16 @@ SDValue LLIRTargetLowering::LowerCall(
 }
 
 bool LLIRTargetLowering::CanLowerReturn(
-    CallingConv::ID CallConv,
-    MachineFunction &MF,
-    bool isVarArg,
-    const SmallVectorImpl<ISD::OutputArg> &Outs,
-    LLVMContext &Context) const
-{
+    CallingConv::ID CallConv, MachineFunction &MF, bool isVarArg,
+    const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext &Context) const {
   return Outs.size() <= 1;
 }
 
 SDValue LLIRTargetLowering::LowerReturn(
-    SDValue Chain,
-    CallingConv::ID CallConv,
-    bool isVarArg,
+    SDValue Chain, CallingConv::ID CallConv, bool isVarArg,
     const SmallVectorImpl<ISD::OutputArg> &Outs,
-    const SmallVectorImpl<SDValue> &OutVals,
-    const SDLoc &DL,
-    SelectionDAG &DAG) const
-{
+    const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
+    SelectionDAG &DAG) const {
   if (Outs.size() > 1) {
     Fail(DL, DAG, "calling convention not supported");
   }
@@ -663,20 +631,19 @@ SDValue LLIRTargetLowering::LowerReturn(
 }
 
 LLIRTargetLowering::AtomicExpansionKind
-LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const
-{
+LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   llvm_unreachable("not implemented");
 }
 
 bool LLIRTargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
   // Make sure tail calls aren't disabled.
-  auto Attr = CI->getParent()->getParent()->getFnAttribute("disable-tail-calls");
+  auto Attr =
+      CI->getParent()->getParent()->getFnAttribute("disable-tail-calls");
   if (!CI->isTailCall() || Attr.getValueAsString() == "true") {
     return false;
   }
 
-  ImmutableCallSite CS(CI);
-  switch (CS.getCallingConv()) {
+  switch (CI->getCallingConv()) {
     // C calling conventions:
     case CallingConv::C:
     case CallingConv::Win64:

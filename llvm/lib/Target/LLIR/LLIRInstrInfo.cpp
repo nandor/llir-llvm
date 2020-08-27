@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "LLIRInstrInfo.h"
+
 #include "LLIR.h"
 #include "LLIRSubtarget.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
@@ -30,68 +31,60 @@ using namespace llvm;
 #include "LLIRGenInstrInfo.inc"
 
 LLIRInstrInfo::LLIRInstrInfo(LLIRSubtarget &ST)
-  : LLIRGenInstrInfo(-1, -1, -1, -1)
-{
-}
+    : LLIRGenInstrInfo(-1, -1, -1, -1) {}
 
-bool LLIRInstrInfo::analyzeBranch(
-    MachineBasicBlock &MBB,
-    MachineBasicBlock *&TBB,
-    MachineBasicBlock *&FBB,
-    SmallVectorImpl<MachineOperand> &Cond,
-    bool AllowModify) const
-{
+bool LLIRInstrInfo::analyzeBranch(MachineBasicBlock &MBB,
+                                  MachineBasicBlock *&TBB,
+                                  MachineBasicBlock *&FBB,
+                                  SmallVectorImpl<MachineOperand> &Cond,
+                                  bool AllowModify) const {
   // Optimise only when there a single condition, followed by jumps.
   bool HaveCond = false;
   for (MachineInstr &MI : MBB.terminators()) {
     switch (MI.getOpcode()) {
-    default:
-      return true;
-    case LLIR::JT:
-      if (HaveCond) {
+      default:
         return true;
-      }
-      Cond.push_back(MachineOperand::CreateImm(true));
-      Cond.push_back(MI.getOperand(0));
-      TBB = MI.getOperand(1).getMBB();
-      HaveCond = true;
-      break;
-    case LLIR::JF:
-      if (HaveCond) {
-        return true;
-      }
-      Cond.push_back(MachineOperand::CreateImm(false));
-      Cond.push_back(MI.getOperand(0));
-      TBB = MI.getOperand(1).getMBB();
-      HaveCond = true;
-      break;
-    case LLIR::JMP:
-      if (!HaveCond) {
-        TBB = MI.getOperand(0).getMBB();
-      } else {
-        FBB = MI.getOperand(0).getMBB();
-      }
-      break;
+      case LLIR::JT:
+        if (HaveCond) {
+          return true;
+        }
+        Cond.push_back(MachineOperand::CreateImm(true));
+        Cond.push_back(MI.getOperand(0));
+        TBB = MI.getOperand(1).getMBB();
+        HaveCond = true;
+        break;
+      case LLIR::JF:
+        if (HaveCond) {
+          return true;
+        }
+        Cond.push_back(MachineOperand::CreateImm(false));
+        Cond.push_back(MI.getOperand(0));
+        TBB = MI.getOperand(1).getMBB();
+        HaveCond = true;
+        break;
+      case LLIR::JMP:
+        if (!HaveCond) {
+          TBB = MI.getOperand(0).getMBB();
+        } else {
+          FBB = MI.getOperand(0).getMBB();
+        }
+        break;
     }
   }
 
   return false;
 }
 
-unsigned LLIRInstrInfo::removeBranch(
-    MachineBasicBlock &MBB,
-    int *BytesRemoved) const
-{
+unsigned LLIRInstrInfo::removeBranch(MachineBasicBlock &MBB,
+                                     int *BytesRemoved) const {
   MachineBasicBlock::instr_iterator I = MBB.instr_end();
   unsigned Count = 0;
 
   while (I != MBB.instr_begin()) {
     --I;
-    if (I->isDebugInstr())
-      continue;
-    if (!I->isTerminator())
-      break;
-    llvm::errs() << *I;
+    if (I->isDebugInstr()) continue;
+    if (!I->isTerminator()) break;
+
     // Remove the branch.
     I->eraseFromParent();
     I = MBB.instr_end();
@@ -102,13 +95,8 @@ unsigned LLIRInstrInfo::removeBranch(
 }
 
 unsigned LLIRInstrInfo::insertBranch(
-    MachineBasicBlock &MBB,
-    MachineBasicBlock *TBB,
-    MachineBasicBlock *FBB,
-    ArrayRef<MachineOperand> Cond,
-    const DebugLoc &DL,
-    int *BytesAdded) const
-{
+    MachineBasicBlock &MBB, MachineBasicBlock *TBB, MachineBasicBlock *FBB,
+    ArrayRef<MachineOperand> Cond, const DebugLoc &DL, int *BytesAdded) const {
   switch (Cond.size()) {
     case 0: {
       if (TBB) {
@@ -138,26 +126,21 @@ unsigned LLIRInstrInfo::insertBranch(
 }
 
 bool LLIRInstrInfo::reverseBranchCondition(
-    SmallVectorImpl<MachineOperand> &Cond) const
-{
+    SmallVectorImpl<MachineOperand> &Cond) const {
   assert(Cond.size() == 2 && "Expected a flag and succesor.");
   Cond.front() = MachineOperand::CreateImm(!Cond.front().getImm());
   return false;
 }
 
-void LLIRInstrInfo::copyPhysReg(
-    MachineBasicBlock &MBB,
-    MachineBasicBlock::iterator MBBI,
-    const DebugLoc &DL,
-    unsigned DstReg,
-    unsigned SrcReg,
-    bool KillSrc) const
-{
+void LLIRInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MBBI,
+                                const DebugLoc &DL, MCRegister DstReg,
+                                MCRegister SrcReg, bool KillSrc) const {
   auto &MRI = MBB.getParent()->getRegInfo();
 
   unsigned Op;
-  if (TargetRegisterInfo::isVirtualRegister(SrcReg)) {
-    if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
+  if (Register::isVirtualRegister(SrcReg)) {
+    if (Register::isVirtualRegister(DstReg)) {
       const TargetRegisterClass *DstCls = MRI.getRegClass(DstReg);
       // virt -> virt
       if (&LLIR::I8RegClass == DstCls) {
@@ -182,7 +165,7 @@ void LLIRInstrInfo::copyPhysReg(
       Op = LLIR::SET_I64;
     }
   } else {
-    if (TargetRegisterInfo::isVirtualRegister(DstReg)) {
+    if (Register::isVirtualRegister(DstReg)) {
       // phys -> virt
       Op = LLIR::GET_I64;
     } else {
@@ -194,25 +177,19 @@ void LLIRInstrInfo::copyPhysReg(
       .addReg(SrcReg, getKillRegState(KillSrc));
 }
 
-void LLIRInstrInfo::storeRegToStackSlot(
-    MachineBasicBlock &MBB,
-    MachineBasicBlock::iterator MBBI,
-    unsigned SrcReg,
-    bool isKill,
-    int FrameIndex,
-    const TargetRegisterClass *RC,
-    const TargetRegisterInfo *TRI) const
-{
-  llvm_unreachable("not implemented");
+void LLIRInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
+                                        MachineBasicBlock::iterator MBBI,
+                                        Register SrcReg, bool isKill,
+                                        int FrameIndex,
+                                        const TargetRegisterClass *RC,
+                                        const TargetRegisterInfo *TRI) const {
+  llvm_unreachable("not implemented: storeRegToStackSlot");
 }
 
-void LLIRInstrInfo::loadRegFromStackSlot(
-    MachineBasicBlock &MBB,
-    MachineBasicBlock::iterator MBBI,
-    unsigned DestReg,
-    int FrameIndex,
-    const TargetRegisterClass *RC,
-    const TargetRegisterInfo *TRI) const
-{
-  llvm_unreachable("not implemented");
+void LLIRInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
+                                         MachineBasicBlock::iterator MBBI,
+                                         Register DestReg, int FrameIndex,
+                                         const TargetRegisterClass *RC,
+                                         const TargetRegisterInfo *TRI) const {
+  llvm_unreachable("not implemented: loadRegFromStackSlot");
 }

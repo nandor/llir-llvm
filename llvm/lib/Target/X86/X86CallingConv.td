@@ -1161,10 +1161,67 @@ def CSR_Win32_CFGuard_Check_NoSSE : CalleeSavedRegs<(add CSR_32_RegCall_NoSSE, E
 def CSR_Win32_CFGuard_Check       : CalleeSavedRegs<(add CSR_32_RegCall, ECX)>;
 def CSR_Win64_RegCall_NoSSE : CalleeSavedRegs<(add RBX, RBP, RSP,
                                               (sequence "R%u", 10, 15))>;
-def CSR_Win64_RegCall       : CalleeSavedRegs<(add CSR_Win64_RegCall_NoSSE,                                  
+def CSR_Win64_RegCall       : CalleeSavedRegs<(add CSR_Win64_RegCall_NoSSE,
                                               (sequence "XMM%u", 8, 15))>;
 def CSR_SysV64_RegCall_NoSSE : CalleeSavedRegs<(add RBX, RBP, RSP,
                                                (sequence "R%u", 12, 15))>;
-def CSR_SysV64_RegCall       : CalleeSavedRegs<(add CSR_SysV64_RegCall_NoSSE,               
+def CSR_SysV64_RegCall       : CalleeSavedRegs<(add CSR_SysV64_RegCall_NoSSE,
                                                (sequence "XMM%u", 8, 15))>;
-                                               
+
+// LLIR calling conventions.
+def CSR_LLIR_Caml : CalleeSavedRegs<(add
+)>;
+
+def CSR_LLIR_Caml_Ext : CalleeSavedRegs<(add
+)>;
+
+def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
+  (add
+    RBX,
+    RSI,
+    RDI,
+    RCX,
+    RDX,
+    RBP,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15,
+    (sequence "XMM%u", 0, 15)
+  )
+>;
+
+def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
+  (add
+    RAX,
+    RBX,
+    RCX,
+    RDX,
+    RSI,
+    RDI,
+    RBP,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15,
+    (sequence "XMM%u", 0, 15)
+  )
+>;
+
+def CSR_LLIR_Caml_Raise : CalleeSavedRegs<
+  (add
+  )
+>;
+
+def CSR_LLIR_Setjmp : CalleeSavedRegs<
+  (add
+  )
+>;

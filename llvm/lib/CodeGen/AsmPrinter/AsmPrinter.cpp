@@ -495,7 +495,7 @@ void AsmPrinter::emitGlobalVariable(const GlobalVariable *GV) {
   // GV's or GVSym's attributes will be used for the EmittedSym.
   emitVisibility(EmittedSym, GV->getVisibility(), !GV->isDeclaration());
   if (GV->isNoDeadStrip()) {
-    OutStreamer->EmitSymbolAttribute(EmittedSym, MCSA_NoDeadStrip);
+    OutStreamer->emitSymbolAttribute(EmittedSym, MCSA_NoDeadStrip);
   }
 
   if (!GV->hasInitializer())   // External globals require no extra code.
@@ -682,7 +682,7 @@ void AsmPrinter::emitFunctionHeader() {
   MF->setSection(getObjFileLowering().SectionForGlobal(&F, TM));
   OutStreamer->SwitchSection(MF->getSection());
   if (F.isNoDeadStrip()) {
-    OutStreamer->EmitSymbolAttribute(CurrentFnSym, MCSA_NoDeadStrip);
+    OutStreamer->emitSymbolAttribute(CurrentFnSym, MCSA_NoDeadStrip);
   }
 
   if (!MAI->hasVisibilityOnlyWithLinkage())

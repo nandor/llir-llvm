@@ -29,8 +29,9 @@ using namespace llvm;
 namespace {
 class LLIRDAGToDAGISel : public SelectionDAGISel {
 public:
-  explicit LLIRDAGToDAGISel(LLIRTargetMachine &tm, CodeGenOpt::Level OL)
-    : SelectionDAGISel(tm)
+  LLIRDAGToDAGISel(LLIRTargetMachine &TM, CodeGenOpt::Level OL)
+    : DAGMatcher(TM, new SelectionDAG(TM, OL), OL)
+    , SelectionDAGISel(TM, OL)
   {
   }
 

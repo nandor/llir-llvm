@@ -19,54 +19,30 @@
 namespace llvm {
 
 class LLIRInstPrinter : public MCInstPrinter {
-public:
-  LLIRInstPrinter(
-      const MCAsmInfo &MAI,
-      const MCInstrInfo &MII,
-      const MCRegisterInfo &MRI
-  );
+ public:
+  LLIRInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &MII,
+                  const MCRegisterInfo &MRI);
 
   void printRegName(raw_ostream &OS, unsigned RegNo) const override;
 
-  void printInst(
-      const MCInst *MI,
-      raw_ostream &O,
-      StringRef Annot,
-      const MCSubtargetInfo &STI
-  ) override;
+  void printInst(const MCInst *MI, uint64_t Address, StringRef Annot, const MCSubtargetInfo &STI,  raw_ostream &O) override;
 
-  void printInstruction(
-      const MCInst *MI,
-      const MCSubtargetInfo &STI,
-      raw_ostream &O
-  );
+  void printInstruction(const MCInst *MI, uint64_t Address,
+                        const MCSubtargetInfo &STI, raw_ostream &O);
 
-  bool printAliasInstr(
-      const MCInst *MI,
-      const MCSubtargetInfo &STI,
-      raw_ostream &O
-  );
+  bool printAliasInstr(const MCInst *MI, uint64_t Address,
+                       const MCSubtargetInfo &STI, raw_ostream &O);
 
-  void printOperand(
-      const MCInst *MI,
-      int opNum,
-      const MCSubtargetInfo &STI,
-      raw_ostream &OS
-  );
+  void printOperand(const MCInst *MI, int opNum, const MCSubtargetInfo &STI,
+                    raw_ostream &OS);
 
   static const char *getRegisterName(unsigned RegNo);
 
-private:
-  void printCall(
-      const char *Op,
-      llvm::raw_ostream &OS,
-      const MCInst *MI,
-      const MCSubtargetInfo &STI,
-      bool isVoid,
-      bool isVA,
-      bool isTail
-  );
+ private:
+  void printCall(const char *Op, llvm::raw_ostream &OS, const MCInst *MI,
+                 const MCSubtargetInfo &STI, bool isVoid, bool isVA,
+                 bool isTail);
 };
-} // end namespace llvm
+}  // end namespace llvm
 
 #endif

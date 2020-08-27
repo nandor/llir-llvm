@@ -35,7 +35,7 @@ public:
 
   bool isMachineVerifierClean() const override;
 
-  bool usesPhysRegsForPEI() const override;
+  bool usesPhysRegsForValues() const override { return false; }
 
 private:
   std::unique_ptr<TargetLoweringObjectFile> TLOF;

@@ -14,6 +14,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "LLIRMCInstLower.h"
+
 #include "LLIRAsmPrinter.h"
 #include "LLIRMachineFunctionInfo.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
@@ -30,9 +31,8 @@
 #include "llvm/Support/raw_ostream.h"
 using namespace llvm;
 
-MCSymbol *
-LLIRMCInstLower::GetSymbolFromOperand(const MachineOperand &MO) const
-{
+MCSymbol *LLIRMCInstLower::GetSymbolFromOperand(
+    const MachineOperand &MO) const {
   const DataLayout &DL = MF.getDataLayout();
   MCSymbol *Sym = nullptr;
   SmallString<128> Name;
@@ -60,31 +60,18 @@ LLIRMCInstLower::GetSymbolFromOperand(const MachineOperand &MO) const
   return Sym;
 }
 
-MCOperand LLIRMCInstLower::LowerSymbolOperand(
-    MCSymbol *Sym,
-    int64_t Offset,
-    bool IsFunc,
-    bool IsGlob) const
-{
-  MCSymbolRefExpr::VariantKind VK =
-      IsFunc ? MCSymbolRefExpr::VK_WebAssembly_FUNCTION :
-      IsGlob ? MCSymbolRefExpr::VK_WebAssembly_GLOBAL :
-      MCSymbolRefExpr::VK_None;
-
-  const MCExpr *Expr = MCSymbolRefExpr::create(Sym, VK, Ctx);
+MCOperand LLIRMCInstLower::LowerSymbolOperand(MCSymbol *Sym, int64_t Offset,
+                                              bool IsFunc, bool IsGlob) const {
+  const MCExpr *Expr =
+      MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, Ctx);
   if (Offset != 0) {
-    Expr = MCBinaryExpr::createAdd(
-        Expr,
-        MCConstantExpr::create(Offset, Ctx),
-        Ctx
-    );
+    Expr =
+        MCBinaryExpr::createAdd(Expr, MCConstantExpr::create(Offset, Ctx), Ctx);
   }
   return MCOperand::createExpr(Expr);
 }
 
-
-void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
-{
+void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const {
   OutMI.setOpcode(MI->getOpcode());
   for (unsigned i = 0, e = MI->getNumOperands(); i != e; ++i) {
     const MachineOperand &MO = MI->getOperand(i);
@@ -101,12 +88,11 @@ void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
           continue;
         }
 
-        if (LLIRRegisterInfo::isVirtualRegister(MO.getReg())) {
+        if (Register::isVirtualRegister(MO.getReg())) {
           const auto &MF = *MI->getParent()->getParent();
           const auto &MFI = *MF.getInfo<LLIRMachineFunctionInfo>();
-          MCOp = MCOperand::createReg(
-              LLIR::NUM_TARGET_REGS + MFI.getGMReg(MO.getReg())
-          );
+          MCOp = MCOperand::createReg(LLIR::NUM_TARGET_REGS +
+                                      MFI.getGMReg(MO.getReg()));
         } else {
           MCOp = MCOperand::createReg(MO.getReg());
         }
@@ -127,21 +113,13 @@ void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const
       }
       case MachineOperand::MO_GlobalAddress: {
         MCOp = LowerSymbolOperand(
-            GetSymbolFromOperand(MO),
-            MO.getOffset(),
-            MO.getGlobal()->getValueType()->isFunctionTy(),
-            false
-        );
+            GetSymbolFromOperand(MO), MO.getOffset(),
+            MO.getGlobal()->getValueType()->isFunctionTy(), false);
         break;
       }
       case MachineOperand::MO_ExternalSymbol: {
         // TODO(nand): remove hardcoded symbols.
-        MCOp = LowerSymbolOperand(
-            GetSymbolFromOperand(MO),
-            0,
-            true,
-            true
-        );
+        MCOp = LowerSymbolOperand(GetSymbolFromOperand(MO), 0, true, true);
         break;
       }
       default: {
