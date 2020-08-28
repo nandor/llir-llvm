@@ -662,7 +662,7 @@ static bool isEndbrImm64(uint64_t Imm) {
   return false;
 }
 
-void X86DAGToDAGISel::PreprocessISelDAG() {
+void X86DAGMatcher::PreprocessISelDAG() {
   bool MadeChange = false;
   for (SelectionDAG::allnodes_iterator I = CurDAG->allnodes_begin(),
        E = CurDAG->allnodes_end(); I != E; ) {
@@ -1232,7 +1232,7 @@ bool X86DAGMatcher::tryOptimizeRem8Extend(SDNode *N) {
   return true;
 }
 
-void X86DAGToDAGISel::PostprocessISelDAG() {
+void X86DAGMatcher::PostprocessISelDAG() {
   // Skip peepholes at -O0.
   if (TM.getOptLevel() == CodeGenOpt::None)
     return;
@@ -5722,20 +5722,19 @@ void X86DAGMatcher::Select(SDNode *Node) {
   SelectCode(Node);
 }
 
-bool X86DAGToDAGISel::
-SelectInlineAsmMemoryOperand(const SDValue &Op, unsigned ConstraintID,
-                             std::vector<SDValue> &OutOps) {
+bool X86DAGMatcher::SelectInlineAsmMemoryOperand(const SDValue &Op,
+                                              unsigned ConstraintID,
+                                              std::vector<SDValue> &OutOps) {
   SDValue Op0, Op1, Op2, Op3, Op4;
   switch (ConstraintID) {
-  default:
-    llvm_unreachable("Unexpected asm memory constraint");
-  case InlineAsm::Constraint_o: // offsetable        ??
-  case InlineAsm::Constraint_v: // not offsetable    ??
-  case InlineAsm::Constraint_m: // memory
-  case InlineAsm::Constraint_X:
-    if (!selectAddr(nullptr, Op, Op0, Op1, Op2, Op3, Op4))
-      return true;
-    break;
+    default:
+      llvm_unreachable("Unexpected asm memory constraint");
+    case InlineAsm::Constraint_o:  // offsetable        ??
+    case InlineAsm::Constraint_v:  // not offsetable    ??
+    case InlineAsm::Constraint_m:  // memory
+    case InlineAsm::Constraint_X:
+      if (!selectAddr(nullptr, Op, Op0, Op1, Op2, Op3, Op4)) return true;
+      break;
   }
 
   OutOps.push_back(Op0);

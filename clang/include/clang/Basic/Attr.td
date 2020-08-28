@@ -2370,6 +2370,11 @@ def PreserveAll : DeclOrTypeAttr {
   let Documentation = [PreserveAllDocs];
 }
 
+def LLIRSetjmp : DeclOrTypeAttr {
+  let Spellings = [Clang<"llir_setjmp">];
+  let Documentation = [LLIRSetjmpDocs];
+}
+
 def Target : InheritableAttr {
   let Spellings = [GCC<"target">];
   let Args = [StringArgument<"featuresStr">];
@@ -3194,6 +3199,11 @@ def DLLImportStaticLocal : InheritableAttr, TargetSpecificAttr<TargetHasDLLImpor
   // attribute is used to determine whether the variables are imported or not.
   let Spellings = [];
   let Subjects = SubjectList<[Function]>;
+  let Documentation = [Undocumented];
+}
+
+def NoDeadStrip : InheritableAttr {
+  let Spellings = [GCC<"no_dead_strip">];
   let Documentation = [Undocumented];
 }
 

@@ -1102,15 +1102,18 @@ void AsmPrinter::emitStackSizeSection(const MachineFunction &MF) {
   OutStreamer->PopSection();
 }
 
-static bool needFuncLabelsForEHOrDebugInfo(const MachineFunction &MF) {
+static bool needFuncLabelsForEHOrDebugInfo(const MachineFunction &MF,
+                                           const MCAsmInfo &MAI) {
+  if (!MAI.doesSupportExceptionHandling() && !MAI.doesSupportDebugInformation())
+    return false;
+
   MachineModuleInfo &MMI = MF.getMMI();
   if (!MF.getLandingPads().empty() || MF.hasEHFunclets() || MMI.hasDebugInfo())
     return true;
 
   // We might emit an EH table that uses function begin and end labels even if
   // we don't have any landingpads.
-  if (!MF.getFunction().hasPersonalityFn())
-    return false;
+  if (!MF.getFunction().hasPersonalityFn()) return false;
   return !isNoOpWithoutInvoke(
       classifyEHPersonality(MF.getFunction().getPersonalityFn()));
 }
@@ -1337,7 +1340,7 @@ void AsmPrinter::emitFunctionBody() {
   // Emit target-specific gunk after the function body.
   emitFunctionBodyEnd();
 
-  if (needFuncLabelsForEHOrDebugInfo(*MF) ||
+  if (needFuncLabelsForEHOrDebugInfo(*MF, *MAI) ||
       MAI->hasDotTypeDotSizeDirective()) {
     // Create a symbol for the end of function.
     CurrentFnEnd = createTempSymbol("func_end");

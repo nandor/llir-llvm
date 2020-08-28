@@ -267,18 +267,11 @@ function(llvm_map_components_to_libnames out_libs)
       string(TOUPPER "${c}" capitalized)
       list(FIND capitalized_libs LLVM${capitalized} lib_idx)
       if( lib_idx LESS 0 )
-        # The component is unknown. Maybe is an omitted target?
-        is_llvm_target_library(${c} iltl_result OMITTED_TARGETS)
-        if(iltl_result)
-          # A missing library to a directly referenced omitted target would be bad.
-          message(FATAL_ERROR "Library '${c}' is a direct reference to a target library for an omitted target.")
-        else()
-          # If it is not an omitted target we should assume it is a component
-          # that hasn't yet been processed by CMake. Missing components will
-          # cause errors later in the configuration, so we can safely assume
-          # that this is valid here.
-          list(APPEND expanded_components LLVM${c})
-        endif()
+        # If it is not an omitted target we should assume it is a component
+        # that hasn't yet been processed by CMake. Missing components will
+        # cause errors later in the configuration, so we can safely assume
+        # that this is valid here.
+        list(APPEND expanded_components LLVM${c})
       else( lib_idx LESS 0 )
         list(GET LLVM_AVAILABLE_LIBS ${lib_idx} canonical_lib)
         list(APPEND expanded_components ${canonical_lib})

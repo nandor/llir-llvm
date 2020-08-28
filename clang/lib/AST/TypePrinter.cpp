@@ -977,6 +977,9 @@ void TypePrinter::printFunctionAfter(const FunctionType::ExtInfo &Info,
     case CC_PreserveAll:
       OS << " __attribute__((preserve_all))";
       break;
+    case CC_LLIRSetjmp:
+      OS << "__attribute__((llir_setjmp))";
+      break;
     }
   }
 
@@ -1688,6 +1691,9 @@ void TypePrinter::printAttributedAfter(const AttributedType *T,
 
   case attr::PreserveAll:
     OS << "preserve_all";
+    break;
+  case attr::LLIRSetjmp:
+    OS << "llir_setjmp";
     break;
   case attr::NoDeref:
     OS << "noderef";

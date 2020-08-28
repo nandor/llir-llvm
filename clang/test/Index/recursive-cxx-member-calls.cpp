@@ -21,7 +21,7 @@ namespace       clang {
       AT_noinline, AT_no_instrument_function, AT_nonnull, AT_noreturn,
       AT_nothrow, AT_nsobject, AT_objc_exception, AT_override,
       AT_cf_returns_not_retained, AT_cf_returns_retained,
-      AT_ns_returns_not_retained, AT_ns_returns_retained, AT_objc_gc, 
+      AT_ns_returns_not_retained, AT_ns_returns_retained, AT_objc_gc,
       AT_overloadable, AT_ownership_holds, AT_ownership_returns,
       AT_ownership_takes, AT_packed, AT_pascal, AT_pure, AT_regparm,
       AT_section, AT_sentinel, AT_stdcall, AT_thiscall, AT_transparent_union,

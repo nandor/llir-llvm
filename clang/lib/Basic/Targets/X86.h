@@ -18,6 +18,7 @@
 #include "clang/Basic/TargetOptions.h"
 #include "llvm/ADT/Triple.h"
 #include "llvm/Support/Compiler.h"
+#include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/X86TargetParser.h"
 
 namespace clang {
@@ -144,8 +145,10 @@ protected:
   enum FPMathKind { FP_Default, FP_SSE, FP_387 } FPMath = FP_Default;
 
 public:
-  X86TargetInfo(const llvm::Triple &Triple, const TargetOptions &)
+  X86TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : TargetInfo(Triple) {
+    LLIR = Opts.LLIR;
+
     LongDoubleFormat = &llvm::APFloat::x87DoubleExtended();
     AddrSpaceMap = &X86AddrSpaceMap;
     HasStrictFP = true;
@@ -228,6 +231,8 @@ public:
 
   std::string convertConstraint(const char *&Constraint) const override;
   const char *getClobbers() const override {
+    if (LLIR)
+      return "";
     return "~{dirflag},~{fpsr},~{flags}";
   }
 
@@ -347,6 +352,7 @@ public:
     case CC_X86Pascal:
     case CC_IntelOclBicc:
     case CC_OpenCLKernel:
+    case CC_LLIRSetjmp:
       return CCCR_OK;
     default:
       return CCCR_Warning;
@@ -667,12 +673,18 @@ public:
     RegParmMax = 6;
 
     // Pointers are 32-bit in x32.
-    resetDataLayout(IsX32 ? "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-"
-                            "i64:64-f80:128-n8:16:32:64-S128"
-                          : IsWinCOFF ? "e-m:w-p270:32:32-p271:32:32-p272:64:"
-                                        "64-i64:64-f80:128-n8:16:32:64-S128"
-                                      : "e-m:e-p270:32:32-p271:32:32-p272:64:"
-                                        "64-i64:64-f80:128-n8:16:32:64-S128");
+    if (llvm::IsLLIR) {
+      resetDataLayout(
+          "e-m:g-p270:32:32-p271:32:32-p272:64:"
+          "64-i64:64-f80:128-n8:16:32:64-S128");
+    } else {
+      resetDataLayout(IsX32 ? "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-"
+                              "i64:64-f80:128-n8:16:32:64-S128"
+                            : IsWinCOFF ? "e-m:w-p270:32:32-p271:32:32-p272:64:"
+                                          "64-i64:64-f80:128-n8:16:32:64-S128"
+                                        : "e-m:e-p270:32:32-p271:32:32-p272:64:"
+                                          "64-i64:64-f80:128-n8:16:32:64-S128");
+    }
 
     // Use fpret only for long double.
     RealTypeUsesObjCFPRet = (1 << TargetInfo::LongDouble);
@@ -711,6 +723,7 @@ public:
     case CC_PreserveAll:
     case CC_X86RegCall:
     case CC_OpenCLKernel:
+    case CC_LLIRSetjmp:
       return CCCR_OK;
     default:
       return CCCR_Warning;

@@ -32,6 +32,7 @@ public:
 
   void emitGlobalVariable(const GlobalVariable *GV) override;
   void emitFunctionBodyStart() override;
+  void emitFunctionBodyEnd() override;
   void emitInstruction(const MachineInstr *MI) override;
   void emitJumpTableInfo() override;
 

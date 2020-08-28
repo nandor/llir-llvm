@@ -194,6 +194,8 @@ protected:
   bool HasBFloat16;
   bool HasStrictFP;
 
+  bool LLIR; // True if lowering to LLIR.
+
   unsigned char MaxAtomicPromoteWidth, MaxAtomicInlineWidth;
   unsigned short SimdDefaultAlign;
   std::unique_ptr<llvm::DataLayout> DataLayout;
