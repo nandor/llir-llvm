@@ -366,6 +366,7 @@ LANGOPT(PaddingOnUnsignedFixedPoint, 1, 0,
         "unsigned fixed point types having one extra padding bit")
 
 LANGOPT(RegisterStaticDestructors, 1, 1, "Register C++ static destructors")
+LANGOPT(LLIR, 1, 0, "Lower to LLIR")
 
 LANGOPT(MatrixTypes, 1, 0, "Enable or disable the builtin matrix type")
 

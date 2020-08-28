@@ -29,6 +29,7 @@
 #include "ToolChains/Hurd.h"
 #include "ToolChains/Lanai.h"
 #include "ToolChains/Linux.h"
+#include "ToolChains/LLIR.h"
 #include "ToolChains/MSP430.h"
 #include "ToolChains/MSVC.h"
 #include "ToolChains/MinGW.h"
@@ -4960,168 +4961,171 @@ std::string Driver::GetClPchPath(Compilation &C, StringRef BaseName) const {
 
 const ToolChain &Driver::getToolChain(const ArgList &Args,
                                       const llvm::Triple &Target) const {
-
   auto &TC = ToolChains[Target.str()];
   if (!TC) {
-    switch (Target.getOS()) {
-    case llvm::Triple::AIX:
-      TC = std::make_unique<toolchains::AIX>(*this, Target, Args);
-      break;
-    case llvm::Triple::Haiku:
-      TC = std::make_unique<toolchains::Haiku>(*this, Target, Args);
-      break;
-    case llvm::Triple::Ananas:
-      TC = std::make_unique<toolchains::Ananas>(*this, Target, Args);
-      break;
-    case llvm::Triple::CloudABI:
-      TC = std::make_unique<toolchains::CloudABI>(*this, Target, Args);
-      break;
-    case llvm::Triple::Darwin:
-    case llvm::Triple::MacOSX:
-    case llvm::Triple::IOS:
-    case llvm::Triple::TvOS:
-    case llvm::Triple::WatchOS:
-      TC = std::make_unique<toolchains::DarwinClang>(*this, Target, Args);
-      break;
-    case llvm::Triple::DragonFly:
-      TC = std::make_unique<toolchains::DragonFly>(*this, Target, Args);
-      break;
-    case llvm::Triple::OpenBSD:
-      TC = std::make_unique<toolchains::OpenBSD>(*this, Target, Args);
-      break;
-    case llvm::Triple::NetBSD:
-      TC = std::make_unique<toolchains::NetBSD>(*this, Target, Args);
-      break;
-    case llvm::Triple::FreeBSD:
-      TC = std::make_unique<toolchains::FreeBSD>(*this, Target, Args);
-      break;
-    case llvm::Triple::Minix:
-      TC = std::make_unique<toolchains::Minix>(*this, Target, Args);
-      break;
-    case llvm::Triple::Linux:
-    case llvm::Triple::ELFIAMCU:
-      if (Target.getArch() == llvm::Triple::hexagon)
-        TC = std::make_unique<toolchains::HexagonToolChain>(*this, Target,
-                                                             Args);
-      else if ((Target.getVendor() == llvm::Triple::MipsTechnologies) &&
-               !Target.hasEnvironment())
-        TC = std::make_unique<toolchains::MipsLLVMToolChain>(*this, Target,
-                                                              Args);
-      else if (Target.getArch() == llvm::Triple::ppc ||
-               Target.getArch() == llvm::Triple::ppc64 ||
-               Target.getArch() == llvm::Triple::ppc64le)
-        TC = std::make_unique<toolchains::PPCLinuxToolChain>(*this, Target,
-                                                              Args);
-      else if (Target.getArch() == llvm::Triple::ve)
-        TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
+    if (Args.hasArg(options::OPT_llir)) {
+      TC = std::make_unique<toolchains::LLIR>(*this, Target, Args);
+    } else {
+      switch (Target.getOS()) {
+      case llvm::Triple::AIX:
+        TC = std::make_unique<toolchains::AIX>(*this, Target, Args);
+        break;
+      case llvm::Triple::Haiku:
+        TC = std::make_unique<toolchains::Haiku>(*this, Target, Args);
+        break;
+      case llvm::Triple::Ananas:
+        TC = std::make_unique<toolchains::Ananas>(*this, Target, Args);
+        break;
+      case llvm::Triple::CloudABI:
+        TC = std::make_unique<toolchains::CloudABI>(*this, Target, Args);
+        break;
+      case llvm::Triple::Darwin:
+      case llvm::Triple::MacOSX:
+      case llvm::Triple::IOS:
+      case llvm::Triple::TvOS:
+      case llvm::Triple::WatchOS:
+        TC = std::make_unique<toolchains::DarwinClang>(*this, Target, Args);
+        break;
+      case llvm::Triple::DragonFly:
+        TC = std::make_unique<toolchains::DragonFly>(*this, Target, Args);
+        break;
+      case llvm::Triple::OpenBSD:
+        TC = std::make_unique<toolchains::OpenBSD>(*this, Target, Args);
+        break;
+      case llvm::Triple::NetBSD:
+        TC = std::make_unique<toolchains::NetBSD>(*this, Target, Args);
+        break;
+      case llvm::Triple::FreeBSD:
+        TC = std::make_unique<toolchains::FreeBSD>(*this, Target, Args);
+        break;
+      case llvm::Triple::Minix:
+        TC = std::make_unique<toolchains::Minix>(*this, Target, Args);
+        break;
+      case llvm::Triple::Linux:
+      case llvm::Triple::ELFIAMCU:
+        if (Target.getArch() == llvm::Triple::hexagon)
+          TC = std::make_unique<toolchains::HexagonToolChain>(*this, Target,
+                                                               Args);
+        else if ((Target.getVendor() == llvm::Triple::MipsTechnologies) &&
+                 !Target.hasEnvironment())
+          TC = std::make_unique<toolchains::MipsLLVMToolChain>(*this, Target,
+                                                                Args);
+        else if (Target.getArch() == llvm::Triple::ppc ||
+                 Target.getArch() == llvm::Triple::ppc64 ||
+                 Target.getArch() == llvm::Triple::ppc64le)
+          TC = std::make_unique<toolchains::PPCLinuxToolChain>(*this, Target,
+                                                                Args);
+        else if (Target.getArch() == llvm::Triple::ve)
+          TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
 
-      else
-        TC = std::make_unique<toolchains::Linux>(*this, Target, Args);
-      break;
-    case llvm::Triple::NaCl:
-      TC = std::make_unique<toolchains::NaClToolChain>(*this, Target, Args);
-      break;
-    case llvm::Triple::Fuchsia:
-      TC = std::make_unique<toolchains::Fuchsia>(*this, Target, Args);
-      break;
-    case llvm::Triple::Solaris:
-      TC = std::make_unique<toolchains::Solaris>(*this, Target, Args);
-      break;
-    case llvm::Triple::AMDHSA:
-      TC = std::make_unique<toolchains::ROCMToolChain>(*this, Target, Args);
-      break;
-    case llvm::Triple::AMDPAL:
-    case llvm::Triple::Mesa3D:
-      TC = std::make_unique<toolchains::AMDGPUToolChain>(*this, Target, Args);
-      break;
-    case llvm::Triple::Win32:
-      switch (Target.getEnvironment()) {
+        else
+          TC = std::make_unique<toolchains::Linux>(*this, Target, Args);
+        break;
+      case llvm::Triple::NaCl:
+        TC = std::make_unique<toolchains::NaClToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::Fuchsia:
+        TC = std::make_unique<toolchains::Fuchsia>(*this, Target, Args);
+        break;
+      case llvm::Triple::Solaris:
+        TC = std::make_unique<toolchains::Solaris>(*this, Target, Args);
+        break;
+      case llvm::Triple::AMDHSA:
+        TC = std::make_unique<toolchains::ROCMToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::AMDPAL:
+      case llvm::Triple::Mesa3D:
+        TC = std::make_unique<toolchains::AMDGPUToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::Win32:
+        switch (Target.getEnvironment()) {
+        default:
+          if (Target.isOSBinFormatELF())
+            TC = std::make_unique<toolchains::Generic_ELF>(*this, Target, Args);
+          else if (Target.isOSBinFormatMachO())
+            TC = std::make_unique<toolchains::MachO>(*this, Target, Args);
+          else
+            TC = std::make_unique<toolchains::Generic_GCC>(*this, Target, Args);
+          break;
+        case llvm::Triple::GNU:
+          TC = std::make_unique<toolchains::MinGW>(*this, Target, Args);
+          break;
+        case llvm::Triple::Itanium:
+          TC = std::make_unique<toolchains::CrossWindowsToolChain>(*this, Target,
+                                                                    Args);
+          break;
+        case llvm::Triple::MSVC:
+        case llvm::Triple::UnknownEnvironment:
+          if (Args.getLastArgValue(options::OPT_fuse_ld_EQ)
+                  .startswith_lower("bfd"))
+            TC = std::make_unique<toolchains::CrossWindowsToolChain>(
+                *this, Target, Args);
+          else
+            TC =
+                std::make_unique<toolchains::MSVCToolChain>(*this, Target, Args);
+          break;
+        }
+        break;
+      case llvm::Triple::PS4:
+        TC = std::make_unique<toolchains::PS4CPU>(*this, Target, Args);
+        break;
+      case llvm::Triple::Contiki:
+        TC = std::make_unique<toolchains::Contiki>(*this, Target, Args);
+        break;
+      case llvm::Triple::Hurd:
+        TC = std::make_unique<toolchains::Hurd>(*this, Target, Args);
+        break;
       default:
-        if (Target.isOSBinFormatELF())
-          TC = std::make_unique<toolchains::Generic_ELF>(*this, Target, Args);
-        else if (Target.isOSBinFormatMachO())
-          TC = std::make_unique<toolchains::MachO>(*this, Target, Args);
-        else
-          TC = std::make_unique<toolchains::Generic_GCC>(*this, Target, Args);
-        break;
-      case llvm::Triple::GNU:
-        TC = std::make_unique<toolchains::MinGW>(*this, Target, Args);
-        break;
-      case llvm::Triple::Itanium:
-        TC = std::make_unique<toolchains::CrossWindowsToolChain>(*this, Target,
-                                                                  Args);
-        break;
-      case llvm::Triple::MSVC:
-      case llvm::Triple::UnknownEnvironment:
-        if (Args.getLastArgValue(options::OPT_fuse_ld_EQ)
-                .startswith_lower("bfd"))
-          TC = std::make_unique<toolchains::CrossWindowsToolChain>(
-              *this, Target, Args);
-        else
+        // Of these targets, Hexagon is the only one that might have
+        // an OS of Linux, in which case it got handled above already.
+        switch (Target.getArch()) {
+        case llvm::Triple::tce:
+          TC = std::make_unique<toolchains::TCEToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::tcele:
+          TC = std::make_unique<toolchains::TCELEToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::hexagon:
+          TC = std::make_unique<toolchains::HexagonToolChain>(*this, Target,
+                                                               Args);
+          break;
+        case llvm::Triple::lanai:
+          TC = std::make_unique<toolchains::LanaiToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::xcore:
+          TC = std::make_unique<toolchains::XCoreToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::wasm32:
+        case llvm::Triple::wasm64:
+          TC = std::make_unique<toolchains::WebAssembly>(*this, Target, Args);
+          break;
+        case llvm::Triple::avr:
+          TC = std::make_unique<toolchains::AVRToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::msp430:
           TC =
-              std::make_unique<toolchains::MSVCToolChain>(*this, Target, Args);
-        break;
-      }
-      break;
-    case llvm::Triple::PS4:
-      TC = std::make_unique<toolchains::PS4CPU>(*this, Target, Args);
-      break;
-    case llvm::Triple::Contiki:
-      TC = std::make_unique<toolchains::Contiki>(*this, Target, Args);
-      break;
-    case llvm::Triple::Hurd:
-      TC = std::make_unique<toolchains::Hurd>(*this, Target, Args);
-      break;
-    default:
-      // Of these targets, Hexagon is the only one that might have
-      // an OS of Linux, in which case it got handled above already.
-      switch (Target.getArch()) {
-      case llvm::Triple::tce:
-        TC = std::make_unique<toolchains::TCEToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::tcele:
-        TC = std::make_unique<toolchains::TCELEToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::hexagon:
-        TC = std::make_unique<toolchains::HexagonToolChain>(*this, Target,
-                                                             Args);
-        break;
-      case llvm::Triple::lanai:
-        TC = std::make_unique<toolchains::LanaiToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::xcore:
-        TC = std::make_unique<toolchains::XCoreToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::wasm32:
-      case llvm::Triple::wasm64:
-        TC = std::make_unique<toolchains::WebAssembly>(*this, Target, Args);
-        break;
-      case llvm::Triple::avr:
-        TC = std::make_unique<toolchains::AVRToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::msp430:
-        TC =
-            std::make_unique<toolchains::MSP430ToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::riscv32:
-      case llvm::Triple::riscv64:
-        TC = std::make_unique<toolchains::RISCVToolChain>(*this, Target, Args);
-        break;
-      case llvm::Triple::ve:
-        TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
-        break;
-      default:
-        if (Target.getVendor() == llvm::Triple::Myriad)
-          TC = std::make_unique<toolchains::MyriadToolChain>(*this, Target,
-                                                              Args);
-        else if (toolchains::BareMetal::handlesTarget(Target))
-          TC = std::make_unique<toolchains::BareMetal>(*this, Target, Args);
-        else if (Target.isOSBinFormatELF())
-          TC = std::make_unique<toolchains::Generic_ELF>(*this, Target, Args);
-        else if (Target.isOSBinFormatMachO())
-          TC = std::make_unique<toolchains::MachO>(*this, Target, Args);
-        else
-          TC = std::make_unique<toolchains::Generic_GCC>(*this, Target, Args);
+              std::make_unique<toolchains::MSP430ToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::riscv32:
+        case llvm::Triple::riscv64:
+          TC = std::make_unique<toolchains::RISCVToolChain>(*this, Target, Args);
+          break;
+        case llvm::Triple::ve:
+          TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
+          break;
+        default:
+          if (Target.getVendor() == llvm::Triple::Myriad)
+            TC = std::make_unique<toolchains::MyriadToolChain>(*this, Target,
+                                                                Args);
+          else if (toolchains::BareMetal::handlesTarget(Target))
+            TC = std::make_unique<toolchains::BareMetal>(*this, Target, Args);
+          else if (Target.isOSBinFormatELF())
+            TC = std::make_unique<toolchains::Generic_ELF>(*this, Target, Args);
+          else if (Target.isOSBinFormatMachO())
+            TC = std::make_unique<toolchains::MachO>(*this, Target, Args);
+          else
+            TC = std::make_unique<toolchains::Generic_GCC>(*this, Target, Args);
+        }
       }
     }
   }

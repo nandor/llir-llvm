@@ -21,31 +21,25 @@ namespace llvm {
 class LLIRSubtarget;
 
 class LLIRFrameLowering : public TargetFrameLowering {
-public:
+ public:
   explicit LLIRFrameLowering(const LLIRSubtarget &ST);
+
+  MachineBasicBlock::iterator eliminateCallFramePseudoInstr(
+      MachineFunction &MF, MachineBasicBlock &MBB,
+      MachineBasicBlock::iterator I) const override;
 
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-  MachineBasicBlock::iterator eliminateCallFramePseudoInstr(
-      MachineFunction &MF,
-      MachineBasicBlock &MBB,
-      MachineBasicBlock::iterator I
-  ) const override;
-
+  bool hasFP(const MachineFunction &MF) const override;
   bool hasReservedCallFrame(const MachineFunction &MF) const override;
 
-  bool hasFP(const MachineFunction &MF) const override;
-
-  int getFrameIndexReference(
-      const MachineFunction &MF,
-      int FI,
-      Register &FrameReg
-  ) const override;
+  int getFrameIndexReference(const MachineFunction &MF, int FI,
+                             Register &FrameReg) const override;
 
   bool targetHandlesStackFrameRounding() const override { return true; }
 };
 
-} // End llvm namespace
+}  // namespace llvm
 
 #endif

@@ -19,25 +19,20 @@
 namespace llvm {
 class Triple;
 
-class LLIRELFMCAsmInfo : public MCAsmInfoELF {
-public:
-  explicit LLIRELFMCAsmInfo(const Triple &TheTriple);
+class LLIRMCAsmInfo : public MCAsmInfo {
+ public:
+  explicit LLIRMCAsmInfo(const Triple &TheTriple);
 
-  const MCExpr* getExprForPersonalitySymbol(
-      const MCSymbol *Sym,
-      unsigned Encoding,
-      MCStreamer &Streamer
-  ) const override;
+  const MCExpr *getExprForPersonalitySymbol(
+      const MCSymbol *Sym, unsigned Encoding,
+      MCStreamer &Streamer) const override;
 
-  const MCExpr* getExprForFDESymbol(
-      const MCSymbol *Sym,
-      unsigned Encoding,
-      MCStreamer &Streamer
-  ) const override;
+  const MCExpr *getExprForFDESymbol(const MCSymbol *Sym, unsigned Encoding,
+                                    MCStreamer &Streamer) const override;
 
   bool isValidUnquotedName(StringRef Name) const override;
 };
 
-} // end namespace llvm
+}  // end namespace llvm
 
 #endif

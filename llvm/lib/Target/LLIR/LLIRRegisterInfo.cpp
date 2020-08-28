@@ -74,7 +74,7 @@ void LLIRRegisterInfo::eliminateFrameIndex(
 
 Register LLIRRegisterInfo::getFrameRegister(const MachineFunction &MF) const
 {
-  return LLIR::NUM_TARGET_REGS;
+  return LLIR::FRAME_ADDR;
 }
 
 const TargetRegisterClass *LLIRRegisterInfo::getPointerRegClass(

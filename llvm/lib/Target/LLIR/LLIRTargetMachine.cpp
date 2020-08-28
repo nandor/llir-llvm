@@ -95,7 +95,7 @@ static std::string computeDataLayout(
   // TODO(nand):
   //  This should be computed based on the CPU, FS and triple.
   //  This value is hardcoded for x86_64.
-  return "e-m:g-i64:64-f80:128-n8:16:32:64-S128";
+  return "e-m:g-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128";
 }
 
 LLIRTargetMachine::LLIRTargetMachine(

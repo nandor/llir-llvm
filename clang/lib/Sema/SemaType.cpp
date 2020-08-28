@@ -124,6 +124,7 @@ static void diagnoseBadTypeAttribute(Sema &S, const ParsedAttr &attr,
   case ParsedAttr::AT_Pcs:                                                     \
   case ParsedAttr::AT_IntelOclBicc:                                            \
   case ParsedAttr::AT_PreserveMost:                                            \
+  case ParsedAttr::AT_LLIRSetjmp:                                             \
   case ParsedAttr::AT_PreserveAll
 
 // Function type attributes.
@@ -7304,6 +7305,8 @@ static Attr *getCCTypeAttr(ASTContext &Ctx, ParsedAttr &Attr) {
     return createSimpleAttr<PreserveMostAttr>(Ctx, Attr);
   case ParsedAttr::AT_PreserveAll:
     return createSimpleAttr<PreserveAllAttr>(Ctx, Attr);
+  case ParsedAttr::AT_LLIRSetjmp:
+    return createSimpleAttr<LLIRSetjmpAttr>(Ctx, Attr);
   }
   llvm_unreachable("unexpected attribute kind!");
 }

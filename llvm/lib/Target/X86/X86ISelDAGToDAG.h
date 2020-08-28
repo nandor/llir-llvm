@@ -90,6 +90,11 @@ public:
 
   bool isProfitableToFormMaskedOp(SDNode *N) const;
 
+  /// Implement addressing mode selection for inline asm expressions.
+  bool SelectInlineAsmMemoryOperand(const SDValue &Op,
+                                    unsigned ConstraintID,
+                                    std::vector<SDValue> &OutOps) override;
+
   // Try to fold a vector load. This makes sure the load isn't non-temporal.
   bool tryFoldVecLoad(SDNode *Root, SDNode *P, SDValue N,
                       SDValue &Base, SDValue &Scale,
@@ -196,6 +201,18 @@ public:
 
   bool IsProfitableToFold(SDValue N, SDNode *U, SDNode *Root) const override;
 
+  virtual const X86TargetMachine &getTargetMachine() const = 0;
+
+  /// Address-mode matching performs shift-of-and to and-of-shift
+  /// reassociation in order to expose more scaled addressing
+  /// opportunities.
+  bool ComplexPatternFuncMutatesDAG() const override {
+    return true;
+  }
+
+  void PreprocessISelDAG() override;
+  void PostprocessISelDAG() override;
+
   #define GET_DAGISEL_DECL
   #include "X86GenDAGISel.inc"
 };
@@ -216,30 +233,15 @@ public:
 
   void emitFunctionEntryCode() override;
 
-  void PreprocessISelDAG() override;
-  void PostprocessISelDAG() override;
-
 private:
   void Select(SDNode *N) override { X86DAGMatcher::Select(N); }
-
-  /// Implement addressing mode selection for inline asm expressions.
-  bool SelectInlineAsmMemoryOperand(const SDValue &Op,
-                                    unsigned ConstraintID,
-                                    std::vector<SDValue> &OutOps) override;
 
   void emitSpecialCodeForMain();
 
   /// Return a reference to the TargetMachine, casted to the target-specific
   /// type.
-  const X86TargetMachine &getTargetMachine() const {
+  const X86TargetMachine &getTargetMachine() const override {
     return static_cast<const X86TargetMachine &>(TM);
-  }
-
-  /// Address-mode matching performs shift-of-and to and-of-shift
-  /// reassociation in order to expose more scaled addressing
-  /// opportunities.
-  bool ComplexPatternFuncMutatesDAG() const override {
-    return true;
   }
 };
 

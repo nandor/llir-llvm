@@ -1231,6 +1231,8 @@ static unsigned getDwarfCC(CallingConv CC) {
     return llvm::dwarf::DW_CC_LLVM_PreserveAll;
   case CC_X86RegCall:
     return llvm::dwarf::DW_CC_LLVM_X86RegCall;
+  case CC_LLIRSetjmp:
+    llvm_unreachable("debug info not supported");
   }
   return 0;
 }

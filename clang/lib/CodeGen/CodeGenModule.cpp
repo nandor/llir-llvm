@@ -959,6 +959,9 @@ void CodeGenModule::setGVPropertiesAux(llvm::GlobalValue *GV,
   setGlobalVisibility(GV, D);
   setDSOLocal(GV);
   GV->setPartition(CodeGenOpts.SymbolPartition);
+  if (D->hasAttr<NoDeadStripAttr>()) {
+    GV->setNoDeadStrip(true);
+  }
 }
 
 static llvm::GlobalVariable::ThreadLocalMode GetLLVMTLSModel(StringRef S) {

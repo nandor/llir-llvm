@@ -90,6 +90,10 @@ void LLIRAsmPrinter::emitFunctionBodyStart()
   AsmPrinter::emitFunctionBodyStart();
 }
 
+void LLIRAsmPrinter::emitFunctionBodyEnd() {
+  getTargetStreamer().emitEnd();
+}
+
 void LLIRAsmPrinter::emitJumpTableInfo() {
   // Nothing to do; jump tables are incorporated into the instruction stream.
 }

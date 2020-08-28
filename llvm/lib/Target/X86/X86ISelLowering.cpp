@@ -5091,7 +5091,7 @@ bool X86TargetLowering::shouldReduceLoadWidth(SDNode *Load,
                                               ISD::LoadExtType ExtTy,
                                               EVT NewVT) const {
   assert(cast<LoadSDNode>(Load)->isSimple() && "illegal to narrow");
-  
+
   // "ELF Handling for Thread-Local Storage" specifies that R_X86_64_GOTTPOFF
   // relocation target a movq or addq instruction: don't let the load shrink.
   SDValue BasePtr = cast<LoadSDNode>(Load)->getBasePtr();
@@ -18160,19 +18160,22 @@ SDValue X86TargetLowering::LowerVSELECT(SDValue Op, SelectionDAG &DAG) const {
 
   // Try to lower this to a blend-style vector shuffle. This can handle all
   // constant condition cases.
-  if (SDValue BlendOp = lowerVSELECTtoVectorShuffle(Op, Subtarget, DAG))
+  if (SDValue BlendOp = lowerVSELECTtoVectorShuffle(Op, Subtarget, DAG)) {
     return BlendOp;
+  }
 
   // If this VSELECT has a vector if i1 as a mask, it will be directly matched
   // with patterns on the mask registers on AVX-512.
   MVT CondVT = Cond.getSimpleValueType();
   unsigned CondEltSize = Cond.getScalarValueSizeInBits();
-  if (CondEltSize == 1)
+  if (CondEltSize == 1) {
     return Op;
+  }
 
   // Variable blends are only legal from SSE4.1 onward.
-  if (!Subtarget.hasSSE41())
+  if (!Subtarget.hasSSE41()) {
     return SDValue();
+  }
 
   SDLoc dl(Op);
   MVT VT = Op.getSimpleValueType();
@@ -18180,8 +18183,9 @@ SDValue X86TargetLowering::LowerVSELECT(SDValue Op, SelectionDAG &DAG) const {
   unsigned NumElts = VT.getVectorNumElements();
 
   // Expand v32i16/v64i8 without BWI.
-  if ((VT == MVT::v32i16 || VT == MVT::v64i8) && !Subtarget.hasBWI())
+  if ((VT == MVT::v32i16 || VT == MVT::v64i8) && !Subtarget.hasBWI()) {
     return SDValue();
+  }
 
   // If the VSELECT is on a 512-bit type, we have to convert a non-i1 condition
   // into an i1 condition so that we can use the mask-based 512-bit blend
@@ -18199,8 +18203,9 @@ SDValue X86TargetLowering::LowerVSELECT(SDValue Op, SelectionDAG &DAG) const {
   // SEXT/TRUNC cases where the mask doesn't match the destination size.
   if (CondEltSize != EltSize) {
     // If we don't have a sign splat, rely on the expansion.
-    if (CondEltSize != DAG.ComputeNumSignBits(Cond))
+    if (CondEltSize != DAG.ComputeNumSignBits(Cond)) {
       return SDValue();
+    }
 
     MVT NewCondSVT = MVT::getIntegerVT(EltSize);
     MVT NewCondVT = MVT::getVectorVT(NewCondSVT, NumElts);
@@ -23108,6 +23113,7 @@ SDValue X86TargetLowering::LowerSELECT(SDValue Op, SelectionDAG &DAG) const {
   // Otherwise FP cmovs get lowered into a less efficient branch sequence later.
   if (Cond.getOpcode() == ISD::SETCC && isScalarFPTypeInSSEReg(VT) &&
       VT == Cond.getOperand(0).getSimpleValueType() && Cond->hasOneUse()) {
+
     SDValue CondOp0 = Cond.getOperand(0), CondOp1 = Cond.getOperand(1);
     bool IsAlwaysSignaling;
     unsigned SSECC =

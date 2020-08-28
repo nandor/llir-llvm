@@ -36,7 +36,7 @@ using namespace llvm;
 static MCAsmInfo *createLLIRMCAsmInfo(const MCRegisterInfo &MRI,
                                       const Triple &TT,
                                       const MCTargetOptions &TO) {
-  return new LLIRELFMCAsmInfo(TT);
+  return new LLIRMCAsmInfo(TT);
 }
 
 static MCInstPrinter *createLLIRMCInstPrinter(const Triple &T,
