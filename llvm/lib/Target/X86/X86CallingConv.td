@@ -1168,13 +1168,13 @@ def CSR_SysV64_RegCall_NoSSE : CalleeSavedRegs<(add RBX, RBP, RSP,
 def CSR_SysV64_RegCall       : CalleeSavedRegs<(add CSR_SysV64_RegCall_NoSSE,
                                                (sequence "XMM%u", 8, 15))>;
 
-// LLIR calling conventions.
-def CSR_LLIR_Caml : CalleeSavedRegs<(add
-)>;
+// LLIR: OCaml call which does not preserve any registers.
+def CSR_LLIR_Caml : CalleeSavedRegs<(add)>;
 
-def CSR_LLIR_Caml_Ext : CalleeSavedRegs<(add
-)>;
+// LLIR: OCaml-to-C call which respects the System-V convention.
+def CSR_LLIR_Caml_Ext : CalleeSavedRegs<(add)>;
 
+// LLIR: OCaml allocation call, does not preserve r14 and rax.
 def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
   (add
     RBX,
@@ -1189,12 +1189,12 @@ def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
     R11,
     R12,
     R13,
-    R14,
     R15,
     (sequence "XMM%u", 0, 15)
   )
 >;
 
+// LLIR: OCaml GC trampoline call, preserves all registers.
 def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
   (add
     RAX,
@@ -1216,12 +1216,8 @@ def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
   )
 >;
 
-def CSR_LLIR_Caml_Raise : CalleeSavedRegs<
-  (add
-  )
->;
+// LLIR: OCaml exception raise call, does not preserve anything.
+def CSR_LLIR_Caml_Raise : CalleeSavedRegs<(add)>;
 
-def CSR_LLIR_Setjmp : CalleeSavedRegs<
-  (add
-  )
->;
+// LLIR: setjmp, does not preserve any registers.
+def CSR_LLIR_Setjmp : CalleeSavedRegs<(add)>;
