@@ -339,6 +339,15 @@ public:
   ///                  machine verification pass afterwards.
   void addPass(Pass *P, bool verifyAfter = true);
 
+  /// Utilities for targets to add passes to the pass manager.
+  ///
+
+  /// Add a CodeGen pass at this point in the pipeline after checking overrides.
+  /// Return the pass that was added, or zero if no pass was added.
+  /// @p verifyAfter   if true and adding a machine function pass add an extra
+  ///                  machine verification pass afterwards.
+  AnalysisID addPass(AnalysisID PassID, bool verifyAfter = true);
+
   /// Check whether continuous CSE should be enabled in GISel passes.
   /// By default, it's enabled for non O0 levels.
   virtual bool isGISelCSEEnabled() const;
@@ -442,15 +451,6 @@ protected:
   // position and remove the `2` suffix here as this callback is what
   // `addPreEmitPass` *should* be but in reality isn't.
   virtual void addPreEmitPass2() {}
-
-  /// Utilities for targets to add passes to the pass manager.
-  ///
-
-  /// Add a CodeGen pass at this point in the pipeline after checking overrides.
-  /// Return the pass that was added, or zero if no pass was added.
-  /// @p verifyAfter   if true and adding a machine function pass add an extra
-  ///                  machine verification pass afterwards.
-  AnalysisID addPass(AnalysisID PassID, bool verifyAfter = true);
 
   /// addMachinePasses helper to create the target-selected or overriden
   /// regalloc pass.
