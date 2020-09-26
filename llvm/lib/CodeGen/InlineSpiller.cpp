@@ -167,12 +167,13 @@ public:
         if (!MI.isGCFrame()) continue;
 
         for (auto *MOP : MI.memoperands()) {
-          auto *Stk = llvm::dyn_cast_or_null<llvm::FixedStackPseudoSourceValue>(
-              MOP->getPseudoValue());
-          int Index = Stk->getFrameIndex();
-          if (Stk && Index > 0 && Slot == (unsigned)Index) {
-            IsGCSpillCache[Slot] = true;
-            return true;
+          using T = llvm::FixedStackPseudoSourceValue;
+          if (auto *Stk = llvm::dyn_cast_or_null<T>(MOP->getPseudoValue())) {
+            int Index = Stk->getFrameIndex();
+            if (Index >= 0 && Slot == (unsigned)Index) {
+              IsGCSpillCache[Slot] = true;
+              return true;
+            }
           }
         }
       }
