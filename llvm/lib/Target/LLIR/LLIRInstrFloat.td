@@ -90,49 +90,53 @@ multiclass CommBinaryFloat
   defm "" : BinaryFloat<node, name, Op32, Op64, Op80>;
 }
 
-multiclass CmpFloat
-  < CondCode cond
+multiclass CmpFloatVariant
+  < SDNode cc
+  , CondCode cond
   , string name
-  , bits<32> Op32
-  , bits<32> Op64
-  , bits<32> Op80
+  , bits<32> op
   >
 {
   def _F32 : I
     < (outs I8:$dst)
     , (ins F32:$lhs, F32:$rhs)
-    , [(set I8:$dst, (setcc F32:$lhs, F32:$rhs, cond))]
+    , [(set I8:$dst, (cc F32:$lhs, F32:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
-    , Op32
+    , op
     >;
 
   def _F64 : I
     < (outs I8:$dst)
     , (ins F64:$lhs, F64:$rhs)
-    , [(set I8:$dst, (setcc F64:$lhs, F64:$rhs, cond))]
+    , [(set I8:$dst, (cc F64:$lhs, F64:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
-    , Op64
+    , op
     >;
 
   def _F80 : I
     < (outs I8:$dst)
     , (ins F80:$lhs, F80:$rhs)
-    , [(set I8:$dst, (setcc F80:$lhs, F80:$rhs, cond))]
+    , [(set I8:$dst, (cc F80:$lhs, F80:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
-    , Op80
+    , op
     >;
 }
 
-multiclass CommCmpFloat
-  < SDNode node
+multiclass CmpFloat
+  < CondCode cond
   , string name
-  , bits<32> Op32
-  , bits<32> Op64
-  , bits<32> Op80
+  , bits<32> op
   >
 {
-  let isCommutable = 1 in
-  defm "" : CmpFloat< node, name, Op32, Op64, Op80>;
+  defm _SETCC : CmpFloatVariant<setcc, cond, name, op>;
+  defm _ANY_FSETCC : CmpFloatVariant<any_fsetcc, cond, name, op>;
+  defm _STRICT_FSETCCS
+    : CmpFloatVariant
+      < strict_fsetccs
+      , cond
+      , !strconcat(name, ".strict")
+      , op
+      >;
 }
 
 multiclass TernaryFloat
@@ -191,26 +195,26 @@ defm FDIV     : BinaryFloat<fdiv, "sdiv", 0xA1, 0xA2, 0x00>;
 defm FREM     : BinaryFloat<frem, "srem", 0xA3, 0xA2, 0x00>;
 defm FPOW     : BinaryFloat<fpow, "pow", 0xA4, 0xA5, 0x00>;
 
-defm OEQ : CmpFloat<SETOEQ, "oeq", 0x5b, 0x00, 0x00>;
-defm ONE : CmpFloat<SETONE, "one", 0x5c, 0x00, 0x00>;
-defm OLT : CmpFloat<SETOLT, "olt", 0x5d, 0x00, 0x00>;
-defm OLE : CmpFloat<SETOLE, "ole", 0x5f, 0x00, 0x00>;
-defm OGT : CmpFloat<SETOGT, "ogt", 0x5e, 0x00, 0x00>;
-defm OGE : CmpFloat<SETOGE, "oge", 0x60, 0x00, 0x00>;
+defm OEQ : CmpFloat<SETOEQ, "oeq", 0x5b>;
+defm ONE : CmpFloat<SETONE, "one", 0x5c>;
+defm OLT : CmpFloat<SETOLT, "olt", 0x5d>;
+defm OLE : CmpFloat<SETOLE, "ole", 0x5f>;
+defm OGT : CmpFloat<SETOGT, "ogt", 0x5e>;
+defm OGE : CmpFloat<SETOGE, "oge", 0x60>;
 
-defm UEQ : CmpFloat<SETUEQ, "ueq", 0x5b, 0x00, 0x00>;
-defm UNE : CmpFloat<SETUNE, "une", 0x5c, 0x00, 0x00>;
-defm ULT : CmpFloat<SETULT, "ult", 0x5d, 0x00, 0x00>;
-defm ULE : CmpFloat<SETULE, "ule", 0x5f, 0x00, 0x00>;
-defm UGT : CmpFloat<SETUGT, "ugt", 0x5e, 0x00, 0x00>;
-defm UGE : CmpFloat<SETUGE, "uge", 0x60, 0x00, 0x00>;
+defm UEQ : CmpFloat<SETUEQ, "ueq", 0x5b>;
+defm UNE : CmpFloat<SETUNE, "une", 0x5c>;
+defm ULT : CmpFloat<SETULT, "ult", 0x5d>;
+defm ULE : CmpFloat<SETULE, "ule", 0x5f>;
+defm UGT : CmpFloat<SETUGT, "ugt", 0x5e>;
+defm UGE : CmpFloat<SETUGE, "uge", 0x60>;
 
-defm EQ : CmpFloat<SETEQ, "eq", 0x5b, 0x00, 0x00>;
-defm NE : CmpFloat<SETNE, "ne", 0x5c, 0x00, 0x00>;
-defm LT : CmpFloat<SETLT, "lt", 0x5d, 0x00, 0x00>;
-defm LE : CmpFloat<SETLE, "le", 0x5f, 0x00, 0x00>;
-defm GT : CmpFloat<SETGT, "gt", 0x5e, 0x00, 0x00>;
-defm GE : CmpFloat<SETGE, "ge", 0x60, 0x00, 0x00>;
+defm EQ : CmpFloat<SETEQ, "eq", 0x5b>;
+defm NE : CmpFloat<SETNE, "ne", 0x5c>;
+defm LT : CmpFloat<SETLT, "lt", 0x5d>;
+defm LE : CmpFloat<SETLE, "le", 0x5f>;
+defm GT : CmpFloat<SETGT, "gt", 0x5e>;
+defm GE : CmpFloat<SETGE, "ge", 0x60>;
 
 defm SELECT : TernaryFloat<select, "select", 0xB0, 0xB1, 0xB2>;
 

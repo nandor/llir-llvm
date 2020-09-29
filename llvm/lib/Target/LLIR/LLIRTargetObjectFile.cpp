@@ -11,15 +11,14 @@
 #include "llvm/Target/TargetMachine.h"
 using namespace llvm;
 
-void LLIRTargetObjectFile::Initialize(
+void LLIRELFTargetObjectFile::Initialize(
     MCContext &Ctx,
     const TargetMachine &TM)
 {
-  TargetLoweringObjectFileELF::Initialize(Ctx, TM);
-  InitializeELF(TM.Options.UseInitArray);
+  TargetLoweringObjectFileLLIR::Initialize(Ctx, TM);
 }
 
-const MCExpr *LLIRTargetObjectFile::getTTypeGlobalReference(
+const MCExpr *LLIRELFTargetObjectFile::getTTypeGlobalReference(
     const GlobalValue *GV,
     unsigned Encoding,
     const TargetMachine &TM,

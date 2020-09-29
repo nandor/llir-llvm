@@ -33,6 +33,7 @@ LLIRMCAsmInfo::LLIRMCAsmInfo(const Triple &TheTriple) {
   ExceptionsType = ExceptionHandling::None;
   PrivateGlobalPrefix = ".L";
   PrivateLabelPrefix = ".L";
+  LCOMMDirectiveAlignmentType = LCOMM::ByteAlignment;
 }
 
 const MCExpr* LLIRMCAsmInfo::getExprForPersonalitySymbol(

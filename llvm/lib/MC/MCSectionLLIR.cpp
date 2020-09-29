@@ -24,6 +24,7 @@ void MCSectionLLIR::PrintSwitchToSection(
     raw_ostream &OS,
     const MCExpr *Subsection) const
 {
+  OS << ".section\t" << Name << "\n";
 }
 
 bool MCSectionLLIR::UseCodeAlign() const { return false; }

@@ -87,14 +87,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::VACOPY, MVT::Other, Custom);
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
-  // Expand conditional branches and selects.
-  for (auto T :
-       {MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::f32, MVT::f64, MVT::f80}) {
-    for (auto Op : {ISD::BR_CC, ISD::SELECT_CC}) {
-      setOperationAction(Op, T, Expand);
-    }
-  }
-
   // Deal with floating point operations.
   for (auto T : {MVT::f32, MVT::f64, MVT::f80}) {
     setOperationAction(ISD::ConstantFP, T, Legal);
@@ -111,6 +103,14 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
     // Expand operations which are not yet supported.
     setOperationAction(ISD::FMA, T, Expand);
+
+    // SETCC/SETCCS are legal.
+    setOperationAction(ISD::STRICT_FSETCC, T, Legal);
+    setOperationAction(ISD::STRICT_FSETCCS, T, Legal);
+
+    // Expand conditionals.
+    setOperationAction(ISD::BR_CC, T, Expand);
+    setOperationAction(ISD::SELECT_CC, T, Expand);
   }
 
   // Disable some integer operations.
@@ -138,6 +138,17 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::ADDE, T, Expand);
     setOperationAction(ISD::SUBC, T, Expand);
     setOperationAction(ISD::SUBE, T, Expand);
+
+    // Expand conditionals.
+    setOperationAction(ISD::BR_CC, T, Expand);
+    setOperationAction(ISD::SELECT_CC, T, Expand);
+
+    // Allow comparisons.
+    setOperationAction(ISD::SINT_TO_FP, T, Legal);
+    setOperationAction(ISD::UINT_TO_FP, T, Legal);
+    setOperationAction(ISD::STRICT_SINT_TO_FP, T, Legal);
+    setOperationAction(ISD::STRICT_UINT_TO_FP, T, Legal);
+
   }
 
   // Disable in-register sign extension.
