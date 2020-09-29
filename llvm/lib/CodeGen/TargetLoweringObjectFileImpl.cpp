@@ -2202,3 +2202,103 @@ MCSection *TargetLoweringObjectFileXCOFF::getSectionForTOCEntry(
       TM.getCodeModel() == CodeModel::Large ? XCOFF::XMC_TE : XCOFF::XMC_TC,
       XCOFF::XTY_SD, SectionKind::getData());
 }
+
+void TargetLoweringObjectFileLLIR::Initialize(MCContext &Ctx,
+                                              const TargetMachine &TM) {
+  TargetLoweringObjectFile::Initialize(Ctx, TM);
+  TTypeEncoding = 0;
+  PersonalityEncoding = 0;
+  LSDAEncoding = 0;
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getSectionForConstant(
+    const DataLayout &DL, SectionKind Kind, const Constant *C,
+    Align &Alignment) const {
+  if (Kind.isReadOnlyWithRel())
+    return DataSection;
+  if (Kind.isReadOnly())
+    return ReadOnlySection;
+  llvm_unreachable("invalid section kind");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getExplicitSectionGlobal(
+    const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
+    const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
+  if (isa<Function>(GO))
+    return TextSection;
+
+  if (const auto *GVar = dyn_cast_or_null<GlobalVariable>(GO)) {
+    if (GVar->isConstant()) {
+      const Constant *C = GVar->getInitializer();
+      if (C->needsRelocation()) {
+        return DataSection;
+      } else {
+        return ReadOnlySection;
+      }
+    } else {
+      return DataSection;
+    }
+  }
+
+  if (Kind.isReadOnlyWithRel())
+    return DataSection;
+  if (Kind.isReadOnly())
+    return ReadOnlySection;
+  if (Kind.isBSS())
+    return BSSSection;
+  if (Kind.isData())
+    return DataSection;
+  llvm_unreachable("invalid section kind");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getSectionForJumpTable(
+    const Function &F, const TargetMachine &TM) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getSectionForMachineBasicBlock(
+    const Function &F, const MachineBasicBlock &MBB,
+    const TargetMachine &TM) const {
+  llvm_unreachable("not implemented");
+}
+
+bool TargetLoweringObjectFileLLIR::shouldPutJumpTableInFunctionSection(
+    bool UsesLabelDifference, const Function &F) const {
+  llvm_unreachable("not implemented");
+}
+
+const MCExpr *TargetLoweringObjectFileLLIR::getTTypeGlobalReference(
+    const GlobalValue *GV, unsigned Encoding, const TargetMachine &TM,
+    MachineModuleInfo *MMI, MCStreamer &Streamer) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSymbol *TargetLoweringObjectFileLLIR::getCFIPersonalitySymbol(
+    const GlobalValue *GV, const TargetMachine &TM,
+    MachineModuleInfo *MMI) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getStaticCtorSection(
+    unsigned Priority, const MCSymbol *KeySym) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getStaticDtorSection(
+    unsigned Priority, const MCSymbol *KeySym) const {
+  llvm_unreachable("not implemented");
+}
+
+const MCExpr *TargetLoweringObjectFileLLIR::lowerRelativeReference(
+    const GlobalValue *LHS, const GlobalValue *RHS,
+    const TargetMachine &TM) const {
+  llvm_unreachable("not implemented");
+}
+
+MCSection *TargetLoweringObjectFileLLIR::getSectionForCommandLines() const {
+  return nullptr;
+}

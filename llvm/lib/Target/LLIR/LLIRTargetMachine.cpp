@@ -98,6 +98,10 @@ static std::string computeDataLayout(
   return "e-m:g-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128";
 }
 
+static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
+  return std::make_unique<LLIRELFTargetObjectFile>();
+}
+
 LLIRTargetMachine::LLIRTargetMachine(
     const Target &T,
     const Triple &TT,
@@ -119,7 +123,7 @@ LLIRTargetMachine::LLIRTargetMachine(
         CodeModel::Large,
         OL
     ),
-    TLOF(std::make_unique<LLIRTargetObjectFile>())
+    TLOF(createTLOF(TT))
 {
   this->Options.TrapUnreachable = true;
   this->Options.NoTrapAfterNoreturn = false;

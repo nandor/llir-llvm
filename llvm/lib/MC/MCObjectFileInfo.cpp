@@ -861,39 +861,10 @@ void MCObjectFileInfo::initXCOFFMCObjectFileInfo(const Triple &T) {
 
 void MCObjectFileInfo::initLLIRMCObjectFileInfo(const Triple &T) {
   // LLIR
-  SupportsWeakOmittedEHFrame = false;
-
-  EHFrameSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-
   TextSection = Ctx->getLLIRSection(".text", SectionKind::getText());
   DataSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  BSSSection = Ctx->getLLIRSection(".bss", SectionKind::getData());
-
-  CStringSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  UStringSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-
-  FourByteConstantSection = Ctx->getLLIRSection(".const", SectionKind::getData());
-  EightByteConstantSection = Ctx->getLLIRSection(".const", SectionKind::getData());
-  SixteenByteConstantSection = Ctx->getLLIRSection(".const", SectionKind::getData());
-
-  ReadOnlySection = Ctx->getLLIRSection(".const", SectionKind::getData());
-  ConstDataSection = Ctx->getLLIRSection(".const", SectionKind::getData());
-
-  TextCoalSection = TextSection;
-  ConstTextCoalSection = ReadOnlySection;
-  DataCoalSection = DataSection;
-  ConstDataCoalSection = ConstDataSection;
-
-  DataCommonSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  DataBSSSection = Ctx->getLLIRSection(".bss", SectionKind::getData());
-
-  LazySymbolPointerSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  NonLazySymbolPointerSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  ThreadLocalPointerSection = Ctx->getLLIRSection(".thread", SectionKind::getData());
-
-  LSDASection = Ctx->getLLIRSection(".lsda", SectionKind::getMetadata());
-  StackMapSection = Ctx->getLLIRSection(".stackmap", SectionKind::getMetadata());
-  FaultMapSection = Ctx->getLLIRSection(".faultmap", SectionKind::getMetadata());
+  BSSSection = Ctx->getLLIRSection(".bss", SectionKind::getBSS());
+  ReadOnlySection = Ctx->getLLIRSection(".const", SectionKind::getReadOnly());
 }
 
 void MCObjectFileInfo::InitMCObjectFileInfo(const Triple &TheTriple, bool PIC,

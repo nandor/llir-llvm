@@ -16,9 +16,9 @@ namespace llvm {
 class MCContext;
 class TargetMachine;
 
-class LLIRTargetObjectFile : public TargetLoweringObjectFileELF {
+class LLIRELFTargetObjectFile : public TargetLoweringObjectFileLLIR {
 public:
-  LLIRTargetObjectFile() : TargetLoweringObjectFileELF() {}
+  LLIRELFTargetObjectFile() : TargetLoweringObjectFileLLIR() {}
 
   void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
