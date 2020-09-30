@@ -240,17 +240,38 @@ endif()
 set(x86_ARCH_SOURCES
   cpu_model.c
   )
+set(llir_x86_ARCH_SOURCES
+  llir/x86_64/cpu_model.c
+  )
 
 if (NOT MSVC)
   set(x86_ARCH_SOURCES
     ${x86_ARCH_SOURCES}
     i386/fp_mode.c
   )
+  set(llir_x86_ARCH_SOURCES
+    ${llir_x86_ARCH_SOURCES}
+    llir/i386/fp_mode.c
+  )
 endif ()
 
 # Implement extended-precision builtins, assuming long double is 80 bits.
 # long double is not 80 bits on Android or MSVC.
 set(x86_80_BIT_SOURCES
+  divxc3.c
+  fixxfdi.c
+  fixxfti.c
+  fixunsxfdi.c
+  fixunsxfsi.c
+  fixunsxfti.c
+  floatdixf.c
+  floattixf.c
+  floatundixf.c
+  floatuntixf.c
+  mulxc3.c
+  powixf2.c
+)
+set(llir_x86_80_BIT_SOURCES
   divxc3.c
   fixxfdi.c
   fixxfti.c
@@ -275,6 +296,15 @@ if (NOT MSVC)
     x86_64/floatundidf.S
     x86_64/floatundisf.S
   )
+  set(llir_x86_64_SOURCES
+    ${GENERIC_SOURCES}
+    ${GENERIC_TF_SOURCES}
+    ${llir_x86_ARCH_SOURCES}
+    x86_64/floatdidf.c
+    x86_64/floatdisf.c
+    llir/x86_64/floatundidf.S
+    llir/x86_64/floatundisf.S
+  )
 
   if (NOT ANDROID)
     set(x86_64_SOURCES
@@ -283,16 +313,28 @@ if (NOT MSVC)
       x86_64/floatdixf.c
       x86_64/floatundixf.S
     )
+    set(llir_x86_64_SOURCES
+      ${llir_x86_64_SOURCES}
+      ${llir_x86_80_BIT_SOURCES}
+      x86_64/floatdixf.c
+      llir/x86_64/floatundixf.S
+    )
   endif()
 
   # Darwin x86_64 Haswell
   set(x86_64h_SOURCES ${x86_64_SOURCES})
+  set(llir_x86_64h_SOURCES ${llir_x86_64_SOURCES})
 
   if (WIN32)
     set(x86_64_SOURCES
       ${x86_64_SOURCES}
       x86_64/chkstk.S
       x86_64/chkstk2.S
+    )
+    set(llir_x86_64_SOURCES
+      ${llir_x86_64_SOURCES}
+      llir/x86_64/chkstk.S
+      llir/x86_64/chkstk2.S
     )
   endif()
 
@@ -338,6 +380,12 @@ else () # MSVC
     ${x86_ARCH_SOURCES}
     x86_64/floatdidf.c
     x86_64/floatdisf.c
+  )
+  set(llir_x86_64_SOURCES
+    ${GENERIC_SOURCES}
+    ${llir_x86_ARCH_SOURCES}
+    llir/x86_64/floatdidf.c
+    llir/x86_64/floatdisf.c
   )
   set(i386_SOURCES ${GENERIC_SOURCES} ${x86_ARCH_SOURCES})
 endif () # if (NOT MSVC)

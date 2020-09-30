@@ -38,6 +38,8 @@ set(SPARCV9 sparcv9)
 set(WASM32 wasm32)
 set(WASM64 wasm64)
 set(VE ve)
+set(LLIR_X86_64 llir_x86_64)
+set(LLIR_AARCH64 llir_aarch64)
 
 if(APPLE)
   set(ARM64 arm64 arm64e)
@@ -49,7 +51,8 @@ set(ALL_BUILTIN_SUPPORTED_ARCH
   ${X86} ${X86_64} ${ARM32} ${ARM64}
   ${HEXAGON} ${MIPS32} ${MIPS64} ${PPC64}
   ${RISCV32} ${RISCV64} ${SPARC} ${SPARCV9}
-  ${WASM32} ${WASM64} ${VE})
+  ${WASM32} ${WASM64} ${VE}
+  ${LLIR_X86_64} ${LLIR_AARCH64})
 
 include(CompilerRTUtils)
 include(CompilerRTDarwinUtils)

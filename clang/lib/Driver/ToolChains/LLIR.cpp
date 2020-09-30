@@ -150,13 +150,12 @@ void LLIR::AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
 
 void LLIR::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
                                         ArgStringList &CC1Args) const {
-  llvm_unreachable("not implemented: AddClangCXXStdlibIncludeArgs");
 }
 
 std::string LLIR::computeSysRoot() const {
   std::string SysRoot = getDriver().SysRoot;
-  if (SysRoot.empty()) {
-    llvm_unreachable("not implemented: sysroot locator");
+  if (!SysRoot.empty()) {
+    return SysRoot;
   }
-  return SysRoot;
+  return std::string();
 }

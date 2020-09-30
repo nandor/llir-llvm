@@ -166,7 +166,7 @@ file(WRITE ${DUMMY_VERS} "{};")
 set(VERS_OPTION "-Wl,--version-script,${DUMMY_VERS}")
 if(COMPILER_RT_HAS_GNU_VERSION_SCRIPT_COMPAT)
   # Solaris 11.4 ld only supports --version-script with
-  # -z gnu-version-script-compat. 
+  # -z gnu-version-script-compat.
   string(APPEND VERS_OPTION " ${VERS_COMPAT_OPTION}")
 endif()
 check_linker_flag("${VERS_OPTION}" COMPILER_RT_HAS_VERSION_SCRIPT)
@@ -285,6 +285,8 @@ set(SPARC sparc)
 set(SPARCV9 sparcv9)
 set(WASM32 wasm32)
 set(WASM64 wasm64)
+set(LLIR_X86_64 llir_x86_64)
+set(LLIR_AARCH64 llir_aarch64)
 
 if(APPLE)
   set(ARM64 arm64)
