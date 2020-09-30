@@ -76,13 +76,9 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     }
   }
 
-  CmdArgs.push_back("-o");
-  CmdArgs.push_back(Output.getFilename());
-
-  if (!Args.hasArg(options::OPT_nostdlib)) {
+  if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
     if (!Args.hasArg(options::OPT_shared))
       CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crt1.o")));
-    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crti.o")));
   }
 
   Args.AddAllArgs(CmdArgs, options::OPT_L);
@@ -92,13 +88,24 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
 
   if (!Args.hasArg(options::OPT_nostdlib)) {
-    if (Args.hasArg(options::OPT_pthread) || Args.hasArg(options::OPT_pthreads))
-      CmdArgs.push_back("-lpthread");
+    if (!Args.hasArg(options::OPT_nodefaultlibs)) {
+      bool WantPthread = Args.hasArg(options::OPT_pthread) ||
+                         Args.hasArg(options::OPT_pthreads);
 
-    CmdArgs.push_back("-lc");
+      if (WantPthread)
+        CmdArgs.push_back("-lpthread");
+
+      if (!Args.hasArg(options::OPT_nolibc))
+        CmdArgs.push_back("-lc");
+
+      const auto &CompilerRT = ToolChain.getCompilerRT(Args, "builtins");
+      CmdArgs.push_back(Args.MakeArgString(CompilerRT));
+    }
   }
 
-  if (Args.hasArg(options::OPT_shared)) {
+  if (Args.hasArg(options::OPT_static)) {
+    CmdArgs.push_back("-static");
+  } else if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
   } else {
     CmdArgs.push_back("-dynamic-linker");
@@ -107,9 +114,8 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(Args.MakeArgString(DynamicLinker));
   }
 
-  if (!Args.hasArg(options::OPT_nostdlib)) {
-    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crtn.o")));
-  }
+  CmdArgs.push_back("-o");
+  CmdArgs.push_back(Output.getFilename());
 
   const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath("llir-ld"));
   C.addCommand(std::make_unique<Command>(

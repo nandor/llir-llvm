@@ -33,10 +33,6 @@ class Target;
 Target &getTheLLIR_X86_64Target();
 Target &getTheLLIR_AArch64Target();
 
-MCCodeEmitter *createLLIRMCCodeEmitter(const MCInstrInfo &MCII,
-                                       const MCRegisterInfo &MRI,
-                                       MCContext &Ctx);
-
 MCAsmBackend *createLLIRAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                    const MCRegisterInfo &MRI,
                                    const MCTargetOptions &Options);
