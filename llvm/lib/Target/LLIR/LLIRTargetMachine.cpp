@@ -80,7 +80,8 @@ public:
 extern "C" void LLVMInitializeLLIRTarget()
 {
   // Register the target.
-  RegisterTargetMachine<LLIRTargetMachine> X(getTheLLIRTarget());
+  RegisterTargetMachine<LLIRTargetMachine> X(getTheLLIR_X86_64Target());
+  RegisterTargetMachine<LLIRTargetMachine> Y(getTheLLIR_AArch64Target());
 
   // Register backend passes.
   auto &PR = *PassRegistry::getPassRegistry();

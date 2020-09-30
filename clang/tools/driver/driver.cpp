@@ -354,13 +354,6 @@ int main(int argc_, const char **argv_) {
 
   llvm::InitializeAllTargets();
   auto TargetAndMode = ToolChain::getTargetAndModeFromProgramName(argv[0]);
-  if (TargetAndMode.TargetPrefix == "llir") {
-    // If this is the llir executable, run the frontend as for the
-    // normal host, but set a flag to change the backend later on.
-    argv.push_back("-llir");
-    TargetAndMode.TargetPrefix = "";
-    TargetAndMode.TargetIsValid = false;
-  }
 
   llvm::BumpPtrAllocator A;
   llvm::StringSaver Saver(A);

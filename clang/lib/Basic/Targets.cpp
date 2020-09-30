@@ -20,6 +20,7 @@
 #include "Targets/AVR.h"
 #include "Targets/BPF.h"
 #include "Targets/Hexagon.h"
+#include "Targets/LLIR.h"
 #include "Targets/Lanai.h"
 #include "Targets/Le64.h"
 #include "Targets/MSP430.h"
@@ -625,6 +626,22 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
 
   case llvm::Triple::ve:
     return new LinuxTargetInfo<VETargetInfo>(Triple, Opts);
+
+  case llvm::Triple::llir_x86_64:
+    switch (os) {
+    case llvm::Triple::Linux:
+      return new LinuxTargetInfo<LLIR_X86_64TargetInfo>(Triple, Opts);
+    default:
+      return new LLIR_X86_64TargetInfo(Triple, Opts);
+    }
+
+  case llvm::Triple::llir_aarch64_be:
+    switch (os) {
+    case llvm::Triple::Linux:
+      return new LinuxTargetInfo<LLIR_AArch64beTargetInfo>(Triple, Opts);
+    default:
+      return new LLIR_AArch64beTargetInfo(Triple, Opts);
+    }
   }
 }
 } // namespace targets

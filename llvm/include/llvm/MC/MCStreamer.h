@@ -477,7 +477,7 @@ public:
                                 unsigned Minor, unsigned Update,
                                 VersionTuple SDKVersion) {}
 
-  void emitVersionForTarget(const Triple &Target,
+  virtual void emitVersionForTarget(const Triple &Target,
                             const VersionTuple &SDKVersion);
 
   /// Note in the output that the specified \p Func is a Thumb mode

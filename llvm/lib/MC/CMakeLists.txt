@@ -24,7 +24,6 @@ add_llvm_component_library(LLVMMC
   MCInstrAnalysis.cpp
   MCInstrDesc.cpp
   MCInstrInfo.cpp
-  MCLLIRStreamer.cpp
   MCLabel.cpp
   MCLinkerOptimizationHint.cpp
   MCMachOStreamer.cpp

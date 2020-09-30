@@ -44,7 +44,7 @@ static const unsigned X86AddrSpaceMap[] = {
 // X86 target abstract base class; x86-32 and x86-64 are very close, so
 // most of the implementation can be shared.
 class LLVM_LIBRARY_VISIBILITY X86TargetInfo : public TargetInfo {
-
+protected:
   enum X86SSEEnum {
     NoSSE,
     SSE1,
@@ -142,7 +142,6 @@ protected:
 public:
   X86TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : TargetInfo(Triple) {
-    LLIR = Opts.LLIR;
 
     LongDoubleFormat = &llvm::APFloat::x87DoubleExtended();
     AddrSpaceMap = &X86AddrSpaceMap;
@@ -226,8 +225,6 @@ public:
 
   std::string convertConstraint(const char *&Constraint) const override;
   const char *getClobbers() const override {
-    if (LLIR)
-      return "";
     return "~{dirflag},~{fpsr},~{flags}";
   }
 
@@ -347,7 +344,6 @@ public:
     case CC_X86Pascal:
     case CC_IntelOclBicc:
     case CC_OpenCLKernel:
-    case CC_LLIRSetjmp:
       return CCCR_OK;
     default:
       return CCCR_Warning;
@@ -668,18 +664,12 @@ public:
     RegParmMax = 6;
 
     // Pointers are 32-bit in x32.
-    if (llvm::IsLLIR) {
-      resetDataLayout(
-          "e-m:g-p270:32:32-p271:32:32-p272:64:"
-          "64-i64:64-f80:128-n8:16:32:64-S128");
-    } else {
-      resetDataLayout(IsX32 ? "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-"
-                              "i64:64-f80:128-n8:16:32:64-S128"
-                            : IsWinCOFF ? "e-m:w-p270:32:32-p271:32:32-p272:64:"
-                                          "64-i64:64-f80:128-n8:16:32:64-S128"
-                                        : "e-m:e-p270:32:32-p271:32:32-p272:64:"
-                                          "64-i64:64-f80:128-n8:16:32:64-S128");
-    }
+    resetDataLayout(IsX32 ? "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-"
+                            "i64:64-f80:128-n8:16:32:64-S128"
+                          : IsWinCOFF ? "e-m:w-p270:32:32-p271:32:32-p272:64:"
+                                        "64-i64:64-f80:128-n8:16:32:64-S128"
+                                      : "e-m:e-p270:32:32-p271:32:32-p272:64:"
+                                        "64-i64:64-f80:128-n8:16:32:64-S128");
 
     // Use fpret only for long double.
     RealTypeUsesObjCFPRet = (1 << TargetInfo::LongDouble);

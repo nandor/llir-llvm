@@ -437,8 +437,7 @@ static void addExceptionArgs(const ArgList &Args, types::ID InputType,
   if (types::isCXX(InputType)) {
     // Disable C++ EH by default on XCore and PS4.
     bool CXXExceptionsEnabled =
-        Triple.getArch() != llvm::Triple::xcore && !Triple.isPS4CPU() &&
-        !Args.hasArg(options::OPT_llir);
+        Triple.getArch() != llvm::Triple::xcore && !Triple.isPS4CPU();
     Arg *ExceptionArg = Args.getLastArg(
         options::OPT_fcxx_exceptions, options::OPT_fno_cxx_exceptions,
         options::OPT_fexceptions, options::OPT_fno_exceptions);
@@ -459,7 +458,7 @@ static void addExceptionArgs(const ArgList &Args, types::ID InputType,
   // So we do not set EH to false.
   Args.AddLastArg(CmdArgs, options::OPT_fignore_exceptions);
 
-  if (EH && !Args.hasArg(options::OPT_llir))
+  if (EH)
     CmdArgs.push_back("-fexceptions");
 }
 
@@ -1292,13 +1291,6 @@ void Clang::AddPreprocessingOptions(Compilation &C, const JobAction &JA,
   // -I- is a deprecated GCC feature, reject it.
   if (Arg *A = Args.getLastArg(options::OPT_I_))
     D.Diag(diag::err_drv_I_dash_not_supported) << A->getAsString(Args);
-
-  // Pass the LLIR flag.
-  if (Args.hasArg(options::OPT_llir)) {
-    CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back("-llir");
-    CmdArgs.push_back("-llir");
-  }
 
   // If we have a --sysroot, and don't have an explicit -isysroot flag, add an
   // -isysroot to the CC1 invocation.

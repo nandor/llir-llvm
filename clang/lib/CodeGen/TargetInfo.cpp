@@ -10841,7 +10841,8 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
 
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
-  case llvm::Triple::aarch64_be: {
+  case llvm::Triple::aarch64_be:
+  case llvm::Triple::llir_aarch64_be: {
     AArch64ABIInfo::ABIKind Kind = AArch64ABIInfo::AAPCS;
     if (getTarget().getABI() == "darwinpcs")
       Kind = AArch64ABIInfo::DarwinPCS;
@@ -10970,7 +10971,8 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
     }
   }
 
-  case llvm::Triple::x86_64: {
+  case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86_64: {
     StringRef ABI = getTarget().getABI();
     X86AVXABILevel AVXLevel =
         (ABI == "avx512"

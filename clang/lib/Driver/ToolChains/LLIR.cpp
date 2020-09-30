@@ -65,6 +65,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   auto &ToolChain = static_cast<const toolchains::LLIR &>(getToolChain());
   ArgStringList CmdArgs;
 
+  // Forward the optimisation level.
   if (Arg *A = Args.getLastArg(options::OPT_O_Group)) {
     if (A->getOption().matches(options::OPT_O0)) {
       CmdArgs.push_back("-O0");
@@ -78,9 +79,11 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
 
-  if (!Args.hasArg(options::OPT_shared))
-    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crt1.o")));
-  CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crti.o")));
+  if (!Args.hasArg(options::OPT_nostdlib)) {
+    if (!Args.hasArg(options::OPT_shared))
+      CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crt1.o")));
+    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crti.o")));
+  }
 
   Args.AddAllArgs(CmdArgs, options::OPT_L);
   Args.AddAllArgs(CmdArgs, options::OPT_u);
@@ -88,10 +91,12 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
   AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
 
-  if (Args.hasArg(options::OPT_pthread) || Args.hasArg(options::OPT_pthreads))
-    CmdArgs.push_back("-lpthread");
+  if (!Args.hasArg(options::OPT_nostdlib)) {
+    if (Args.hasArg(options::OPT_pthread) || Args.hasArg(options::OPT_pthreads))
+      CmdArgs.push_back("-lpthread");
 
-  CmdArgs.push_back("-lc");
+    CmdArgs.push_back("-lc");
+  }
 
   if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
@@ -102,7 +107,9 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(Args.MakeArgString(DynamicLinker));
   }
 
-  CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crtn.o")));
+  if (!Args.hasArg(options::OPT_nostdlib)) {
+    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crtn.o")));
+  }
 
   const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath("llir-ld"));
   C.addCommand(std::make_unique<Command>(

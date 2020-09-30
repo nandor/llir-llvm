@@ -203,7 +203,7 @@ bool X86TargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
     } else if (Feature == "+lwp") {
       HasLWP = true;
     } else if (Feature == "+fma") {
-      HasFMA = !LLIR;
+      HasFMA = true;
     } else if (Feature == "+f16c") {
       HasF16C = true;
     } else if (Feature == "+gfni") {
@@ -332,10 +332,6 @@ bool X86TargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
                          .Case("+sse4a", SSE4A)
                          .Default(NoXOP);
     XOPLevel = std::max(XOPLevel, XLevel);
-    if (LLIR) {
-      SSELevel = std::min(SSE1, SSELevel);
-      XOPLevel = std::min(NoXOP, XOPLevel);
-    }
   }
 
   // LLVM doesn't have a separate switch for fpmath, so only accept it if it
@@ -370,8 +366,6 @@ void X86TargetInfo::getTargetDefines(const LangOptions &Opts,
     Builder.defineMacro("__amd64");
     Builder.defineMacro("__x86_64");
     Builder.defineMacro("__x86_64__");
-    if (Opts.LLIR)
-      Builder.defineMacro("__llir__");
     if (getTriple().getArchName() == "x86_64h") {
       Builder.defineMacro("__x86_64h");
       Builder.defineMacro("__x86_64h__");

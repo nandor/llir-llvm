@@ -98,7 +98,8 @@ public:
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
     ve,             // NEC SX-Aurora Vector Engine
-    llir,           // LLIR
+    llir_x86_64,    // LLIR for X86-64
+    llir_aarch64_be,// LLIR for aarch64
     LastArchType = ve
   };
   enum SubArchType {
@@ -415,7 +416,7 @@ public:
   bool isArch16Bit() const;
 
   /// Test whether the architecture is LLIR.
-  bool isArchLLIR() const { return getArch() == llir; }
+  bool isArchLLIR() const;
 
   /// isOSVersionLT - Helper function for doing comparisons against version
   /// numbers included in the target triple.
