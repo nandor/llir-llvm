@@ -59,8 +59,6 @@ class raw_pwrite_stream;
 class TargetMachine;
 class TargetOptions;
 
-extern bool IsLLIR;
-
 MCStreamer *createNullStreamer(MCContext &Ctx);
 // Takes ownership of \p TAB and \p CE.
 
@@ -488,64 +486,50 @@ public:
                                      bool IncrementalLinkerCompatible,
                                      bool DWARFMustBeAtTheEnd) const {
     MCStreamer *S;
-    if (IsLLIR) {
-      if (LLIRStreamerCtorFn)
-        S = LLIRStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
+    switch (T.getObjectFormat()) {
+    case Triple::UnknownObjectFormat:
+      llvm_unreachable("Unknown object format");
+    case Triple::COFF:
+      assert(T.isOSWindows() && "only Windows COFF is supported");
+      S = COFFStreamerCtorFn(Ctx, std::move(TAB), std::move(OW),
+                             std::move(Emitter), RelaxAll,
+                             IncrementalLinkerCompatible);
+      break;
+    case Triple::MachO:
+      if (MachOStreamerCtorFn)
+        S = MachOStreamerCtorFn(Ctx, std::move(TAB), std::move(OW),
+                                std::move(Emitter), RelaxAll,
+                                DWARFMustBeAtTheEnd);
+      else
+        S = createMachOStreamer(Ctx, std::move(TAB), std::move(OW),
+                                std::move(Emitter), RelaxAll,
+                                DWARFMustBeAtTheEnd);
+      break;
+    case Triple::ELF:
+      if (ELFStreamerCtorFn)
+        S = ELFStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
+                              std::move(Emitter), RelaxAll);
+      else
+        S = createELFStreamer(Ctx, std::move(TAB), std::move(OW),
+                              std::move(Emitter), RelaxAll);
+      break;
+    case Triple::Wasm:
+      if (WasmStreamerCtorFn)
+        S = WasmStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
                                std::move(Emitter), RelaxAll);
       else
-        S = createLLIRStreamer(Ctx, std::move(TAB), std::move(OW),
+        S = createWasmStreamer(Ctx, std::move(TAB), std::move(OW),
                                std::move(Emitter), RelaxAll);
-    } else {
-      switch (T.getObjectFormat()) {
-      case Triple::UnknownObjectFormat:
-        llvm_unreachable("Unknown object format");
-      case Triple::COFF:
-        assert(T.isOSWindows() && "only Windows COFF is supported");
-        S = COFFStreamerCtorFn(Ctx, std::move(TAB), std::move(OW),
-                               std::move(Emitter), RelaxAll,
-                               IncrementalLinkerCompatible);
-        break;
-      case Triple::MachO:
-        if (MachOStreamerCtorFn)
-          S = MachOStreamerCtorFn(Ctx, std::move(TAB), std::move(OW),
-                                  std::move(Emitter), RelaxAll,
-                                  DWARFMustBeAtTheEnd);
-        else
-          S = createMachOStreamer(Ctx, std::move(TAB), std::move(OW),
-                                  std::move(Emitter), RelaxAll,
-                                  DWARFMustBeAtTheEnd);
-        break;
-      case Triple::ELF:
-        if (ELFStreamerCtorFn)
-          S = ELFStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
-                                std::move(Emitter), RelaxAll);
-        else
-          S = createELFStreamer(Ctx, std::move(TAB), std::move(OW),
-                                std::move(Emitter), RelaxAll);
-        break;
-      case Triple::Wasm:
-        if (WasmStreamerCtorFn)
-          S = WasmStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
-                                 std::move(Emitter), RelaxAll);
-        else
-          S = createWasmStreamer(Ctx, std::move(TAB), std::move(OW),
-                                 std::move(Emitter), RelaxAll);
-        break;
-      case Triple::GOFF:
-        report_fatal_error("GOFF MCObjectStreamer not implemented yet");
-      case Triple::XCOFF:
-        S = createXCOFFStreamer(Ctx, std::move(TAB), std::move(OW),
-                                std::move(Emitter), RelaxAll);
-        break;
-      case Triple::LLIR:
-        if (LLIRStreamerCtorFn)
-          S = LLIRStreamerCtorFn(T, Ctx, std::move(TAB), std::move(OW),
-                                 std::move(Emitter), RelaxAll);
-        else
-          S = createLLIRStreamer(Ctx, std::move(TAB), std::move(OW),
-                                 std::move(Emitter), RelaxAll);
-        break;
-      }
+      break;
+    case Triple::GOFF:
+      report_fatal_error("GOFF MCObjectStreamer not implemented yet");
+    case Triple::XCOFF:
+      S = createXCOFFStreamer(Ctx, std::move(TAB), std::move(OW),
+                              std::move(Emitter), RelaxAll);
+      break;
+    case Triple::LLIR:
+      report_fatal_error("LLIR MCObjectStreamer not implemented yet");
+      break;
     }
     if (ObjectTargetStreamerCtorFn)
       ObjectTargetStreamerCtorFn(*S, STI);

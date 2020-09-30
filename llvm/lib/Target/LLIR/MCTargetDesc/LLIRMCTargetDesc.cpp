@@ -60,11 +60,11 @@ static MCTargetStreamer *createAsmTargetStreamer(MCStreamer &S,
 }
 
 extern "C" void LLVMInitializeLLIRTargetMC() {
-  // Register the MC asm info.
-  RegisterMCAsmInfoFn X(getTheLLIRTarget(), createLLIRMCAsmInfo);
-
   // Register stuff for all targets and subtargets.
-  for (Target *T : {&getTheLLIRTarget()}) {
+  for (Target *T : {&getTheLLIR_X86_64Target(), &getTheLLIR_AArch64Target()}) {
+    // Register the MC asm info.
+    RegisterMCAsmInfoFn X(*T, createLLIRMCAsmInfo);
+
     TargetRegistry::RegisterMCInstPrinter(*T, createLLIRMCInstPrinter);
     TargetRegistry::RegisterMCCodeEmitter(*T, createLLIRMCCodeEmitter);
     TargetRegistry::RegisterMCAsmBackend(*T, createLLIRAsmBackend);

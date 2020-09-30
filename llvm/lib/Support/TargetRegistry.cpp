@@ -15,16 +15,6 @@
 #include <vector>
 using namespace llvm;
 
-bool llvm::IsLLIR = false;
-
-static cl::opt<bool, true>
-EnableLLIR(
-    "llir",
-    cl::desc("Generate LLIR intermediate output"),
-    cl::Hidden,
-    cl::location(IsLLIR)
-);
-
 // Clients are responsible for avoid race conditions in registration.
 static Target *FirstTarget = nullptr;
 
@@ -41,11 +31,7 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
   const Target *TheTarget = nullptr;
   if (!ArchName.empty()) {
     auto I = find_if(targets(), [&](const Target &T) {
-      if (EnableLLIR) {
-        return T.ArchMatchFn(Triple::llir);
-      } else {
-        return T.getName() == ArchName;
-      }
+      return T.getName() == ArchName;
     });
 
     if (I == targets().end()) {
@@ -57,13 +43,9 @@ const Target *TargetRegistry::lookupTarget(const std::string &ArchName,
 
     // Adjust the triple to match (if known), otherwise stick with the
     // given triple.
-    if (EnableLLIR) {
-      TheTriple.setArch(Triple::llir);
-    } else {
-      Triple::ArchType Type = Triple::getArchTypeForLLVMName(ArchName);
-      if (Type != Triple::UnknownArch) {
-        TheTriple.setArch(Type);
-      }
+    Triple::ArchType Type = Triple::getArchTypeForLLVMName(ArchName);
+    if (Type != Triple::UnknownArch) {
+      TheTriple.setArch(Type);
     }
   } else {
     // Get the target specific parser.
@@ -89,10 +71,6 @@ const Target *TargetRegistry::lookupTarget(const std::string &TT,
     return nullptr;
   }
   Triple::ArchType Arch = Triple(TT).getArch();
-  // If LLIR is enabled, replace the architecture.
-  if (EnableLLIR) {
-    Arch = Triple::llir;
-  }
 
   auto ArchMatch = [&](const Target &T) { return T.ArchMatchFn(Arch); };
   auto I = find_if(targets(), ArchMatch);

@@ -3703,7 +3703,6 @@ static void ParseTargetArgs(TargetOptions &Opts, ArgList &Args,
     else
       Opts.EABIVersion = EABIVersion;
   }
-  Opts.LLIR = Args.hasArg(OPT_llir);
   Opts.CPU = std::string(Args.getLastArgValue(OPT_target_cpu));
   Opts.TuneCPU = std::string(Args.getLastArgValue(OPT_tune_cpu));
   Opts.FPMath = std::string(Args.getLastArgValue(OPT_mfpmath));
@@ -3805,7 +3804,6 @@ bool CompilerInvocation::CreateFromArgs(CompilerInvocation &Res,
   ParseTargetArgs(Res.getTargetOpts(), Args, Diags);
   Success &= ParseCodeGenArgs(Res.getCodeGenOpts(), Args, DashX, Diags,
                               Res.getTargetOpts(), Res.getFrontendOpts());
-  LangOpts.LLIR = Args.hasArg(OPT_llir);
   ParseHeaderSearchArgs(Res.getHeaderSearchOpts(), Args,
                         Res.getFileSystemOpts().WorkingDir);
   llvm::Triple T(Res.getTargetOpts().Triple);
