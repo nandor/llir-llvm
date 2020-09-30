@@ -63,6 +63,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                        const llvm::opt::ArgList &Args,
                                        const char *LinkingOutput) const {
   auto &ToolChain = static_cast<const toolchains::LLIR &>(getToolChain());
+  const llvm::Triple &Triple = ToolChain.getTriple();
   ArgStringList CmdArgs;
 
   // Forward the optimisation level.
@@ -110,7 +111,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   } else {
     CmdArgs.push_back("-dynamic-linker");
     SmallString<128> DynamicLinker(ToolChain.computeSysRoot());
-    llvm::sys::path::append(DynamicLinker, "lib", "ld-musl-x86_64.so.1");
+    llvm::sys::path::append(DynamicLinker, "lib", "ld-musl-" + Triple.getArchName().str() + ".so.1");
     CmdArgs.push_back(Args.MakeArgString(DynamicLinker));
   }
 
