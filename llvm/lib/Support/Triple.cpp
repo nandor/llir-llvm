@@ -1328,8 +1328,8 @@ bool Triple::isArch16Bit() const {
   return getArchPointerBitWidth(getArch()) == 16;
 }
 
-bool Triple::isArchLLIR() const {
-   switch (Arch) {
+bool Triple::isLLIR() const {
+  switch (Arch) {
   case llvm::Triple::UnknownArch:
   case llvm::Triple::avr:
   case llvm::Triple::msp430:

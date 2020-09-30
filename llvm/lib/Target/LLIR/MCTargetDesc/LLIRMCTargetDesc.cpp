@@ -39,7 +39,7 @@ static MCAsmInfo *createLLIRMCAsmInfo(const MCRegisterInfo &MRI,
   return new LLIRMCAsmInfo(TT);
 }
 
-static MCInstPrinter *createLLIRMCInstPrinter(const Triple &T,
+static MCInstPrinter *createMCInstPrinter(const Triple &T,
                                               unsigned SyntaxVariant,
                                               const MCAsmInfo &MAI,
                                               const MCInstrInfo &MII,
@@ -59,17 +59,31 @@ static MCTargetStreamer *createAsmTargetStreamer(MCStreamer &S,
   return new LLIRMCTargetAsmStreamer(S, OS);
 }
 
+static MCSubtargetInfo *createMCSubtargetInfo(const Triple &TT, StringRef CPU,
+                                              StringRef FS) {
+  return createLLIRMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+}
+
 extern "C" void LLVMInitializeLLIRTargetMC() {
   // Register stuff for all targets and subtargets.
   for (Target *T : {&getTheLLIR_X86_64Target(), &getTheLLIR_AArch64Target()}) {
     // Register the MC asm info.
     RegisterMCAsmInfoFn X(*T, createLLIRMCAsmInfo);
 
-    TargetRegistry::RegisterMCInstPrinter(*T, createLLIRMCInstPrinter);
-    TargetRegistry::RegisterMCCodeEmitter(*T, createLLIRMCCodeEmitter);
+    // Register the MCInstPrinter.
+    TargetRegistry::RegisterMCInstPrinter(*T, createMCInstPrinter);
+
+    // Register the ASM Backend.
     TargetRegistry::RegisterMCAsmBackend(*T, createLLIRAsmBackend);
+
+    // Register the MC subtarget info.
+    TargetRegistry::RegisterMCSubtargetInfo(*T, createMCSubtargetInfo);
+
+    // Register the object target streamer.
     TargetRegistry::RegisterObjectTargetStreamer(*T,
                                                  createObjectTargetStreamer);
+
+    // Register the asm target streamer.
     TargetRegistry::RegisterAsmTargetStreamer(*T, createAsmTargetStreamer);
   }
 }
