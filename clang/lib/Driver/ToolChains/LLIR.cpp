@@ -98,9 +98,6 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
       if (!Args.hasArg(options::OPT_nolibc))
         CmdArgs.push_back("-lc");
-
-      const auto &CompilerRT = ToolChain.getCompilerRT(Args, "builtins");
-      CmdArgs.push_back(Args.MakeArgString(CompilerRT));
     }
   }
 
