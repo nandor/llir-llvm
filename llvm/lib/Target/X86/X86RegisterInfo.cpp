@@ -379,6 +379,8 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
     return CSR_LLIR_Caml_Gc_SaveList;
   case CallingConv::LLIR_CAML_RAISE:
     return CSR_LLIR_Caml_Raise_SaveList;
+  case CallingConv::LLIR_SETJMP:
+    return CSR_LLIR_Setjmp_SaveList;
   default:
     break;
   }
@@ -503,6 +505,8 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
     return CSR_LLIR_Caml_Gc_RegMask;
   case CallingConv::LLIR_CAML_RAISE:
     return CSR_LLIR_Caml_Raise_RegMask;
+  case CallingConv::LLIR_SETJMP:
+    return CSR_LLIR_Setjmp_RegMask;
   default:
     break;
   }
