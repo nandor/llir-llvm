@@ -99,17 +99,6 @@ include "LLIRInstrFormats.td"
 // Additional instructions.
 //===----------------------------------------------------------------------===//
 
-def VASTART : I
-  < (outs)
-  , (ins I64:$frame)
-  , [(LLIRvastart I64:$frame)]
-  , "vastart\t$frame"
-  , 0x00
-  >
-{
-  let hasSideEffects = 1;
-}
-
 let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 {
   def MOV_I8 : I
@@ -184,30 +173,6 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , 0x0E
     >;
 
-  def GET_I64 : I
-    < (outs I64:$dst)
-    , (ins R64:$src)
-    , []
-    , "mov.i64\t$dst, $src"
-    , 0x0A
-    >;
-
-  def SET_I64 : I
-    < (outs)
-    , (ins R64:$dst, I64:$src)
-    , []
-    , "set\t$dst, $src"
-    , 0x0A
-    >;
-
-  def ALLOCA_I64 : I
-    < (outs I64:$res)
-    , (ins I64:$size, i64imm:$align)
-    , [(set I64:$res, (LLIRalloca I64:$size, imm:$align))]
-    , "alloca.i64\t$res, $size, $align"
-    , 0x0F
-    >;
-
   def UNDEF_I8 : I
       < (outs I8:$res)
       , (ins)
@@ -263,14 +228,6 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , "undef.f80\t$res"
       , 0x14
       >;
-
-  def RDTSC_I64 : I
-      < (outs I64:$res)
-      , (ins)
-      , [(set I64:$res, LLIRrdtsc)]
-      , "rdtsc.i64\t$res"
-      , 0x15
-      >;
 }
 
 def : Pat
@@ -282,6 +239,54 @@ def : Pat
   < (LLIRsymbol texternalsym:$addr)
   , (ADDR_I64 i64addr_op:$addr)
   >;
+
+//===----------------------------------------------------------------------===//
+// Special instructions with side effects.
+//===----------------------------------------------------------------------===//
+
+let hasSideEffects = 1 in
+{
+  def VASTART : I
+    < (outs)
+    , (ins I64:$frame)
+    , [(LLIRvastart I64:$frame)]
+    , "vastart\t$frame"
+    , 0x00
+    >;
+
+  def ALLOCA_I64 : I
+    < (outs I64:$res)
+    , (ins I64:$size, i64imm:$align)
+    , [(set I64:$res, (LLIRalloca I64:$size, imm:$align))]
+    , "alloca.i64\t$res, $size, $align"
+    , 0x0F
+    >;
+
+  def RDTSC_I64 : I
+      < (outs I64:$res)
+      , (ins)
+      , [(set I64:$res, LLIRrdtsc)]
+      , "rdtsc.i64\t$res"
+      , 0x15
+    >;
+
+  def GET_I64 : I
+    < (outs I64:$dst)
+    , (ins R64:$src)
+    , []
+    , "mov.i64\t$dst, $src"
+    , 0x0A
+    >;
+
+  def SET_I64 : I
+    < (outs)
+    , (ins R64:$dst, I64:$src)
+    , []
+    , "set\t$dst, $src"
+    , 0x0A
+    >;
+
+}
 
 //===----------------------------------------------------------------------===//
 // Additional sets of instructions.
