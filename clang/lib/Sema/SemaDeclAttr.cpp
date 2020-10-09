@@ -4476,9 +4476,6 @@ static void handleCallConvAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   case ParsedAttr::AT_PreserveAll:
     D->addAttr(::new (S.Context) PreserveAllAttr(S.Context, AL));
     return;
-  case ParsedAttr::AT_LLIRSetjmp:
-    D->addAttr(::new (S.Context) LLIRSetjmpAttr(S.Context, AL));
-    return;
   default:
     llvm_unreachable("unexpected attribute kind");
   }
@@ -4643,9 +4640,6 @@ bool Sema::CheckCallingConvAttr(const ParsedAttr &Attrs, CallingConv &CC,
     break;
   case ParsedAttr::AT_PreserveAll:
     CC = CC_PreserveAll;
-    break;
-  case ParsedAttr::AT_LLIRSetjmp:
-    CC = CC_LLIRSetjmp;
     break;
   default: llvm_unreachable("unexpected attribute kind");
   }
@@ -7304,7 +7298,6 @@ static void ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D,
   case ParsedAttr::AT_IntelOclBicc:
   case ParsedAttr::AT_PreserveMost:
   case ParsedAttr::AT_PreserveAll:
-  case ParsedAttr::AT_LLIRSetjmp:
   case ParsedAttr::AT_AArch64VectorPcs:
     handleCallConvAttr(S, D, AL);
     break;

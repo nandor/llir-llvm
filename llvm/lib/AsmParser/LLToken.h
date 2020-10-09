@@ -162,7 +162,6 @@ enum Kind {
   kw_hhvmcc,
   kw_hhvm_ccc,
   kw_cxx_fast_tlscc,
-  kw_llir_setjmp,
   kw_amdgpu_vs,
   kw_amdgpu_ls,
   kw_amdgpu_hs,

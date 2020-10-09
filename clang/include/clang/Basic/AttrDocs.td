@@ -4014,13 +4014,6 @@ experimental at this time.
   }];
 }
 
-def LLIRSetjmpDocs : Documentation {
-  let Category = DocCatCallingConvs;
-  let Content = [{
-The LLIR setjmp calling convention, which does not preserve any registers.
-  }];
-}
-
 def DeprecatedDocs : Documentation {
   let Category = DocCatDecl;
   let Content = [{

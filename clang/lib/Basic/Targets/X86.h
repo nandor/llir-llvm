@@ -708,7 +708,6 @@ public:
     case CC_PreserveAll:
     case CC_X86RegCall:
     case CC_OpenCLKernel:
-    case CC_LLIRSetjmp:
       return CCCR_OK;
     default:
       return CCCR_Warning;

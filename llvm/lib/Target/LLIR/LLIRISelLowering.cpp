@@ -573,6 +573,16 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SDValue Callee = CLI.Callee;
   CallingConv::ID CallConv = CLI.CallConv;
 
+
+  if (const auto *GA = ::dyn_cast_or_null<GlobalAddressSDNode>(CLI.Callee)) {
+    if (auto *GV = GA->getGlobal()) {
+      StringRef name = GV->getName( );
+      if (name == "sigsetjmp" || name == "setjmp" || name == "_setjmp") {
+        CallConv = CallingConv::LLIR_SETJMP;
+      }
+    }
+  }
+
   MachineFunction &MF = DAG.getMachineFunction();
   const Module *M = MF.getMMI().getModule();
   Metadata *IsCFProtectionSupported = M->getModuleFlag("cf-protection-branch");

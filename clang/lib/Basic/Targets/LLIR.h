@@ -38,27 +38,6 @@ class LLVM_LIBRARY_VISIBILITY LLIR_X86_64TargetInfo : public X86_64TargetInfo {
 
   const char *getClobbers() const override { return ""; }
 
-  CallingConvCheckResult checkCallingConvention(CallingConv CC) const override {
-    // Most of the non-ARM calling conventions are i386 conventions.
-    switch (CC) {
-      case CC_X86ThisCall:
-      case CC_X86FastCall:
-      case CC_X86StdCall:
-      case CC_X86VectorCall:
-      case CC_X86RegCall:
-      case CC_C:
-      case CC_PreserveMost:
-      case CC_Swift:
-      case CC_X86Pascal:
-      case CC_IntelOclBicc:
-      case CC_OpenCLKernel:
-      case CC_LLIRSetjmp:
-        return CCCR_OK;
-      default:
-        return CCCR_Warning;
-    }
-  }
-
   bool handleTargetFeatures(std::vector<std::string> &Features,
                             DiagnosticsEngine &Diags) override {
     if (X86_64TargetInfo::handleTargetFeatures(Features, Diags)) {

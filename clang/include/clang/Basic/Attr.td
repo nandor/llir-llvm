@@ -2281,11 +2281,6 @@ def PreserveAll : DeclOrTypeAttr {
   let Documentation = [PreserveAllDocs];
 }
 
-def LLIRSetjmp : DeclOrTypeAttr {
-  let Spellings = [Clang<"llir_setjmp">];
-  let Documentation = [LLIRSetjmpDocs];
-}
-
 def Target : InheritableAttr {
   let Spellings = [GCC<"target">];
   let Args = [StringArgument<"featuresStr">];
