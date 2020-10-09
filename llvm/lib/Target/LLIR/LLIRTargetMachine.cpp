@@ -88,15 +88,67 @@ extern "C" void LLVMInitializeLLIRTarget()
   initializeLLIRRegisterNumberingPass(PR);
 }
 
+static std::string computeDataLayoutX86_64(const Triple &TT) {
+  // X86 is little endian
+  std::string Ret = "e";
+
+  Ret += DataLayout::getManglingComponent(TT);
+  // X86 and x32 have 32 bit pointers.
+  if ((TT.isArch64Bit() &&
+       (TT.getEnvironment() == Triple::GNUX32 || TT.isOSNaCl())) ||
+      !TT.isArch64Bit())
+    Ret += "-p:32:32";
+
+  // Address spaces for 32 bit signed, 32 bit unsigned, and 64 bit pointers.
+  Ret += "-p270:32:32-p271:32:32-p272:64:64";
+
+  // Some ABIs align 64 bit integers and doubles to 64 bits, others to 32.
+  if (TT.isArch64Bit() || TT.isOSWindows() || TT.isOSNaCl())
+    Ret += "-i64:64";
+  else if (TT.isOSIAMCU())
+    Ret += "-i64:32-f64:32";
+  else
+    Ret += "-f64:32:64";
+
+  // Some ABIs align long double to 128 bits, others to 32.
+  if (TT.isOSNaCl() || TT.isOSIAMCU())
+    ; // No f80
+  else if (TT.isArch64Bit() || TT.isOSDarwin())
+    Ret += "-f80:128";
+  else
+    Ret += "-f80:32";
+
+  if (TT.isOSIAMCU())
+    Ret += "-f128:32";
+
+  // The registers can hold 8, 16, 32 or, in x86-64, 64 bits.
+  if (TT.isArch64Bit())
+    Ret += "-n8:16:32:64";
+  else
+    Ret += "-n8:16:32";
+
+  // The stack is aligned to 32 bits on some ABIs and 128 bits on others.
+  if ((!TT.isArch64Bit() && TT.isOSWindows()) || TT.isOSIAMCU())
+    Ret += "-a:0:32-S32";
+  else
+    Ret += "-S128";
+
+  return Ret;
+}
+
 static std::string computeDataLayout(
     const Triple &TT,
     StringRef CPU,
     StringRef FS)
 {
-  // TODO(nand):
-  //  This should be computed based on the CPU, FS and triple.
-  //  This value is hardcoded for x86_64.
-  return "e-m:g-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128";
+  switch (TT.getArch()) {
+    case Triple::llir_x86_64: {
+      return computeDataLayoutX86_64(TT);
+    }
+    default: {
+      llvm_unreachable("invalid LLIR target");
+    }
+  }
 }
 
 static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
