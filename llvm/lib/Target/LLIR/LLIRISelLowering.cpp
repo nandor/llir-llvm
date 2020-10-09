@@ -101,9 +101,12 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setCondCodeAction(CC, T, Expand);
     }
 
-    // Expand operations which are not yet supported.
-    setOperationAction(ISD::FMA, T, Legal);
+    // Allow ftrunc.
     setOperationAction(ISD::FTRUNC, T, Legal);
+
+    // Expand operations which are not yet supported.
+    setOperationAction(ISD::FMA, T, Expand);
+    setOperationAction(ISD::STRICT_FMA, T, Expand);
 
     // SETCC/SETCCS are legal.
     setOperationAction(ISD::STRICT_FSETCC, T, Legal);
@@ -119,7 +122,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::STRICT_FMUL, T, Legal);
     setOperationAction(ISD::STRICT_FDIV, T, Legal);
     setOperationAction(ISD::STRICT_FREM, T, Legal);
-    setOperationAction(ISD::STRICT_FMA, T, Legal);
   }
 
   // Disable some integer operations.
