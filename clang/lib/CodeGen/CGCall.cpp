@@ -64,7 +64,6 @@ unsigned CodeGenTypes::ClangCallConvToLLVMCallConv(CallingConv CC) {
   case CC_OpenCLKernel: return CGM.getTargetCodeGenInfo().getOpenCLKernelCallingConv();
   case CC_PreserveMost: return llvm::CallingConv::PreserveMost;
   case CC_PreserveAll: return llvm::CallingConv::PreserveAll;
-  case CC_LLIRSetjmp: return llvm::CallingConv::LLIR_SETJMP;
   case CC_Swift: return llvm::CallingConv::Swift;
   }
 }
@@ -239,9 +238,6 @@ static CallingConv getCallingConventionForDecl(const Decl *D, bool IsWindows) {
 
   if (D->hasAttr<PreserveAllAttr>())
     return CC_PreserveAll;
-
-  if (D->hasAttr<LLIRSetjmpAttr>())
-    return CC_LLIRSetjmp;
 
   return CC_C;
 }
