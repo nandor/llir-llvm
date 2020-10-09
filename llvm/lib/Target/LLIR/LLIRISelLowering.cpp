@@ -111,6 +111,14 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Expand conditionals.
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
+
+    // Allow strict instructions.
+    setOperationAction(ISD::STRICT_FADD, T, Legal);
+    setOperationAction(ISD::STRICT_FSUB, T, Legal);
+    setOperationAction(ISD::STRICT_FMUL, T, Legal);
+    setOperationAction(ISD::STRICT_FDIV, T, Legal);
+    setOperationAction(ISD::STRICT_FREM, T, Legal);
+    setOperationAction(ISD::STRICT_FMA, T, Legal);
   }
 
   // Disable some integer operations.
@@ -143,12 +151,17 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
 
-    // Allow comparisons.
+    // Allow casts.
     setOperationAction(ISD::SINT_TO_FP, T, Legal);
     setOperationAction(ISD::UINT_TO_FP, T, Legal);
+    setOperationAction(ISD::FP_TO_UINT, T, Legal);
+    setOperationAction(ISD::FP_TO_SINT, T, Legal);
+
+    // Allow strict instructions.
     setOperationAction(ISD::STRICT_SINT_TO_FP, T, Legal);
     setOperationAction(ISD::STRICT_UINT_TO_FP, T, Legal);
-
+    setOperationAction(ISD::STRICT_FP_TO_SINT, T, Legal);
+    setOperationAction(ISD::STRICT_FP_TO_UINT, T, Legal);
   }
 
   // Disable in-register sign extension.

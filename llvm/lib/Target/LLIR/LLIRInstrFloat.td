@@ -128,8 +128,20 @@ multiclass CmpFloat
   , bits<32> op
   >
 {
-  defm _SETCC : CmpFloatVariant<setcc, cond, name, op>;
-  defm _ANY_FSETCC : CmpFloatVariant<any_fsetcc, cond, name, op>;
+  defm _SETCC
+    : CmpFloatVariant
+      < setcc
+      , cond
+      , name
+      , op
+      >;
+  defm _ANY_FSETCC
+    : CmpFloatVariant
+      < strict_fsetcc
+      , cond
+      , !strconcat(name, ".strict")
+      , op
+      >;
   defm _STRICT_FSETCCS
     : CmpFloatVariant
       < strict_fsetccs
@@ -186,13 +198,19 @@ defm FLOG10 : UnaryFloat<flog10, "log10",  0xB2, 0xB3, 0x00>;
 defm FCEIL  : UnaryFloat<fceil,  "fceil",  0xB2, 0xB3, 0x00>;
 defm FFLOOR : UnaryFloat<ffloor, "ffloor", 0xB2, 0xB3, 0x00>;
 
-defm FADD : CommBinaryFloat<fadd, "add",  0x90, 0x91, 0x00>;
-defm FMUL : CommBinaryFloat<fmul, "mul",  0x90, 0x90, 0x00>;
+defm FADD_R : CommBinaryFloat<fadd, "add",  0x90, 0x91, 0x00>;
+defm FMUL_R : CommBinaryFloat<fmul, "mul",  0x90, 0x90, 0x00>;
+defm FADD_S : CommBinaryFloat<strict_fadd, "add.strict",  0x90, 0x91, 0x00>;
+defm FMUL_S : CommBinaryFloat<strict_fmul, "mul.strict",  0x90, 0x90, 0x00>;
+
+defm FSUB_R    : BinaryFloat<fsub, "sub", 0xA0, 0xA1, 0x00>;
+defm FDIV_R    : BinaryFloat<fdiv, "sdiv", 0xA1, 0xA2, 0x00>;
+defm FREM_R    : BinaryFloat<frem, "srem", 0xA3, 0xA2, 0x00>;
+defm FSUB_S    : BinaryFloat<strict_fsub, "sub.strict", 0xA0, 0xA1, 0x00>;
+defm FDIV_S    : BinaryFloat<strict_fdiv, "sdiv.strict", 0xA1, 0xA2, 0x00>;
+defm FREM_S    : BinaryFloat<strict_frem, "srem.strict", 0xA3, 0xA2, 0x00>;
 
 defm COPYSIGN : BinaryFloat<fcopysign, "copysign", 0x98, 0xa6, 0x00>;
-defm FSUB     : BinaryFloat<fsub, "sub", 0xA0, 0xA1, 0x00>;
-defm FDIV     : BinaryFloat<fdiv, "sdiv", 0xA1, 0xA2, 0x00>;
-defm FREM     : BinaryFloat<frem, "srem", 0xA3, 0xA2, 0x00>;
 defm FPOW     : BinaryFloat<fpow, "pow", 0xA4, 0xA5, 0x00>;
 
 defm OEQ : CmpFloat<SETOEQ, "oeq", 0x5b>;
