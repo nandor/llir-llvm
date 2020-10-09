@@ -197,6 +197,7 @@ defm FLOG2  : UnaryFloat<flog2,  "log2",   0xB2, 0xB3, 0x00>;
 defm FLOG10 : UnaryFloat<flog10, "log10",  0xB2, 0xB3, 0x00>;
 defm FCEIL  : UnaryFloat<fceil,  "fceil",  0xB2, 0xB3, 0x00>;
 defm FFLOOR : UnaryFloat<ffloor, "ffloor", 0xB2, 0xB3, 0x00>;
+defm FTRUNC : UnaryFloat<ftrunc, "trunc",  0xB2, 0xB3, 0x00>;
 
 defm FADD_R : CommBinaryFloat<fadd, "add",  0x90, 0x91, 0x00>;
 defm FMUL_R : CommBinaryFloat<fmul, "mul",  0x90, 0x90, 0x00>;
