@@ -102,7 +102,8 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     }
 
     // Expand operations which are not yet supported.
-    setOperationAction(ISD::FMA, T, Expand);
+    setOperationAction(ISD::FMA, T, Legal);
+    setOperationAction(ISD::FTRUNC, T, Legal);
 
     // SETCC/SETCCS are legal.
     setOperationAction(ISD::STRICT_FSETCC, T, Legal);
