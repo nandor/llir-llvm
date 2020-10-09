@@ -30,6 +30,7 @@ def RETURN_I32 : Return<I32>;
 def RETURN_I64 : Return<I64>;
 def RETURN_F32 : Return<F32>;
 def RETURN_F64 : Return<F64>;
+def RETURN_F80 : Return<F80>;
 def RETURN_VOID : TerminatorInst<(ins), [(LLIRreturn)], "ret", 0x70>
 {
   let isReturn = 1;
