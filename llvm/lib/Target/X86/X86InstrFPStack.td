@@ -23,8 +23,9 @@ def SDTX86Fst       : SDTypeProfile<0, 2, [SDTCisFP<0>,
 def SDTX86Fild      : SDTypeProfile<1, 1, [SDTCisFP<0>, SDTCisPtrTy<1>]>;
 def SDTX86Fist      : SDTypeProfile<0, 2, [SDTCisFP<0>, SDTCisPtrTy<1>]>;
 
-def SDTX86CwdStore  : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
-def SDTX86CwdLoad   : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
+def SDTX86Fopst     : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
+def SDTX86Fopld     : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
+def SDTX86Fclex     : SDTypeProfile<0, 0, []>;
 
 def X86fld          : SDNode<"X86ISD::FLD", SDTX86Fld,
                              [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
@@ -34,14 +35,22 @@ def X86fild         : SDNode<"X86ISD::FILD", SDTX86Fild,
                              [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
 def X86fist         : SDNode<"X86ISD::FIST", SDTX86Fist,
                              [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-def X86fp_to_mem : SDNode<"X86ISD::FP_TO_INT_IN_MEM", SDTX86Fst,
-                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-def X86fp_cwd_get16 : SDNode<"X86ISD::FNSTCW16m",          SDTX86CwdStore,
-                             [SDNPHasChain, SDNPMayStore, SDNPSideEffect,
-                              SDNPMemOperand]>;
-def X86fp_cwd_set16 : SDNode<"X86ISD::FLDCW16m",          SDTX86CwdLoad,
+def X86fp_to_mem    : SDNode<"X86ISD::FP_TO_INT_IN_MEM", SDTX86Fst,
+                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_cwd_get16 : SDNode<"X86ISD::FNSTCW16m",         SDTX86Fopst,
+                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_swd_get16 : SDNode<"X86ISD::FNSTSW16m",         SDTX86Fopst,
+                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_cwd_set16 : SDNode<"X86ISD::FLDCW16m",         SDTX86Fopld,
                              [SDNPHasChain, SDNPMayLoad, SDNPSideEffect,
                               SDNPMemOperand]>;
+def X86fp_env_get   : SDNode<"X86ISD::FNSTENVm",            SDTX86Fopst,
+                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_env_set   : SDNode<"X86ISD::FLDENVm",            SDTX86Fopld,
+                             [SDNPHasChain, SDNPMayLoad, SDNPSideEffect,
+                              SDNPMemOperand]>;
+def X86fp_env_clex  : SDNode<"X86ISD::FNCLEX",            SDTX86Fclex,
+                             [SDNPHasChain, SDNPSideEffect]>;
 
 def X86fstf32 : PatFrag<(ops node:$val, node:$ptr),
                         (X86fst node:$val, node:$ptr), [{
@@ -396,17 +405,23 @@ def FICOMP32m: FPI<0xDA, MRM3m, (outs), (ins i32mem:$src), "ficomp{l}\t$src">;
 
 let SchedRW = [WriteMicrocoded] in {
 let Defs = [FPSW, FPCW], mayLoad = 1 in {
-def FLDENVm  : FPI<0xD9, MRM4m, (outs), (ins f32mem:$src), "fldenv\t$src">;
+def FLDENVm  : I<0xD9, MRM4m,
+                 (outs), (ins f32mem:$src), "fldenv\t$src",
+                 [(X86fp_env_set addr:$src)]>;
 def FRSTORm  : FPI<0xDD, MRM4m, (outs), (ins f32mem:$dst), "frstor\t$dst">;
 }
 
 let Defs = [FPSW, FPCW], Uses = [FPSW, FPCW], mayStore = 1 in {
-def FSTENVm  : FPI<0xD9, MRM6m, (outs), (ins f32mem:$dst), "fnstenv\t$dst">;
+def FSTENVm  : I<0xD9, MRM6m,
+                 (outs), (ins f32mem:$dst), "fnstenv\t$dst",
+                 [(X86fp_env_get addr:$dst)]>;
 def FSAVEm   : FPI<0xDD, MRM6m, (outs), (ins f32mem:$dst), "fnsave\t$dst">;
 }
 
 let Uses = [FPSW], mayStore = 1 in
-def FNSTSWm  : FPI<0xDD, MRM7m, (outs), (ins i16mem:$dst), "fnstsw\t$dst">;
+def FNSTSWm  : I<0xDD, MRM7m,
+                 (outs), (ins i16mem:$dst), "fnstsw\t$dst",
+                 [(X86fp_swd_get16 addr:$dst)]>;
 
 let mayLoad = 1 in
 def FBLDm    : FPI<0xDF, MRM4m, (outs), (ins f80mem:$src), "fbld\t$src">;
@@ -722,7 +737,7 @@ let Defs = [FPSW, FPCW] in
 def FNINIT : I<0xDB, MRM_E3, (outs), (ins), "fninit", []>;
 // Clear exceptions
 let Defs = [FPSW] in
-def FNCLEX : I<0xDB, MRM_E2, (outs), (ins), "fnclex", []>;
+def FNCLEX : I<0xDB, MRM_E2, (outs), (ins), "fnclex", [(X86fp_env_clex)]>;
 } // SchedRW
 
 // Operand-less floating-point instructions for the disassembler.

@@ -776,10 +776,15 @@ namespace llvm {
     // scalar broadcast from memory
     VBROADCAST_LOAD,
 
-    // Store FP control world into i16 memory.
+    // FP control word/status word/environment loads and stores.
     FNSTCW16m,
-    // Load FP control word from i16 memory.
+    FNSTSW16m,
+    FNSTENVm,
     FLDCW16m,
+    FLDENVm,
+    LDMXCSR32m,
+    STMXCSR32m,
+    FNCLEX,
 
     /// This instruction implements FP_TO_SINT with the
     /// integer destination in memory and a FP reg source.  This corresponds
