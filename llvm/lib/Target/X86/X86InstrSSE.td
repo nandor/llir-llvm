@@ -13,6 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 //===----------------------------------------------------------------------===//
+// SSE specific DAG nodes.
+//===----------------------------------------------------------------------===//
+
+def SDTX86SSEst : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
+def SDTX86SSEld : SDTypeProfile<0, 1, [SDTCisPtrTy<0>]>;
+
+def X86sse_xcsr_get32 : SDNode<"X86ISD::STMXCSR32m", SDTX86SSEst,
+                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86sse_xcsr_set32 : SDNode<"X86ISD::LDMXCSR32m", SDTX86SSEst,
+                             [SDNPHasChain, SDNPMayLoad, SDNPSideEffect,
+                              SDNPMemOperand]>;
+
+//===----------------------------------------------------------------------===//
 // SSE 1 & 2 Instructions Classes
 //===----------------------------------------------------------------------===//
 
@@ -3217,12 +3230,17 @@ def VSTMXCSR : VPSI<0xAE, MRM3m, (outs), (ins i32mem:$dst),
 
 let mayLoad=1, hasSideEffects=1 in
 def LDMXCSR : I<0xAE, MRM2m, (outs), (ins i32mem:$src),
-              "ldmxcsr\t$src", [(int_x86_sse_ldmxcsr addr:$src)]>,
+              "ldmxcsr\t$src",
+              [(int_x86_sse_ldmxcsr addr:$src)]>,
               PS, Sched<[WriteLDMXCSR]>;
 let mayStore=1, hasSideEffects=1 in
 def STMXCSR : I<0xAE, MRM3m, (outs), (ins i32mem:$dst),
-              "stmxcsr\t$dst", [(int_x86_sse_stmxcsr addr:$dst)]>,
+              "stmxcsr\t$dst",
+              [(int_x86_sse_stmxcsr addr:$dst)]>,
               PS, Sched<[WriteSTMXCSR]>;
+
+def : Pat<(X86sse_xcsr_get32 addr:$dst), (STMXCSR addr:$dst)>;
+def : Pat<(X86sse_xcsr_set32 addr:$src), (LDMXCSR addr:$src)>;
 
 //===---------------------------------------------------------------------===//
 // SSE2 - Move Aligned/Unaligned Packed Integer Instructions
