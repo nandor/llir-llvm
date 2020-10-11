@@ -534,6 +534,7 @@ static bool isCallingConvSupported(CallingConv::ID ID) {
   switch (ID) {
     case CallingConv::C:
     case CallingConv::Fast:
+    case CallingConv::Win64:
     case CallingConv::LLIR_SETJMP:
       return true;
     default:
