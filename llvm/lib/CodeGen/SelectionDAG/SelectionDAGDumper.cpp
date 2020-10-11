@@ -179,7 +179,6 @@ std::string SDNode::getOperationName(const SelectionDAG *G) const {
   case ISD::ANNOTATION_LABEL:           return "annotation_label";
   case ISD::HANDLENODE:                 return "handlenode";
   case ISD::GC_FRAME:                   return "gc_frame";
-  case ISD::GC_ARG:                     return "gc_arg";
 
   // Unary operators
   case ISD::FABS:                       return "fabs";
