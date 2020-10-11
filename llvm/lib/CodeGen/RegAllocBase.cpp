@@ -12,11 +12,13 @@
 //===----------------------------------------------------------------------===//
 
 #include "RegAllocBase.h"
+#include "llvm/ADT/PostOrderIterator.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/CodeGen/LiveInterval.h"
 #include "llvm/CodeGen/LiveIntervals.h"
 #include "llvm/CodeGen/LiveRegMatrix.h"
+#include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
@@ -185,6 +187,63 @@ void RegAllocBase::postOptimization() {
       // Move the frame after the call.
       FrameIt->removeFromParent();
       MBB.insertAfter(CallIt, &*FrameIt);
+    }
+  }
+
+  // Fixup stack argument references.
+  {
+    MachineFrameInfo &MFI = MF->getFrameInfo();
+    DenseMap<MachineBasicBlock *, DenseSet<int>> BlockSlotsIn;
+
+    std::function<void(MachineBasicBlock *)> traverse =
+      [&](MachineBasicBlock *MBB) {
+        DenseSet<int> SlotsIn = BlockSlotsIn[MBB];
+
+        for (auto It = MBB->rbegin(); It != MBB->rend(); ++It) {
+          MachineInstr *MI = &*It;
+          DenseSet<int> OnInstruction;
+          for (auto *MOP : MI->memoperands()) {
+            using T = FixedStackPseudoSourceValue;
+            if (auto *Stk = dyn_cast_or_null<T>(MOP->getPseudoValue())) {
+              int StackSlot = Stk->getFrameIndex();
+              if (StackSlot < 0) {
+                OnInstruction.insert(StackSlot);
+                SlotsIn.insert(StackSlot);
+              }
+            }
+          }
+
+          if (MI->isGCFrame()) {
+            for (auto StackSlot : SlotsIn) {
+              if (!OnInstruction.count(StackSlot)) {
+                MI->addMemOperand(*MF, MF->getMachineMemOperand(
+                    MachinePointerInfo::getFixedStack(*MF, StackSlot, 0),
+                    MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
+                    MFI.getObjectSize(StackSlot),
+                    MFI.getObjectAlign(StackSlot)
+                ));
+              }
+            }
+          }
+        }
+
+        for (auto *PredMBB : MBB->predecessors()) {
+          bool Changed = false;
+          for (auto StackSlot : SlotsIn) {
+            DenseSet<int> &PredSlotsIn = BlockSlotsIn[PredMBB];
+            Changed |= PredSlotsIn.insert(StackSlot).second;
+          }
+          if (Changed) {
+            traverse(PredMBB);
+          }
+        }
+      };
+
+    for (auto I = po_begin(MF), E = po_end(MF); I != E; ++I) {
+      auto it = BlockSlotsIn.find(*I);
+      if (it == BlockSlotsIn.end()) {
+        traverse(*I);
+      }
     }
   }
 }
