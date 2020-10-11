@@ -71,16 +71,22 @@ def ZEXT_I8_I64   : Conv<I64, I8,  zext,   "zext",  "i64", 0x00>;
 def ZEXT_I16_I64  : Conv<I64, I16, zext,   "zext",  "i64", 0x00>;
 def ZEXT_I32_I64  : Conv<I64, I32, zext,   "zext",  "i64", 0x00>;
 
+def I16_R_S_F32   : Conv<I16, F32, fp_to_sint, "sext", "i16", 0xF0>;
 def I32_R_S_F32   : Conv<I32, F32, fp_to_sint, "sext", "i32", 0xF0>;
 def I64_R_S_F32   : Conv<I64, F32, fp_to_sint, "sext", "i64", 0xF0>;
+def I16_R_S_F64   : Conv<I16, F64, fp_to_sint, "sext", "i16", 0xF0>;
 def I32_R_S_F64   : Conv<I32, F64, fp_to_sint, "sext", "i32", 0xF0>;
 def I64_R_S_F64   : Conv<I64, F64, fp_to_sint, "sext", "i64", 0xF0>;
+def I16_R_S_F80   : Conv<I16, F80, fp_to_sint, "sext", "i16", 0xF0>;
 def I32_R_S_F80   : Conv<I32, F80, fp_to_sint, "sext", "i32", 0xF0>;
 def I64_R_S_F80   : Conv<I64, F80, fp_to_sint, "sext", "i64", 0xF0>;
+def I16_R_U_F32   : Conv<I16, F32, fp_to_uint, "zext", "i16", 0xF0>;
 def I32_R_U_F32   : Conv<I32, F32, fp_to_uint, "zext", "i32", 0xF0>;
 def I64_R_U_F32   : Conv<I64, F32, fp_to_uint, "zext", "i64", 0xF0>;
+def I16_R_U_F64   : Conv<I16, F64, fp_to_uint, "zext", "i16", 0xF0>;
 def I32_R_U_F64   : Conv<I32, F64, fp_to_uint, "zext", "i32", 0xF0>;
 def I64_R_U_F64   : Conv<I64, F64, fp_to_uint, "zext", "i64", 0xF0>;
+def I16_R_U_F80   : Conv<I16, F80, fp_to_uint, "zext", "i16", 0xF0>;
 def I32_R_U_F80   : Conv<I32, F80, fp_to_uint, "zext", "i32", 0xF0>;
 def I64_R_U_F80   : Conv<I64, F80, fp_to_uint, "zext", "i64", 0xF0>;
 

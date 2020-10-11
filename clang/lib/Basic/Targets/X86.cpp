@@ -107,7 +107,7 @@ bool X86TargetInfo::initFeatureMap(
     const std::vector<std::string> &FeaturesVec) const {
   // FIXME: This *really* should not be here.
   // X86_64 always has SSE2.
-  if (getTriple().getArch() == llvm::Triple::x86_64)
+  if (getTriple().isArch64Bit())
     setFeatureEnabled(Features, "sse2", true);
 
   using namespace llvm::X86;
@@ -361,12 +361,13 @@ void X86TargetInfo::getTargetDefines(const LangOptions &Opts,
   Builder.defineMacro("__code_model_" + CodeModel + "__");
 
   // Target identification.
-  if (getTriple().getArch() == llvm::Triple::x86_64) {
+  if (getTriple().isArch64Bit()) {
     Builder.defineMacro("__amd64__");
     Builder.defineMacro("__amd64");
     Builder.defineMacro("__x86_64");
     Builder.defineMacro("__x86_64__");
-    if (getTriple().getArchName() == "x86_64h") {
+    StringRef name = getTriple().getArchName();
+    if (name == "x86_64h" || name == "x86_64h") {
       Builder.defineMacro("__x86_64h");
       Builder.defineMacro("__x86_64h__");
     }
@@ -785,7 +786,7 @@ void X86TargetInfo::getTargetDefines(const LangOptions &Opts,
   }
   if (HasCX8)
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
-  if (HasCX16 && getTriple().getArch() == llvm::Triple::x86_64)
+  if (HasCX16 && getTriple().isArch64Bit())
     Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_16");
 
   if (HasFloat128)
@@ -959,8 +960,8 @@ bool X86TargetInfo::hasFeature(StringRef Feature) const {
       .Case("wbnoinvd", HasWBNOINVD)
       .Case("waitpkg", HasWAITPKG)
       .Case("x86", true)
-      .Case("x86_32", getTriple().getArch() == llvm::Triple::x86)
-      .Case("x86_64", getTriple().getArch() == llvm::Triple::x86_64)
+      .Case("x86_32", getTriple().isArch32Bit())
+      .Case("x86_64", getTriple().isArch64Bit())
       .Case("xop", XOPLevel >= XOP)
       .Case("xsave", HasXSAVE)
       .Case("xsavec", HasXSAVEC)
