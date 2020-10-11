@@ -708,9 +708,6 @@ void InlineSpiller::reMaterializeAll() {
       // Debug values are not allowed to affect codegen.
       if (MI.isDebugValue())
         continue;
-      // Frames do not affect codegen.
-      if (MI.isGCFrame())
-        continue;
 
       assert(!MI.isDebugInstr() && "Did not expect to find a use in debug "
              "instruction that isn't a DBG_VALUE");

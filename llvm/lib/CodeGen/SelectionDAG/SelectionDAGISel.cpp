@@ -2787,7 +2787,6 @@ void DAGMatcher::SelectCodeCommon(SDNode *NodeToMatch,
   case ISD::LIFETIME_START:
   case ISD::LIFETIME_END:
   case ISD::GC_FRAME:
-  case ISD::GC_ARG:
     NodeToMatch->setNodeId(-1); // Mark selected.
     return;
   case ISD::AssertSext:

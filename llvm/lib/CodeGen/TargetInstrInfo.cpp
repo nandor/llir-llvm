@@ -467,6 +467,27 @@ void TargetInstrInfo::getNoop(MCInst &NopInst) const {
   llvm_unreachable("Not implemented");
 }
 
+static MachineInstr *foldGCFrame(MachineFunction &MF, MachineInstr &MI,
+                                 ArrayRef<unsigned> Ops, int FrameIndex,
+                                 const TargetInstrInfo &TII) {
+  auto *NewMI =
+      MF.CreateMachineInstr(TII.get(MI.getOpcode()), MI.getDebugLoc(), true);
+  MachineInstrBuilder MIB(MF, NewMI);
+
+  // Copy the label.
+  MIB.add(MI.getOperand(0));
+
+  // Copy all operands, minus the registers turned into stack references.
+  for (unsigned i = 1, e = MI.getNumOperands(); i < e; ++i) {
+    MachineOperand &MO = MI.getOperand(i);
+    if (!is_contained(Ops, i)) {
+      MIB.add(MO);
+    }
+  }
+
+  return NewMI;
+}
+
 static MachineInstr *foldPatchpoint(MachineFunction &MF, MachineInstr &MI,
                                     ArrayRef<unsigned> Ops, int FrameIndex,
                                     const TargetInstrInfo &TII) {
@@ -591,9 +612,13 @@ MachineInstr *TargetInstrInfo::foldMemoryOperand(MachineInstr &MI,
 
   MachineInstr *NewMI = nullptr;
 
-  if (MI.getOpcode() == TargetOpcode::STACKMAP ||
-      MI.getOpcode() == TargetOpcode::PATCHPOINT ||
-      MI.getOpcode() == TargetOpcode::STATEPOINT) {
+  if (MI.isGCFrame()) {
+    NewMI = foldGCFrame(MF, MI, Ops, FI, *this);
+    if (NewMI)
+      MBB->insert(MI, NewMI);
+  } else if (MI.getOpcode() == TargetOpcode::STACKMAP ||
+             MI.getOpcode() == TargetOpcode::PATCHPOINT ||
+             MI.getOpcode() == TargetOpcode::STATEPOINT) {
     // Fold stackmap/patchpoint.
     NewMI = foldPatchpoint(MF, MI, Ops, FI, *this);
     if (NewMI)
@@ -660,14 +685,23 @@ MachineInstr *TargetInstrInfo::foldMemoryOperand(MachineInstr &MI,
   MachineInstr *NewMI = nullptr;
   int FrameIndex = 0;
 
-  if ((MI.getOpcode() == TargetOpcode::STACKMAP ||
-       MI.getOpcode() == TargetOpcode::PATCHPOINT ||
-       MI.getOpcode() == TargetOpcode::STATEPOINT) &&
-      isLoadFromStackSlot(LoadMI, FrameIndex)) {
-    // Fold stackmap/patchpoint.
-    NewMI = foldPatchpoint(MF, MI, Ops, FrameIndex, *this);
-    if (NewMI)
-      NewMI = &*MBB.insert(MI, NewMI);
+  if (isLoadFromStackSlot(LoadMI, FrameIndex)) {
+    if (MI.isGCFrame()) {
+      // Fold GC frame.
+      NewMI = foldGCFrame(MF, MI, Ops, FrameIndex, *this);
+      if (NewMI)
+        NewMI = &*MBB.insert(MI, NewMI);
+    } else if (MI.getOpcode() == TargetOpcode::STACKMAP ||
+               MI.getOpcode() == TargetOpcode::PATCHPOINT ||
+               MI.getOpcode() == TargetOpcode::STATEPOINT) {
+      // Fold stackmap/patchpoint.
+      NewMI = foldPatchpoint(MF, MI, Ops, FrameIndex, *this);
+      if (NewMI)
+        NewMI = &*MBB.insert(MI, NewMI);
+    } else {
+      // Ask the target to do the actual folding.
+      NewMI = foldMemoryOperandImpl(MF, MI, Ops, MI, LoadMI, LIS);
+    }
   } else {
     // Ask the target to do the actual folding.
     NewMI = foldMemoryOperandImpl(MF, MI, Ops, MI, LoadMI, LIS);

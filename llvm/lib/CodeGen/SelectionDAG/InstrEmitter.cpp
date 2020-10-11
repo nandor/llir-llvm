@@ -1071,10 +1071,6 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
     break;
   }
 
-  case ISD::GC_ARG: {
-    break;
-  }
-
   case ISD::GC_FRAME: {
     auto *gcFrame = cast<GCFrameSDNode>(Node);
 
@@ -1088,15 +1084,10 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
     MIB.addSym(gcFrame->getLabel());
 
     for (unsigned i = 1, n = Node->getNumOperands(); i < n; ++i) {
-      auto &op = Node->getOperand(i);
-      if (op->getOpcode() == ISD::GC_ARG) {
-        MIB.addMemOperand(cast<GCArgSDNode>(op)->getMemOperand());
-      } else {
-        AddOperand(
-            MIB, Node->getOperand(i), i, nullptr, VRBaseMap,
-            false, false, false
-        );
-      }
+      AddOperand(
+          MIB, Node->getOperand(i), i, nullptr, VRBaseMap,
+          false, false, false
+      );
     }
     break;
   }

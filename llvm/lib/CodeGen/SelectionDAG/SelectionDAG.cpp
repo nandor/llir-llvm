@@ -1898,23 +1898,6 @@ SDValue SelectionDAG::getGCFrame(
   return SDValue(N, 0);
 }
 
-SDValue SelectionDAG::getGCArg(const SDLoc &dl, MVT vt, MachineMemOperand *MMO)
-{
-  FoldingSetNodeID ID;
-  AddNodeIDNode(ID, ISD::GC_ARG, getVTList(vt), {});
-  ID.AddPointer(MMO);
-
-  void *IP = nullptr;
-  if (SDNode *E = FindNodeOrInsertPos(ID, IP)) {
-    return SDValue(E, 0);
-  }
-
-  auto *N = newSDNode<GCArgSDNode>(dl.getDebugLoc(), vt, MMO);
-  CSEMap.InsertNode(N, IP);
-  InsertNode(N);
-  return SDValue(N, 0);
-}
-
 SDValue SelectionDAG::getSrcValue(const Value *V) {
   FoldingSetNodeID ID;
   AddNodeIDNode(ID, ISD::SRCVALUE, getVTList(MVT::Other), None);

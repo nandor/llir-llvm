@@ -2144,25 +2144,6 @@ public:
   }
 };
 
-class GCArgSDNode : public SDNode {
-  friend class SelectionDAG;
-
-  MachineMemOperand *MMO;
-
-  GCArgSDNode(const DebugLoc &dl, MVT vt, MachineMemOperand *MMO)
-    : SDNode(ISD::GC_ARG, 0, dl, getSDVTList(vt))
-    , MMO(MMO)
-  {
-  }
-
-public:
-  MachineMemOperand *getMemOperand() const { return MMO; }
-
-  static bool classof(const SDNode *N) {
-    return N->getOpcode() == ISD::GC_ARG;
-  }
-};
-
 class ExternalSymbolSDNode : public SDNode {
   friend class SelectionDAG;
 

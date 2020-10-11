@@ -887,9 +887,6 @@ enum NodeType {
   /// GC_FRAME - Represents a label used by LLIR to emit effective GC frames.
   GC_FRAME,
 
-  /// GC_ARG - Represents an argument captured by a GC frame.
-  GC_ARG,
-
   /// EH_LABEL - Represents a label in mid basic block used to track
   /// locations needed for debug and exception handling tables.  These nodes
   /// take a chain as input and return a chain.
