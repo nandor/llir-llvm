@@ -5016,7 +5016,7 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
         TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
 
       else if (Target.getArch() == llvm::Triple::llir_x86_64 ||
-               Target.getArch() == llvm::Triple::llir_aarch64_be)
+               Target.getArch() == llvm::Triple::llir_aarch64)
         TC = std::make_unique<toolchains::LLIR>(*this, Target, Args);
       else
         TC = std::make_unique<toolchains::Linux>(*this, Target, Args);
@@ -5114,7 +5114,7 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
         TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
         break;
       case llvm::Triple::llir_x86_64:
-      case llvm::Triple::llir_aarch64_be:
+      case llvm::Triple::llir_aarch64:
         TC = std::make_unique<toolchains::LLIR>(*this, Target, Args);
         break;
       default:

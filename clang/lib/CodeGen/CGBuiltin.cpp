@@ -4518,7 +4518,7 @@ static Value *EmitTargetArchBuiltinExpr(CodeGenFunction *CGF,
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
-  case llvm::Triple::llir_aarch64_be:
+  case llvm::Triple::llir_aarch64:
     return CGF->EmitAArch64BuiltinExpr(BuiltinID, E, Arch);
   case llvm::Triple::bpfeb:
   case llvm::Triple::bpfel:

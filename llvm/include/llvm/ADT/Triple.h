@@ -99,7 +99,7 @@ public:
     renderscript64, // 64-bit RenderScript
     ve,             // NEC SX-Aurora Vector Engine
     llir_x86_64,    // LLIR for X86-64
-    llir_aarch64_be,// LLIR for aarch64
+    llir_aarch64,   // LLIR for aarch64
     LastArchType = ve
   };
   enum SubArchType {

@@ -76,7 +76,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case x86_64:         return "x86_64";
   case xcore:          return "xcore";
   case llir_x86_64:    return "llir_x86_64";
-  case llir_aarch64_be:   return "llir_aarch64_be";
+  case llir_aarch64:   return "llir_aarch64";
   }
 
   llvm_unreachable("Invalid ArchType!");
@@ -322,7 +322,7 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("renderscript64", renderscript64)
     .Case("ve", ve)
     .Case("llir_x86_64", llir_x86_64)
-    .Case("llir_aarch64_be", llir_aarch64_be)
+    .Case("llir_aarch64", llir_aarch64)
     .Default(UnknownArch);
 }
 
@@ -452,8 +452,9 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("ve", Triple::ve)
     .Case("wasm32", Triple::wasm32)
     .Case("wasm64", Triple::wasm64)
+    .Case("llir_arm64", Triple::aarch64)
     .Case("llir_x86_64", Triple::llir_x86_64)
-    .Case("llir_aarch64_be", Triple::llir_aarch64_be)
+    .Case("llir_aarch64", Triple::llir_aarch64)
     .Default(Triple::UnknownArch);
 
   // Some architectures require special parsing logic just to compute the
@@ -735,7 +736,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
     return Triple::Wasm;
 
   case Triple::llir_x86_64:
-  case Triple::llir_aarch64_be:
+  case Triple::llir_aarch64:
     return Triple::LLIR;
   }
   llvm_unreachable("unknown architecture");
@@ -1310,7 +1311,7 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::wasm64:
   case llvm::Triple::x86_64:
   case llvm::Triple::llir_x86_64:
-  case llvm::Triple::llir_aarch64_be:
+  case llvm::Triple::llir_aarch64:
     return 64;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1384,7 +1385,7 @@ bool Triple::isLLIR() const {
   case llvm::Triple::x86_64:
     return false;
   case llvm::Triple::llir_x86_64:
-  case llvm::Triple::llir_aarch64_be:
+  case llvm::Triple::llir_aarch64:
     return true;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1403,7 +1404,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::systemz:
   case Triple::ve:
   case Triple::llir_x86_64:
-  case Triple::llir_aarch64_be:
+  case Triple::llir_aarch64:
     T.setArch(UnknownArch);
     break;
 
@@ -1498,7 +1499,7 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::wasm64:
   case Triple::x86_64:
   case Triple::llir_x86_64:
-  case Triple::llir_aarch64_be:
+  case Triple::llir_aarch64:
     // Already 64-bit.
     break;
 

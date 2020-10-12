@@ -635,12 +635,12 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
       return new LLIR_X86_64TargetInfo(Triple, Opts);
     }
 
-  case llvm::Triple::llir_aarch64_be:
+  case llvm::Triple::llir_aarch64:
     switch (os) {
     case llvm::Triple::Linux:
-      return new LinuxTargetInfo<LLIR_AArch64beTargetInfo>(Triple, Opts);
+      return new LinuxTargetInfo<LLIR_AArch64leTargetInfo>(Triple, Opts);
     default:
-      return new LLIR_AArch64beTargetInfo(Triple, Opts);
+      return new LLIR_AArch64leTargetInfo(Triple, Opts);
     }
   }
 }

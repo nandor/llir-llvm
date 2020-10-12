@@ -39,6 +39,7 @@ void tools::llir::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
                                           const llvm::opt::ArgList &Args,
                                           const char *LinkingOutput) const {
   auto &ToolChain = static_cast<const toolchains::LLIR &>(getToolChain());
+  const llvm::Triple &Triple = ToolChain.getTriple();
   ArgStringList CmdArgs;
 
   CmdArgs.push_back("-o");
@@ -52,7 +53,8 @@ void tools::llir::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
     llvm_unreachable("Assembler::ConstructJob");
   }
 
-  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath("llir-as"));
+  const std::string as = Triple.str() + "-as";
+  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath(as.c_str()));
   C.addCommand(std::make_unique<Command>(
       JA, *this, ResponseFileSupport::AtFileCurCP(), Exec, CmdArgs, Inputs));
 }
@@ -115,7 +117,8 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
 
-  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath("llir-ld"));
+  const std::string ld = Triple.str() + "-ld";
+  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath(ld.c_str()));
   C.addCommand(std::make_unique<Command>(
       JA, *this, ResponseFileSupport::AtFileCurCP(), Exec, CmdArgs, Inputs));
 }

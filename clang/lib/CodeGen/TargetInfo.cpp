@@ -10842,7 +10842,7 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
-  case llvm::Triple::llir_aarch64_be: {
+  case llvm::Triple::llir_aarch64: {
     AArch64ABIInfo::ABIKind Kind = AArch64ABIInfo::AAPCS;
     if (getTarget().getABI() == "darwinpcs")
       Kind = AArch64ABIInfo::DarwinPCS;
