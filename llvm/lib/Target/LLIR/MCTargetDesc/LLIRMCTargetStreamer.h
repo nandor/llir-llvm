@@ -28,6 +28,10 @@ public:
   virtual void emitParams(ArrayRef<MVT> params) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
+  /// .ctor
+  virtual void emitCtor(int Priority, const MCSymbol *Sym) = 0;
+  /// .dtor
+  virtual void emitDtor(int Priority, const MCSymbol *Sym) = 0;
   /// .end
   virtual void emitEnd() = 0;
   /// .noinline
@@ -43,6 +47,8 @@ public:
   virtual void emitVarArg() override;
   virtual void emitParams(ArrayRef<MVT> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
+  virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
+  virtual void emitDtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
 
@@ -59,6 +65,8 @@ public:
   virtual void emitVarArg() override;
   virtual void emitParams(ArrayRef<MVT> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
+  virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
+  virtual void emitDtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
 };

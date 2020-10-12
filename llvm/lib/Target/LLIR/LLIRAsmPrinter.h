@@ -35,6 +35,8 @@ public:
   void emitFunctionBodyEnd() override;
   void emitInstruction(const MachineInstr *MI) override;
   void emitJumpTableInfo() override;
+  void emitXXStructorList(const DataLayout &DL, const Constant *List,
+                          bool IsCtor) override;
 
   bool PrintAsmOperand(
       const MachineInstr *MI,

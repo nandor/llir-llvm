@@ -90,6 +90,25 @@ void LLIRAsmPrinter::emitJumpTableInfo() {
   // Nothing to do; jump tables are incorporated into the instruction stream.
 }
 
+void LLIRAsmPrinter::emitXXStructorList(const DataLayout &DL,
+                                        const Constant *List, bool IsCtor) {
+  auto &Streamer = getTargetStreamer();
+
+  SmallVector<Structor, 8> Structors;
+  preprocessXXStructorList(DL, List, Structors);
+  if (Structors.empty())
+    return;
+  for (const Structor &S : Structors) {
+    auto *GV = dyn_cast<GlobalValue>(S.Func);
+    assert(GV && "not a global value");
+    if (IsCtor) {
+      Streamer.emitCtor(S.Priority, getSymbol(GV));
+    } else {
+      Streamer.emitDtor(S.Priority, getSymbol(GV));
+    }
+  }
+}
+
 bool LLIRAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
                                      const char *ExtraCode, raw_ostream &O) {
   if (ExtraCode) llvm_unreachable("not implemented");
