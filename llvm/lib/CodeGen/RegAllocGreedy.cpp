@@ -2301,9 +2301,6 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
     (1.0f / MBFI->getEntryFreq());
   SmallVector<float, 8> GapWeight;
 
-  for (MCPhysReg PhysReg : Order) {
-    assert(PhysReg);
-
   auto Advance = [this, Uses](unsigned &I) {
     while (++I < Uses.size())
       if (!Indexes->getInstructionFromIndex(Uses[I])->isGCFrame())
@@ -2311,8 +2308,9 @@ unsigned RAGreedy::tryLocalSplit(LiveInterval &VirtReg, AllocationOrder &Order,
     return I;
   };
 
-  Order.rewind();
-  while (unsigned PhysReg = Order.next()) {
+  for (MCPhysReg PhysReg : Order) {
+    assert(PhysReg);
+
     // Keep track of the largest spill weight that would need to be evicted in
     // order to make use of PhysReg between UseSlots[I] and UseSlots[I + 1].
     calcGapWeights(PhysReg, GapWeight);

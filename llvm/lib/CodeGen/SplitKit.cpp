@@ -1371,7 +1371,7 @@ void SplitEditor::rewriteAssigned(bool ExtendRanges) {
       MO.setReg(0);
       GCFrames.push_back(MI);
     } else {
-      MO.setReg(LI.reg);
+      MO.setReg(LI.reg());
     }
 
     LLVM_DEBUG(dbgs() << "  rewr " << printMBBReference(*MI->getParent())
@@ -1457,7 +1457,7 @@ void SplitEditor::rewriteAssigned(bool ExtendRanges) {
     for (unsigned R : *Edit) {
       LiveInterval &LI = LIS.getInterval(R);
       if (LI.liveAt(Idx)) {
-        MI->addOperand(MachineOperand::CreateReg(LI.reg, false));
+        MI->addOperand(MachineOperand::CreateReg(LI.reg(), false));
       }
     }
   }

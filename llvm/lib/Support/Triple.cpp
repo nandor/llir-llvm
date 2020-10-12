@@ -1389,6 +1389,7 @@ bool Triple::isLLIR() const {
   case llvm::Triple::ve:
   case llvm::Triple::wasm64:
   case llvm::Triple::x86_64:
+  case llvm::Triple::csky:
     return false;
   case llvm::Triple::llir_x86_64:
   case llvm::Triple::llir_aarch64:
