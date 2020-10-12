@@ -136,6 +136,15 @@ static std::string computeDataLayoutX86_64(const Triple &TT) {
   return Ret;
 }
 
+static std::string computeDataLayoutAArch64(const Triple &TT) {
+  if (TT.isOSBinFormatMachO()) {
+    return "e-m:o-i64:64-i128:128-n32:64-S128";
+  }
+  if (TT.isOSBinFormatCOFF())
+    return "e-m:w-p:64:64-i32:32-i64:64-i128:128-n32:64-S128";
+  return "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128";
+}
+
 static std::string computeDataLayout(
     const Triple &TT,
     StringRef CPU,
@@ -144,6 +153,9 @@ static std::string computeDataLayout(
   switch (TT.getArch()) {
     case Triple::llir_x86_64: {
       return computeDataLayoutX86_64(TT);
+    }
+    case Triple::llir_aarch64: {
+      return computeDataLayoutAArch64(TT);
     }
     default: {
       llvm_unreachable("invalid LLIR target");

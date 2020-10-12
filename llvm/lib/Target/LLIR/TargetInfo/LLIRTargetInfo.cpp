@@ -25,7 +25,6 @@ Target &llvm::getTheLLIR_AArch64Target() {
 extern "C" void LLVMInitializeLLIRTargetInfo() {
   RegisterTarget<Triple::llir_x86_64, false> X(
       getTheLLIR_X86_64Target(), "llir-x86-64", "LLIR over x86-64", "LLIR");
-  RegisterTarget<Triple::llir_aarch64_be, false> Y(getTheLLIR_AArch64Target(),
-                                                   "llir-aarch64-be",
-                                                   "LLIR over aarch64", "LLIR");
+  RegisterTarget<Triple::llir_aarch64, false> Y(
+      getTheLLIR_AArch64Target(), "llir-aarch64", "LLIR over aarch64", "LLIR");
 }

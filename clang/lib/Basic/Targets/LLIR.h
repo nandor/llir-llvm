@@ -57,12 +57,11 @@ class LLVM_LIBRARY_VISIBILITY LLIR_X86_64TargetInfo : public X86_64TargetInfo {
 };
 
 // llir aarch64 generic target
-class LLVM_LIBRARY_VISIBILITY LLIR_AArch64beTargetInfo
-    : public AArch64beTargetInfo {
- public:
-  LLIR_AArch64beTargetInfo(const llvm::Triple &Triple,
-                           const TargetOptions &Opts)
-      : AArch64beTargetInfo(Triple, Opts) {}
+class LLVM_LIBRARY_VISIBILITY LLIR_AArch64leTargetInfo
+    : public AArch64leTargetInfo {
+public:
+  LLIR_AArch64leTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
+      : AArch64leTargetInfo(Triple, Opts) {}
 };
 
 }  // namespace targets
