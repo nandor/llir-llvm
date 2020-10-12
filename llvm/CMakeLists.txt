@@ -1119,39 +1119,45 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN ".svn" EXCLUDE
     )
 
-  install(DIRECTORY lib/Target/X86
-    DESTINATION include/llvm/Target
-    COMPONENT llvm-headers
-    FILES_MATCHING
-    PATTERN "*.def"
-    PATTERN "*.h"
-    PATTERN "*.td"
-    PATTERN "*LICENSE.TXT"
-    )
+  foreach(arch X86 AArch64)
+    install(DIRECTORY lib/Target/${arch}
+      DESTINATION include/llvm/Target
+      COMPONENT llvm-headers
+      FILES_MATCHING
+      PATTERN "*.def"
+      PATTERN "*.h"
+      PATTERN "*.td"
+      PATTERN "*LICENSE.TXT"
+      )
 
-  install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/Target/X86
-    DESTINATION include/llvm/Target
-    FILES_MATCHING
-    PATTERN "*.inc"
-    PATTERN "CMakeFiles" EXCLUDE
-    )
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/lib/Target/${arch}
+      DESTINATION include/llvm/Target
+      FILES_MATCHING
+      PATTERN "*.inc"
+      PATTERN "CMakeFiles" EXCLUDE
+      )
+
+    install(FILES
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmMatcher.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenFastISel.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmWriter.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenGlobalISel.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmWriter1.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenInstrInfo.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenCallingConv.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterBank.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenDAGISel.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterInfo.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenDisassemblerTables.inc
+        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenSubtargetInfo.inc
+      DESTINATION include/llvm/Target/${arch}/MCTargetDesc
+      )
+  endforeach()
 
   install(FILES
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmMatcher.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenFastISel.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenGlobalISel.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter1.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenInstrInfo.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenCallingConv.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterBank.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDAGISel.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterInfo.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDisassemblerTables.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
       ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenEVEX2VEXTables.inc
     DESTINATION include/llvm/Target/X86/MCTargetDesc
-    )
+  )
 
   install(DIRECTORY lib/CodeGen/SelectionDAG
     DESTINATION include/llvm/CodeGen
