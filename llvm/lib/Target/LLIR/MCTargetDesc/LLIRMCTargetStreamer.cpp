@@ -81,6 +81,16 @@ void LLIRMCTargetAsmStreamer::emitCallingConv(CallingConv::ID CallConv)
   }
 }
 
+void LLIRMCTargetAsmStreamer::emitCtor(int Priority, const MCSymbol *Sym)
+{
+  OS << ".ctor " << Priority << ", " << Sym->getName() << "\n";
+}
+
+void LLIRMCTargetAsmStreamer::emitDtor(int Priority, const MCSymbol *Sym)
+{
+  OS << ".dtor " << Priority << ", " << Sym->getName() << "\n";
+}
+
 void LLIRMCTargetAsmStreamer::emitEnd()
 {
   OS << "\t.end\n";
@@ -114,6 +124,16 @@ void LLIRMCTargetLLIRStreamer::emitParams(ArrayRef<MVT> params)
 void LLIRMCTargetLLIRStreamer::emitCallingConv(CallingConv::ID CallConv)
 {
   llvm_unreachable("LLIRMCTargetLLIRStreamer::emitCallingConv");
+}
+
+void LLIRMCTargetLLIRStreamer::emitCtor(int Priority, const MCSymbol *Sym)
+{
+  llvm_unreachable("not implemented");
+}
+
+void LLIRMCTargetLLIRStreamer::emitDtor(int Priority, const MCSymbol *Sym)
+{
+  llvm_unreachable("not implemented");
 }
 
 void LLIRMCTargetLLIRStreamer::emitEnd()
