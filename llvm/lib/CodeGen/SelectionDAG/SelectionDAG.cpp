@@ -1875,22 +1875,19 @@ SDValue SelectionDAG::getBlockAddress(const BlockAddress *BA, EVT VT,
   return SDValue(N, 0);
 }
 
-SDValue SelectionDAG::getGCFrame(
-    const SDLoc &dl,
-    ISD::FrameType type,
-    ArrayRef<SDValue> ops,
-    MCSymbol *label)
-{
+SDValue SelectionDAG::getGCFrame(const SDLoc &dl, ISD::FrameType kind,
+                                 SDVTList types, ArrayRef<SDValue> ops,
+                                 MCSymbol *label) {
   FoldingSetNodeID ID;
-  AddNodeIDNode(ID, ISD::GC_FRAME, getVTList(MVT::Other), ops);
-  ID.AddInteger(type);
+  AddNodeIDNode(ID, ISD::GC_FRAME, types, ops);
+  ID.AddInteger(kind);
   ID.AddPointer(label);
   void *IP = nullptr;
   if (SDNode *E = FindNodeOrInsertPos(ID, IP)) {
     return SDValue(E, 0);
   }
 
-  auto *N = newSDNode<GCFrameSDNode>(dl.getDebugLoc(), type, label);
+  auto *N = newSDNode<GCFrameSDNode>(dl.getDebugLoc(), kind, types, label);
   createOperands(N, ops);
 
   CSEMap.InsertNode(N, IP);

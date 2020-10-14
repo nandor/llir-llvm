@@ -976,6 +976,9 @@ EmitMachineNode(SDNode *Node, bool IsClone, bool IsCloned,
       } else if (F->getOpcode() == ISD::CopyToReg) {
         // Skip CopyToReg nodes that are internal to the glue chain.
         continue;
+      } else if (F->getOpcode() == ISD::GC_FRAME) {
+        // Skip GC frames.
+        continue;
       }
       // Collect declared implicit uses.
       const MCInstrDesc &MCID = TII->get(F->getMachineOpcode());
@@ -1083,11 +1086,9 @@ EmitSpecialNode(SDNode *Node, bool IsClone, bool IsCloned,
     auto MIB = BuildMI(*MBB, InsertPos, Node->getDebugLoc(), TII->get(Opc));
     MIB.addSym(gcFrame->getLabel());
 
-    for (unsigned i = 1, n = Node->getNumOperands(); i < n; ++i) {
-      AddOperand(
-          MIB, Node->getOperand(i), i, nullptr, VRBaseMap,
-          false, false, false
-      );
+    for (unsigned i = 1, n = Node->getNumOperands() - 1; i < n; ++i) {
+      AddOperand(MIB, Node->getOperand(i), i, nullptr, VRBaseMap,
+                 /*isDebug=*/false, /*isClone=*/false, /*isCloned=*/false);
     }
     break;
   }

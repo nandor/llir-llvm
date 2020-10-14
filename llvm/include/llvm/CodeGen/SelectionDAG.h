@@ -722,12 +722,8 @@ public:
   }
 
   // LLIR frame for garbage collection metadata.
-  SDValue getGCFrame(
-      const SDLoc &dl,
-      ISD::FrameType type,
-      ArrayRef<SDValue> ops,
-      MCSymbol *label
-  );
+  SDValue getGCFrame(const SDLoc &dl, ISD::FrameType kind, SDVTList types,
+                     ArrayRef<SDValue> ops, MCSymbol *label);
 
   // This version of the getCopyToReg method takes an extra operand, which
   // indicates that there is potentially an incoming glue value (if Glue is not

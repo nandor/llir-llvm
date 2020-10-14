@@ -2123,19 +2123,16 @@ public:
 class GCFrameSDNode : public SDNode {
   friend class SelectionDAG;
 
-  ISD::FrameType Type;
+  ISD::FrameType Kind;
 
   MCSymbol *Label;
 
-  GCFrameSDNode(const DebugLoc &dl, ISD::FrameType type, MCSymbol *L)
-    : SDNode(ISD::GC_FRAME, 0, dl, getSDVTList(MVT::Other))
-    , Type(type)
-    , Label(L)
-  {
-  }
+  GCFrameSDNode(const DebugLoc &dl, ISD::FrameType kind, SDVTList types,
+                MCSymbol *L)
+      : SDNode(ISD::GC_FRAME, 0, dl, types), Kind(kind), Label(L) {}
 
 public:
-  ISD::FrameType getType() const { return Type; }
+  ISD::FrameType getType() const { return Kind; }
 
   MCSymbol *getLabel() const { return Label; }
 
