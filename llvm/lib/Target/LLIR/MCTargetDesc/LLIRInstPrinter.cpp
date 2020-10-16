@@ -37,7 +37,7 @@ LLIRInstPrinter::LLIRInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &MII,
 void LLIRInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const {
   switch (RegNo) {
     case LLIR::RSP: {
-      OS << "$rsp";
+      OS << "$sp";
       break;
     }
     case LLIR::FRAME_ADDR: {
