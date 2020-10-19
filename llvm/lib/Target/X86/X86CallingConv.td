@@ -1174,9 +1174,10 @@ def CSR_LLIR_Caml : CalleeSavedRegs<(add)>;
 // LLIR: OCaml-to-C call which respects the System-V convention.
 def CSR_LLIR_Caml_Ext : CalleeSavedRegs<(add)>;
 
-// LLIR: OCaml allocation call, does not preserve r14 and rax.
+// LLIR: OCaml allocation call, does not preserve r14 and r15.
 def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
   (add
+    RAX,
     RBX,
     RSI,
     RDI,
@@ -1189,7 +1190,6 @@ def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
     R11,
     R12,
     R13,
-    R15,
     (sequence "XMM%u", 0, 15)
   )
 >;
