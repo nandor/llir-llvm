@@ -565,6 +565,10 @@ void InlineSpiller::markValueUsed(LiveInterval *LI, VNInfo *VNI) {
 
 bool InlineSpiller::canGuaranteeAssignmentAfterRemat(Register VReg,
                                                      MachineInstr &MI) {
+  // Disable this for GC frames.
+  if (MI.isGCFrame())
+    return false;
+
   if (!RestrictStatepointRemat)
     return true;
   // Here's a quick explanation of the problem we're trying to handle here:
@@ -1099,21 +1103,6 @@ void InlineSpiller::spillAroundUses(Register Reg) {
         eliminateRedundantSpills(SibLI, SibLI.getVNInfoAt(Idx));
         // The COPY will fold to a reload below.
       }
-    }
-
-    if (MI->isGCFrame()) {
-      // GC_FRAMES are always folded.
-      MachineFrameInfo &MFI = MF.getFrameInfo();
-      for (auto &Op : Ops) {
-        Op.first->RemoveOperand(Op.second);
-        Op.first->addMemOperand(MF, MF.getMachineMemOperand(
-            MachinePointerInfo::getFixedStack(MF, StackSlot, 0),
-            MachineMemOperand::MOLoad | MachineMemOperand::MOStore,
-            MFI.getObjectSize(StackSlot),
-            MFI.getObjectAlign(StackSlot)
-        ));
-      }
-      continue;
     }
 
     // Attempt to fold memory ops.
