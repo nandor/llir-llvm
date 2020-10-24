@@ -1216,8 +1216,5 @@ def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
   )
 >;
 
-// LLIR: OCaml exception raise call, does not preserve anything.
-def CSR_LLIR_Caml_Raise : CalleeSavedRegs<(add)>;
-
 // LLIR: setjmp, does not preserve any registers.
 def CSR_LLIR_Setjmp : CalleeSavedRegs<(add)>;
