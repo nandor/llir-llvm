@@ -135,7 +135,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::UMULO, T, Custom);
 
     // Expand unavailable integer operations.
-    setOperationAction(ISD::BSWAP, T, Expand);
+    setOperationAction(ISD::BSWAP, T, Legal);
     setOperationAction(ISD::SMUL_LOHI, T, Expand);
     setOperationAction(ISD::UMUL_LOHI, T, Expand);
     setOperationAction(ISD::MULHS, T, Expand);

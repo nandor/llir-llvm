@@ -18,6 +18,22 @@ multiclass UnaryInt
   , bits<32> b
   >
 {
+  def _I8 : I
+    < (outs I8:$dst)
+    , (ins I8:$arg)
+    , [(set I8:$dst, (node I8:$arg))]
+    , !strconcat(name, ".i8\t$dst, $arg")
+    , b
+    >;
+
+  def _I16 : I
+    < (outs I16:$dst)
+    , (ins I16:$arg)
+    , [(set I16:$dst, (node I16:$arg))]
+    , !strconcat(name, ".i16\t$dst, $arg")
+    , b
+    >;
+
   def _I32 : I
     < (outs I32:$dst)
     , (ins I32:$arg)
@@ -266,6 +282,7 @@ multiclass OverflowInt
 defm POPCNT : UnaryInt<ctpop, "popcnt", 0x90>;
 defm CLZ : UnaryInt<ctlz, "clz", 0x90>;
 defm CTZ : UnaryInt<cttz, "ctz", 0x90>;
+defm BSWAP : UnaryInt<bswap, "bswap", 0x90>;
 
 defm ADD : CommBinaryInt<add, "add", 0x90>;
 defm XOR : CommBinaryInt<xor, "xor", 0x90>;
