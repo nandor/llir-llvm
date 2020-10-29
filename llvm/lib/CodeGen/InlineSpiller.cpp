@@ -1067,12 +1067,8 @@ void InlineSpiller::spillAroundUses(Register Reg) {
       continue;
 
     // Analyze instruction.
-    using OpsElem = std::pair<MachineInstr*, unsigned>;
-    SmallVector<OpsElem, 8> Ops;
+    SmallVector<std::pair<MachineInstr*, unsigned>, 8> Ops;
     VirtRegInfo RI = AnalyzeVirtRegInBundle(*MI, Reg, &Ops);
-    std::sort(Ops.begin(), Ops.end(), [](const OpsElem &a, const OpsElem &b) {
-      return b.second < a.second;
-    });
 
     // Find the slot index where this instruction reads and writes OldLI.
     // This is usually the def slot, except for tied early clobbers.
