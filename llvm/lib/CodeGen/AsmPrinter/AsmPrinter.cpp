@@ -1850,7 +1850,7 @@ void AsmPrinter::SetupMachineFunction(MachineFunction &MF) {
   if (F.hasFnAttribute("patchable-function-entry") ||
       F.hasFnAttribute("function-instrument") ||
       F.hasFnAttribute("xray-instruction-threshold") ||
-      needFuncLabelsForEHOrDebugInfo(MF) || NeedsLocalForSize ||
+      needFuncLabelsForEHOrDebugInfo(MF, *MAI) || NeedsLocalForSize ||
       MF.getTarget().Options.EmitStackSizeSection || MF.hasBBLabels()) {
     CurrentFnBegin = createTempSymbol("func_begin");
     if (NeedsLocalForSize)

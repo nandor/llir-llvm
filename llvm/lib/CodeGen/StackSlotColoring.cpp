@@ -160,7 +160,8 @@ void StackSlotColoring::ScanForSpillSlotRefs(MachineFunction &MF) {
   for (MachineFunction::iterator MBBI = MF.begin(), E = MF.end();
        MBBI != E; ++MBBI) {
     MachineBasicBlock *MBB = &*MBBI;
-    for (auto MII = MBB->instr_begin(), EE = MBB->instr_end(); MII != EE; ++MII) {
+    for (MachineBasicBlock::iterator MII = MBB->begin(), EE = MBB->end();
+         MII != EE; ++MII) {
       MachineInstr &MI = *MII;
       for (unsigned i = 0, e = MI.getNumOperands(); i != e; ++i) {
         MachineOperand &MO = MI.getOperand(i);

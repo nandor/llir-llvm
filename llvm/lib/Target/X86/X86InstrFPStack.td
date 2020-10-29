@@ -35,17 +35,20 @@ def X86fild         : SDNode<"X86ISD::FILD", SDTX86Fild,
                              [SDNPHasChain, SDNPMayLoad, SDNPMemOperand]>;
 def X86fist         : SDNode<"X86ISD::FIST", SDTX86Fist,
                              [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-def X86fp_to_mem    : SDNode<"X86ISD::FP_TO_INT_IN_MEM", SDTX86Fst,
-                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
-def X86fp_cwd_get16 : SDNode<"X86ISD::FNSTCW16m",         SDTX86Fopst,
-                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_to_mem : SDNode<"X86ISD::FP_TO_INT_IN_MEM", SDTX86Fst,
+                          [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+def X86fp_cwd_get16 : SDNode<"X86ISD::FNSTCW16m",          SDTX86Fopst,
+                             [SDNPHasChain, SDNPMayStore, SDNPSideEffect,
+                              SDNPMemOperand]>;
 def X86fp_swd_get16 : SDNode<"X86ISD::FNSTSW16m",         SDTX86Fopst,
-                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+                             [SDNPHasChain, SDNPMayStore, SDNPSideEffect,
+                              SDNPMemOperand]>;
 def X86fp_cwd_set16 : SDNode<"X86ISD::FLDCW16m",         SDTX86Fopld,
                              [SDNPHasChain, SDNPMayLoad, SDNPSideEffect,
                               SDNPMemOperand]>;
 def X86fp_env_get   : SDNode<"X86ISD::FNSTENVm",            SDTX86Fopst,
-                             [SDNPHasChain, SDNPMayStore, SDNPMemOperand]>;
+                             [SDNPHasChain, SDNPMayStore, SDNPSideEffect,
+                              SDNPMemOperand]>;
 def X86fp_env_set   : SDNode<"X86ISD::FLDENVm",            SDTX86Fopld,
                              [SDNPHasChain, SDNPMayLoad, SDNPSideEffect,
                               SDNPMemOperand]>;
