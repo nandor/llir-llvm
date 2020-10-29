@@ -12,6 +12,7 @@
 #include "AArch64RegisterInfo.h"
 #include "AArch64Subtarget.h"
 #include "AArch64TargetMachine.h"
+#include "AArch64MachineFunctionInfo.h"
 #include "MCTargetDesc/AArch64AddressingModes.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
 
@@ -168,6 +169,11 @@ public:
     return SelectSVELogicalImm(N, VT, Imm);
   }
 
+  template <MVT::SimpleValueType VT>
+  bool SelectSVEArithImm(SDValue N, SDValue &Imm) {
+    return SelectSVEArithImm(N, VT, Imm);
+  }
+
   template <unsigned Low, unsigned High, bool AllowSaturation = false>
   bool SelectSVEShiftImm(SDValue N, SDValue &Imm) {
     return SelectSVEShiftImm(N, Low, High, AllowSaturation, Imm);
@@ -300,11 +306,11 @@ protected:
 
   bool SelectSVELogicalImm(SDValue N, MVT VT, SDValue &Imm);
 
-  bool SelectSVESignedArithImm(SDValue N, MVT VT, SDValue &Imm);
+  bool SelectSVESignedArithImm(SDValue N, SDValue &Imm);
   bool SelectSVEShiftImm(SDValue N, uint64_t Low, uint64_t High,
                          bool AllowSaturation, SDValue &Imm);
 
-  bool SelectSVEArithImm(SDValue N, SDValue &Imm);
+  bool SelectSVEArithImm(SDValue N, MVT VT, SDValue &Imm);
   bool SelectSVERegRegAddrMode(SDValue N, unsigned Scale, SDValue &Base,
                                SDValue &Offset);
 

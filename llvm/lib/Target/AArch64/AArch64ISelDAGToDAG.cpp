@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "AArch64ISelDAGToDAG.h"
-#include "AArch64MachineFunctionInfo.h"
 #include "AArch64TargetMachine.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
@@ -2842,7 +2841,7 @@ bool AArch64DAGMatcher::SelectSVESignedArithImm(SDValue N, SDValue &Imm) {
   return false;
 }
 
-bool AArch64DAGMatcher::SelectSVEArithImm(SDValue N,  MVT VT, SDValue &Imm) {
+bool AArch64DAGMatcher::SelectSVEArithImm(SDValue N, MVT VT, SDValue &Imm) {
   if (auto CNode = dyn_cast<ConstantSDNode>(N)) {
     uint64_t ImmVal = CNode->getZExtValue();
 
