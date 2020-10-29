@@ -88,9 +88,6 @@ public:
   /// * CUDA compilation uses it to control parts of CUDA compilation
   ///   in clang that depend on specific version of the CUDA SDK.
   llvm::VersionTuple SDKVersion;
-
-  /// \brief Emit LLIR.
-  bool LLIR = false;
 };
 
 }  // end namespace clang

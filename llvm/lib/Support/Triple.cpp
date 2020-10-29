@@ -324,8 +324,9 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("renderscript64", renderscript64)
     .Case("ve", ve)
     .Case("csky", csky)
-    .Case("llir_x86_64", llir_x86_64)
+    .Case("llir_arm64", llir_aarch64)
     .Case("llir_aarch64", llir_aarch64)
+    .Case("llir_x86_64", llir_x86_64)
     .Default(UnknownArch);
 }
 
@@ -456,7 +457,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("wasm32", Triple::wasm32)
     .Case("wasm64", Triple::wasm64)
     .Case("csky", Triple::csky)
-    .Case("llir_arm64", Triple::aarch64)
+    .Case("llir_arm64", Triple::llir_aarch64)
     .Case("llir_x86_64", Triple::llir_x86_64)
     .Case("llir_aarch64", Triple::llir_aarch64)
     .Default(Triple::UnknownArch);
