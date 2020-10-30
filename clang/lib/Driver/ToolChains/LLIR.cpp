@@ -108,10 +108,20 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   } else if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
   } else {
+    SmallString<128> SysRoot(ToolChain.computeSysRoot());
+
+    SmallString<128> LibDir(SysRoot);
+    llvm::sys::path::append(LibDir, "lib");
+
+    SmallString<128> DynamicLinkerPath(LibDir);
+    std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
+    llvm::sys::path::append(DynamicLinkerPath, Linker);
+
+    CmdArgs.push_back("-rpath");
+    CmdArgs.push_back(Args.MakeArgString(LibDir));
+
     CmdArgs.push_back("-dynamic-linker");
-    SmallString<128> DynamicLinker(ToolChain.computeSysRoot());
-    llvm::sys::path::append(DynamicLinker, "lib", "ld-musl-" + Triple.getArchName().str() + ".so.1");
-    CmdArgs.push_back(Args.MakeArgString(DynamicLinker));
+    CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
   }
 
   CmdArgs.push_back("-o");
