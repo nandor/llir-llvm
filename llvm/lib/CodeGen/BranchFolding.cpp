@@ -1228,31 +1228,6 @@ static bool IsBranchOnlyBlock(MachineBasicBlock *MBB) {
   return I->isBranch();
 }
 
-/// IsBetterFallthrough - Return true if it would be clearly better to
-/// fall-through to MBB1 than to fall through into MBB2.  This has to return
-/// a strict ordering, returning true for both (MBB1,MBB2) and (MBB2,MBB1) will
-/// result in infinite loops.
-static bool IsBetterFallthrough(MachineBasicBlock *MBB1,
-                                MachineBasicBlock *MBB2) {
-  assert(MBB1 && MBB2 && "Unknown MachineBasicBlock");
-
-  // Right now, we use a simple heuristic.  If MBB2 ends with a call, and
-  // MBB1 doesn't, we prefer to fall through into MBB1.  This allows us to
-  // optimize branches that branch to either a return block or an assert block
-  // into a fallthrough to the return.
-  MachineBasicBlock::iterator MBB1I = MBB1->getLastNonDebugInstr();
-  MachineBasicBlock::iterator MBB2I = MBB2->getLastNonDebugInstr();
-  if (MBB1I == MBB1->end() || MBB2I == MBB2->end())
-    return false;
-
-  // If there is a clear successor ordering we make sure that one block
-  // will fall through to the next
-  if (MBB1->isSuccessor(MBB2)) return true;
-  if (MBB2->isSuccessor(MBB1)) return false;
-
-  return MBB2I->isCall() && !MBB1I->isCall();
-}
-
 /// getBranchDebugLoc - Find and return, if any, the DebugLoc of the branch
 /// instructions on the block.
 static DebugLoc getBranchDebugLoc(MachineBasicBlock &MBB) {
@@ -1307,6 +1282,36 @@ static void salvageDebugInfoFromEmptyBlock(const TargetInstrInfo *TII,
   for (MachineBasicBlock *PredBB : MBB.predecessors())
     if (PredBB->succ_size() == 1)
       copyDebugInfoToPredecessor(TII, MBB, *PredBB);
+}
+
+bool BranchFolder::IsBetterFallthrough(MachineBasicBlock &From,
+                                        MachineBasicBlock *MBB1,
+                                        MachineBasicBlock *MBB2) {
+  assert(MBB1 && MBB2 && "Unknown MachineBasicBlock");
+
+  // Fall through to the more frequent branch.
+  BranchProbability P1 = MBPI.getEdgeProbability(&From, MBB1);
+  BranchProbability P2 = MBPI.getEdgeProbability(&From, MBB2);
+  if (P1 > P2)
+    return true;
+  if (P2 > P1)
+    return false;
+
+  // Right now, we use a simple heuristic.  If MBB2 ends with a call, and
+  // MBB1 doesn't, we prefer to fall through into MBB1.  This allows us to
+  // optimize branches that branch to either a return block or an assert block
+  // into a fallthrough to the return.
+  MachineBasicBlock::iterator MBB1I = MBB1->getLastNonFrameInstr();
+  MachineBasicBlock::iterator MBB2I = MBB2->getLastNonFrameInstr();
+  if (MBB1I == MBB1->end() || MBB2I == MBB2->end())
+    return false;
+
+  // If there is a clear successor ordering we make sure that one block
+  // will fall through to the next
+  if (MBB1->isSuccessor(MBB2)) return true;
+  if (MBB2->isSuccessor(MBB1)) return false;
+
+  return MBB2I->isCall() && !MBB1I->isCall();
 }
 
 bool BranchFolder::OptimizeBlock(MachineBasicBlock *MBB) {
@@ -1480,7 +1485,7 @@ ReoptimizeBlock:
       // last.  Only do the swap if one is clearly better to fall through than
       // the other.
       if (FallThrough == --MF.end() &&
-          !IsBetterFallthrough(PriorTBB, MBB))
+          !IsBetterFallthrough(PrevBB, PriorTBB, MBB))
         DoTransform = false;
 
       if (DoTransform) {

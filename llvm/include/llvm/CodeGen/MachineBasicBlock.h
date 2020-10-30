@@ -667,6 +667,13 @@ public:
     return const_cast<MachineBasicBlock *>(this)->getLastNonDebugInstr();
   }
 
+  /// Returns an iterator to the last non-debug instruction in the basic block,
+  /// or end(), also excluding GC frames.
+  iterator getLastNonFrameInstr();
+  const_iterator getLastNonFrameInstr() const {
+    return const_cast<MachineBasicBlock *>(this)->getLastNonFrameInstr();
+  }
+
   /// Convenience function that returns true if the block ends in a return
   /// instruction.
   bool isReturnBlock() const {

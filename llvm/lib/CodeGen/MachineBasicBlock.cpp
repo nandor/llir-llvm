@@ -259,6 +259,15 @@ MachineBasicBlock::iterator MachineBasicBlock::getLastNonDebugInstr() {
   return end();
 }
 
+MachineBasicBlock::iterator MachineBasicBlock::getLastNonFrameInstr() {
+  iterator I = getLastNonDebugInstr();
+  if (I == begin())
+    return I;
+  if (I->isGCFrame())
+    return std::prev(I);
+  return I;
+}
+
 bool MachineBasicBlock::hasEHPadSuccessor() const {
   for (const_succ_iterator I = succ_begin(), E = succ_end(); I != E; ++I)
     if ((*I)->isEHPad())

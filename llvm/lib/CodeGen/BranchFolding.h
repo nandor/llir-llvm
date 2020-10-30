@@ -180,6 +180,13 @@ class TargetRegisterInfo;
 
     bool OptimizeBranches(MachineFunction &MF);
 
+    /// IsBetterFallthrough - Return true if it would be clearly better to
+    /// fall-through to MBB1 than to fall through into MBB2.  This has to return
+    /// a strict ordering, returning true for both (MBB1,MBB2) and (MBB2,MBB1)
+    /// will result in infinite loops.
+    bool IsBetterFallthrough(MachineBasicBlock &From, MachineBasicBlock *MBB1,
+                             MachineBasicBlock *MBB2);
+
     /// Analyze and optimize control flow related to the specified block. This
     /// is never called on the entry block.
     bool OptimizeBlock(MachineBasicBlock *MBB);
