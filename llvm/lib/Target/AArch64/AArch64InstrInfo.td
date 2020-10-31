@@ -2155,7 +2155,10 @@ def DCPS3 : ExceptionGeneration<0b101, 0b11, "dcps3">;
 def HLT   : ExceptionGeneration<0b010, 0b00, "hlt">;
 def HVC   : ExceptionGeneration<0b000, 0b10, "hvc">;
 def SMC   : ExceptionGeneration<0b000, 0b11, "smc">;
+
+let Defs = [X0] in {
 def SVC   : ExceptionGeneration<0b000, 0b01, "svc">;
+}
 
 // DCPSn defaults to an immediate operand of zero if unspecified.
 def : InstAlias<"dcps1", (DCPS1 0)>;
