@@ -74,6 +74,17 @@ const MCPhysReg *
 AArch64RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   assert(MF && "Invalid MachineFunction pointer.");
 
+  if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML)
+    return CSR_LLIR_Caml_SaveList;
+  if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML_EXT)
+    return CSR_LLIR_Caml_Ext_SaveList;
+  if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML_ALLOC)
+    return CSR_LLIR_Caml_Alloc_SaveList;
+  if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML_GC)
+    return CSR_LLIR_Caml_Gc_SaveList;
+  if (MF->getFunction().getCallingConv() == CallingConv::LLIR_SETJMP)
+    return CSR_LLIR_Setjmp_SaveList;
+
   if (MF->getFunction().getCallingConv() == CallingConv::GHC)
     // GHC set of callee saved regs is empty as all those regs are
     // used for passing STG regs around
@@ -206,6 +217,16 @@ AArch64RegisterInfo::getDarwinCallPreservedMask(const MachineFunction &MF,
 const uint32_t *
 AArch64RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                           CallingConv::ID CC) const {
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML)
+    return CSR_LLIR_Caml_RegMask;
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_EXT)
+    return CSR_LLIR_Caml_Ext_RegMask;
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_ALLOC)
+    return CSR_LLIR_Caml_Alloc_RegMask;
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_GC)
+    return CSR_LLIR_Caml_Gc_RegMask;
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_SETJMP)
+    return CSR_LLIR_Setjmp_RegMask;
   bool SCS = MF.getFunction().hasFnAttribute(Attribute::ShadowCallStack);
   if (CC == CallingConv::GHC)
     // This is academic because all GHC calls are (supposed to be) tail calls
