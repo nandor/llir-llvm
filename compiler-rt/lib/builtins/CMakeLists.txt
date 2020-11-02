@@ -550,10 +550,20 @@ set(aarch64_SOURCES
   aarch64/fp_mode.c
 )
 
+set(llir_aarch64_SOURCES
+  ${GENERIC_TF_SOURCES}
+  ${GENERIC_SOURCES}
+  aarch64/fp_mode.c
+)
+
 if (MINGW)
   set(aarch64_SOURCES
     ${aarch64_SOURCES}
     aarch64/chkstk.S
+  )
+  set(llir_aarch64_SOURCES
+    ${llir_aarch64_SOURCES}
+    llir/aarch64/chkstk.S
   )
 endif()
 
