@@ -64,8 +64,8 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                        const InputInfoList &Inputs,
                                        const llvm::opt::ArgList &Args,
                                        const char *LinkingOutput) const {
-  auto &ToolChain = static_cast<const toolchains::LLIR &>(getToolChain());
-  const llvm::Triple &Triple = ToolChain.getTriple();
+  auto &TC = static_cast<const toolchains::LLIR &>(getToolChain());
+  const llvm::Triple &Triple = TC.getTriple();
   ArgStringList CmdArgs;
 
   // Forward the optimisation level.
@@ -81,14 +81,14 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
     if (!Args.hasArg(options::OPT_shared))
-      CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crt1.o")));
+      CmdArgs.push_back(Args.MakeArgString(TC.GetFilePath("crt1.o")));
   }
 
   Args.AddAllArgs(CmdArgs, options::OPT_L);
   Args.AddAllArgs(CmdArgs, options::OPT_u);
-  ToolChain.AddFilePathLibArgs(Args, CmdArgs);
+  TC.AddFilePathLibArgs(Args, CmdArgs);
 
-  AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
+  AddLinkerInputs(TC, Inputs, Args, CmdArgs, JA);
 
   if (!Args.hasArg(options::OPT_nostdlib)) {
     if (!Args.hasArg(options::OPT_nodefaultlibs)) {
@@ -108,7 +108,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   } else if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
   } else {
-    SmallString<128> SysRoot(ToolChain.computeSysRoot());
+    SmallString<128> SysRoot(TC.computeSysRoot());
 
     SmallString<128> LibDir(SysRoot);
     llvm::sys::path::append(LibDir, "lib");
@@ -122,13 +122,20 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
     CmdArgs.push_back("-dynamic-linker");
     CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+
+    if (!Args.hasArg(options::OPT_nostdlib)) {
+      auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
+      if (TC.getVFS().exists(RT)) {
+        CmdArgs.push_back(Args.MakeArgString(RT));
+      }
+    }
   }
 
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
 
-  const std::string ld = Triple.str() + "-ld";
-  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath(ld.c_str()));
+  const std::string LD = Triple.str() + "-ld";
+  const char *Exec = Args.MakeArgString(TC.GetProgramPath(LD.c_str()));
   C.addCommand(std::make_unique<Command>(
       JA, *this, ResponseFileSupport::AtFileCurCP(), Exec, CmdArgs, Inputs));
 }

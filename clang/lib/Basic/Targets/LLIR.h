@@ -64,6 +64,12 @@ class LLVM_LIBRARY_VISIBILITY LLIR_AArch64leTargetInfo
 public:
   LLIR_AArch64leTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : AArch64leTargetInfo(Triple, Opts) {}
+
+  void getTargetDefines(const LangOptions &Opts,
+                        MacroBuilder &Builder) const override {
+    AArch64leTargetInfo::getTargetDefines(Opts, Builder);
+    Builder.defineMacro("__llir__");
+  }
 };
 
 // llir ppc64 generic target
@@ -72,6 +78,12 @@ class LLVM_LIBRARY_VISIBILITY LLIR_PPC64TargetInfo
 public:
   LLIR_PPC64TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : PPC64TargetInfo(Triple, Opts) {}
+
+  void getTargetDefines(const LangOptions &Opts,
+                        MacroBuilder &Builder) const override {
+    PPC64TargetInfo::getTargetDefines(Opts, Builder);
+    Builder.defineMacro("__llir__");
+  }
 };
 
 }  // namespace targets
