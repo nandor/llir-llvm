@@ -51,6 +51,12 @@ void __compilerrt_abort_impl(const char *file, int line, const char *function) {
   __builtin_trap();
 }
 
+#elif __llir__
+
+void __compilerrt_abort_impl(const char *file, int line, const char *function) {
+  __builtin_trap();
+}
+
 #else
 
 // Get the system definition of abort()

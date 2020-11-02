@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "int_lib.h"
+#ifndef __llir__
 #include <assert.h>
 #include <stddef.h>
 
@@ -96,9 +97,6 @@ void __clear_cache(void *start, void *end) {
 #elif defined(__mips__) && defined(__OpenBSD__)
   cacheflush(start, (uintptr_t)end - (uintptr_t)start, BCACHE);
 #elif defined(__aarch64__) && !defined(__APPLE__)
-#if defined(__llir__)
-  __builtin_trap();
-#else
   uint64_t xstart = (uint64_t)(uintptr_t)start;
   uint64_t xend = (uint64_t)(uintptr_t)end;
 
@@ -130,7 +128,6 @@ void __clear_cache(void *start, void *end) {
       __asm __volatile("ic ivau, %0" ::"r"(addr));
   }
   __asm __volatile("isb sy");
-#endif
 #elif defined(__powerpc64__)
   const size_t line_size = 32;
   const size_t len = (uintptr_t)end - (uintptr_t)start;
@@ -176,3 +173,4 @@ void __clear_cache(void *start, void *end) {
 #endif
 #endif
 }
+#endif
