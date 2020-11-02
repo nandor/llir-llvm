@@ -10986,8 +10986,10 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
                                                         IsSoftFloat));
     }
     return SetCGInfo(new PPC64TargetCodeGenInfo(Types));
-  case llvm::Triple::ppc64le: {
-    assert(Triple.isOSBinFormatELF() && "PPC64 LE non-ELF not supported!");
+  case llvm::Triple::ppc64le:
+  case llvm::Triple::llir_ppc64le: {
+    assert((Triple.isOSBinFormatELF() || Triple.isOSBinFormatLLIR()) &&
+           "PPC64 LE non-ELF not supported!");
     PPC64_SVR4_ABIInfo::ABIKind Kind = PPC64_SVR4_ABIInfo::ELFv2;
     if (getTarget().getABI() == "elfv1" || getTarget().getABI() == "elfv1-qpx")
       Kind = PPC64_SVR4_ABIInfo::ELFv1;

@@ -145,21 +145,59 @@ static std::string computeDataLayoutAArch64(const Triple &TT) {
   return "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128";
 }
 
-static std::string computeDataLayout(
-    const Triple &TT,
-    StringRef CPU,
-    StringRef FS)
-{
+static std::string computeDataLayoutPPC64(const Triple &TT) {
+  bool isPPC64le = TT.getArch() == Triple::ppc64le;
+  bool is64Bit = TT.getArch() == Triple::ppc64 || isPPC64le;
+  std::string Ret;
+
+  // Most PPC* platforms are big endian, PPC64LE is little endian.
+  if (isPPC64le)
+    Ret = "e";
+  else
+    Ret = "E";
+
+  Ret += DataLayout::getManglingComponent(TT);
+
+  // PPC32 has 32 bit pointers. The PS3 (OS Lv2) is a PPC64 machine with 32 bit
+  // pointers.
+  if (!is64Bit || TT.getOS() == Triple::Lv2)
+    Ret += "-p:32:32";
+
+  // Note, the alignment values for f64 and i64 on ppc64 in Darwin
+  // documentation are wrong; these are correct (i.e. "what gcc does").
+  if (is64Bit || !TT.isOSDarwin())
+    Ret += "-i64:64";
+  else
+    Ret += "-f64:32:64";
+
+  // PPC64 has 32 and 64 bit registers, PPC32 has only 32 bit ones.
+  if (is64Bit)
+    Ret += "-n32:64";
+  else
+    Ret += "-n32";
+
+  // Specify the vector alignment explicitly. For v256i1 and v512i1, the
+  // calculated alignment would be 256*alignment(i1) and 512*alignment(i1),
+  // which is 256 and 512 bytes - way over aligned.
+  if ((isPPC64le || TT.getArch() == Triple::ppc64) &&
+      (TT.isOSAIX() || TT.isOSLinux()))
+    Ret += "-v256:256:256-v512:512:512";
+
+  return Ret;
+}
+
+static std::string computeDataLayout(const Triple &TT, StringRef CPU,
+                                     StringRef FS) {
   switch (TT.getArch()) {
-    case Triple::llir_x86_64: {
-      return computeDataLayoutX86_64(TT);
-    }
-    case Triple::llir_aarch64: {
-      return computeDataLayoutAArch64(TT);
-    }
-    default: {
-      llvm_unreachable("invalid LLIR target");
-    }
+  case Triple::llir_x86_64:
+    return computeDataLayoutX86_64(TT);
+  case Triple::llir_aarch64:
+    return computeDataLayoutAArch64(TT);
+  case Triple::llir_ppc64le:
+    return computeDataLayoutPPC64(TT);
+  default: {
+    llvm_unreachable("invalid LLIR target");
+  }
   }
 }
 

@@ -101,6 +101,7 @@ public:
     ve,             // NEC SX-Aurora Vector Engine
     llir_x86_64,    // LLIR for X86-64
     llir_aarch64,   // LLIR for aarch64
+    llir_ppc64le,   // LLIR for ppc64le
     LastArchType = ve
   };
   enum SubArchType {

@@ -134,4 +134,5 @@ LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer() {
 extern "C" void LLVMInitializeLLIRAsmPrinter() {
   RegisterAsmPrinter<LLIRAsmPrinter> X(getTheLLIR_X86_64Target());
   RegisterAsmPrinter<LLIRAsmPrinter> Y(getTheLLIR_AArch64Target());
+  RegisterAsmPrinter<LLIRAsmPrinter> Z(getTheLLIR_PPC64Target());
 }

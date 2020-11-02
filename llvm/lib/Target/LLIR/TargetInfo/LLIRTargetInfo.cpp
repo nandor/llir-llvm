@@ -22,9 +22,16 @@ Target &llvm::getTheLLIR_AArch64Target() {
   return TheLLIR_AArch64_Target;
 }
 
+Target &llvm::getTheLLIR_PPC64Target() {
+  static Target TheLLIR_AArch64_Target;
+  return TheLLIR_AArch64_Target;
+}
+
 extern "C" void LLVMInitializeLLIRTargetInfo() {
   RegisterTarget<Triple::llir_x86_64, false> X(
       getTheLLIR_X86_64Target(), "llir-x86-64", "LLIR over x86-64", "LLIR");
   RegisterTarget<Triple::llir_aarch64, false> Y(
       getTheLLIR_AArch64Target(), "llir-aarch64", "LLIR over aarch64", "LLIR");
+  RegisterTarget<Triple::llir_ppc64le, false> Z(
+      getTheLLIR_PPC64Target(), "llir-ppc64le", "LLIR over ppc64le", "LLIR");
 }

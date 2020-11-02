@@ -66,7 +66,8 @@ static MCSubtargetInfo *createMCSubtargetInfo(const Triple &TT, StringRef CPU,
 
 extern "C" void LLVMInitializeLLIRTargetMC() {
   // Register stuff for all targets and subtargets.
-  for (Target *T : {&getTheLLIR_X86_64Target(), &getTheLLIR_AArch64Target()}) {
+  for (Target *T : {&getTheLLIR_X86_64Target(), &getTheLLIR_AArch64Target(),
+                    &getTheLLIR_PPC64Target()}) {
     // Register the MC asm info.
     RegisterMCAsmInfoFn X(*T, createLLIRMCAsmInfo);
 

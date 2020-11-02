@@ -78,6 +78,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case xcore:          return "xcore";
   case llir_x86_64:    return "llir_x86_64";
   case llir_aarch64:   return "llir_aarch64";
+  case llir_ppc64le:   return "llir_ppc64le";
   }
 
   llvm_unreachable("Invalid ArchType!");
@@ -327,6 +328,7 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("llir_arm64", llir_aarch64)
     .Case("llir_aarch64", llir_aarch64)
     .Case("llir_x86_64", llir_x86_64)
+    .Case("llir_ppc64le", llir_ppc64le)
     .Default(UnknownArch);
 }
 
@@ -460,6 +462,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("llir_arm64", Triple::llir_aarch64)
     .Case("llir_x86_64", Triple::llir_x86_64)
     .Case("llir_aarch64", Triple::llir_aarch64)
+    .Case("llir_ppc64le", Triple::llir_ppc64le)
     .Default(Triple::UnknownArch);
 
   // Some architectures require special parsing logic just to compute the
@@ -743,6 +746,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
 
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
+  case Triple::llir_ppc64le:
     return Triple::LLIR;
   }
   llvm_unreachable("unknown architecture");
@@ -1319,6 +1323,7 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::x86_64:
   case llvm::Triple::llir_x86_64:
   case llvm::Triple::llir_aarch64:
+  case llvm::Triple::llir_ppc64le:
     return 64;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1394,6 +1399,7 @@ bool Triple::isLLIR() const {
     return false;
   case llvm::Triple::llir_x86_64:
   case llvm::Triple::llir_aarch64:
+  case llvm::Triple::llir_ppc64le:
     return true;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1413,6 +1419,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::ve:
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
+  case Triple::llir_ppc64le:
     T.setArch(UnknownArch);
     break;
 
@@ -1510,6 +1517,7 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::x86_64:
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
+  case Triple::llir_ppc64le:
     // Already 64-bit.
     break;
 

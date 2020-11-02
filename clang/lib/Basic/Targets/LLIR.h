@@ -15,6 +15,8 @@
 
 #include "OSTargets.h"
 #include "X86.h"
+#include "AArch64.h"
+#include "PPC.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/TargetOptions.h"
 #include "llvm/ADT/Triple.h"
@@ -62,6 +64,14 @@ class LLVM_LIBRARY_VISIBILITY LLIR_AArch64leTargetInfo
 public:
   LLIR_AArch64leTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
       : AArch64leTargetInfo(Triple, Opts) {}
+};
+
+// llir ppc64 generic target
+class LLVM_LIBRARY_VISIBILITY LLIR_PPC64TargetInfo
+    : public PPC64TargetInfo {
+public:
+  LLIR_PPC64TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
+      : PPC64TargetInfo(Triple, Opts) {}
 };
 
 }  // namespace targets
