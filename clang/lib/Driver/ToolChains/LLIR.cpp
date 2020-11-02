@@ -122,13 +122,11 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
     CmdArgs.push_back("-dynamic-linker");
     CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+  }
 
-    if (!Args.hasArg(options::OPT_nostdlib)) {
-      auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
-      if (TC.getVFS().exists(RT)) {
-        CmdArgs.push_back(Args.MakeArgString(RT));
-      }
-    }
+  auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
+  if (TC.getVFS().exists(RT)) {
+    CmdArgs.push_back(Args.MakeArgString(RT));
   }
 
   CmdArgs.push_back("-o");
