@@ -111,8 +111,6 @@ void LLIRAsmPrinter::emitXXStructorList(const DataLayout &DL,
 
 bool LLIRAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
                                      const char *ExtraCode, raw_ostream &O) {
-  if (ExtraCode) llvm_unreachable("not implemented");
-
   const MachineOperand &MO = MI->getOperand(OpNo);
   assert(MO.getType() == MachineOperand::MO_Register && "register expected");
   auto &MFI = *MI->getParent()->getParent()->getInfo<LLIRMachineFunctionInfo>();

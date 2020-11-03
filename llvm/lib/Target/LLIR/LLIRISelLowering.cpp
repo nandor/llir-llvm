@@ -339,17 +339,44 @@ SDValue LLIRTargetLowering::LowerVAARG(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const {
-  // See the X86ISelLowering implementation
+  SDLoc DL(Op);
   SDValue Chain = Op.getOperand(0);
   SDValue DstPtr = Op.getOperand(1);
   SDValue SrcPtr = Op.getOperand(2);
+
   const Value *DstSV = cast<SrcValueSDNode>(Op.getOperand(3))->getValue();
   const Value *SrcSV = cast<SrcValueSDNode>(Op.getOperand(4))->getValue();
-  SDLoc DL(Op);
 
-  return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr, DAG.getIntPtrConstant(24, DL),
-                       Align(8), /*isVolatile*/ false, false, false,
-                       MachinePointerInfo(DstSV), MachinePointerInfo(SrcSV));
+  if (Subtarget->isX86_64()) {
+    // X86-64 va_list is a struct { i32, i32, i8*, i8* }, except on Windows,
+    // where a va_list is still an i8*.
+    if (Subtarget->isCallingConvWin64(
+            DAG.getMachineFunction().getFunction().getCallingConv()))
+      // Probably a Win64 va_copy.
+      return DAG.expandVACopy(Op.getNode());
+
+    return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr,
+                         DAG.getIntPtrConstant(24, DL), Align(8),
+                         /*isVolatile*/ false, false, false,
+                         MachinePointerInfo(DstSV), MachinePointerInfo(SrcSV));
+  }
+  if (Subtarget->isAArch64()) {
+    // AAPCS has three pointers and two ints (= 32 bytes), Darwin has single
+    // pointer.
+    unsigned PtrSize = Subtarget->isTargetILP32() ? 4 : 8;
+    unsigned VaListSize =
+        (Subtarget->isTargetDarwin() || Subtarget->isTargetWindows()) ? PtrSize
+                                                                      : 32;
+    return DAG.getMemcpy(Chain, DL, DstPtr, SrcPtr,
+                         DAG.getConstant(VaListSize, DL, MVT::i32),
+                         Align(PtrSize),
+                         /*isVolatile*/ false, false, false,
+                         MachinePointerInfo(DstSV), MachinePointerInfo(SrcSV));
+  }
+  if (Subtarget->isPPC64le()) {
+    return DAG.expandVACopy(Op.getNode());
+  }
+  llvm_unreachable("invalid architecture");
 }
 
 SDValue LLIRTargetLowering::LowerCopyToReg(SDValue Op,

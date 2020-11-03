@@ -62,6 +62,60 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
     return TargetTriple.getArch() == llvm::Triple::llir_aarch64;
   }
 
+  bool isPPC64le() const {
+    return TargetTriple.getArch() == llvm::Triple::llir_ppc64le;
+  }
+
+  bool isTargetDarwin() const { return TargetTriple.isOSDarwin(); }
+
+  bool isTargetWindows() const { return TargetTriple.isOSWindows(); }
+
+  bool isTargetWin64() const {
+    return TargetTriple.isArch64Bit() && isTargetWindows();
+  }
+
+  bool isTargetILP32() const { return TargetTriple.isArch32Bit(); }
+
+  bool isCallingConvWin64(CallingConv::ID CC) const {
+    if (isX86_64()) {
+      switch (CC) {
+      // On Win64, all these conventions just use the default convention.
+      case CallingConv::C:
+      case CallingConv::Fast:
+      case CallingConv::Tail:
+      case CallingConv::Swift:
+      case CallingConv::X86_FastCall:
+      case CallingConv::X86_StdCall:
+      case CallingConv::X86_ThisCall:
+      case CallingConv::X86_VectorCall:
+      case CallingConv::Intel_OCL_BI:
+        return isTargetWin64();
+      // This convention allows using the Win64 convention on other targets.
+      case CallingConv::Win64:
+        return true;
+      // This convention allows using the SysV convention on Windows targets.
+      case CallingConv::X86_64_SysV:
+        return false;
+      // Otherwise, who knows what this is.
+      default:
+        return false;
+      }
+    } else if (isAArch64()) {
+      switch (CC) {
+      case CallingConv::C:
+      case CallingConv::Fast:
+      case CallingConv::Swift:
+        return isTargetWindows();
+      case CallingConv::Win64:
+        return true;
+      default:
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
  private:
   void ParseSubtargetFeatures(StringRef CPU, StringRef TrueCPU, StringRef FS);
 
