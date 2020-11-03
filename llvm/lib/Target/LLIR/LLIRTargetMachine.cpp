@@ -37,6 +37,7 @@ public:
   }
 
   void addIRPasses() override {
+    addPass(createAtomicExpandPass());
     TargetPassConfig::addIRPasses();
   }
 

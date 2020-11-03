@@ -35,6 +35,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/IntrinsicsX86.h"
+#include "llvm/IR/IntrinsicsLLIR.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
@@ -194,6 +195,9 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::Other, Custom);
   setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::Other, Custom);
   setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
+
+  // Custom lowering for some buildings.
+  setOperationAction(ISD::READCYCLECOUNTER, MVT::i64, Custom);
 }
 
 SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
@@ -239,6 +243,8 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return LowerINTRINSIC_W_CHAIN(Op, DAG);
     case ISD::INTRINSIC_VOID:
       return LowerINTRINSIC_VOID(Op, DAG);
+    case ISD::READCYCLECOUNTER:
+      return LowerREADCYCLECOUNTER(Op, DAG);
     default: {
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
@@ -432,6 +438,12 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
       return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
                          DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
     }
+    case Intrinsic::llir_ldaxr:
+    case Intrinsic::llir_stlxr:
+    case Intrinsic::llir_ldxr:
+    case Intrinsic::llir_stxr: {
+      return SDValue();
+    }
   }
   llvm_unreachable("invalid intrinsic");
 }
@@ -439,6 +451,12 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
 SDValue LLIRTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
                                                 SelectionDAG &DAG) const {
   llvm_unreachable("invalid intrinsic");
+}
+
+SDValue LLIRTargetLowering::LowerREADCYCLECOUNTER(SDValue Op,
+                                                  SelectionDAG &DAG) const {
+  return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
+                   DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
 }
 
 MachineBasicBlock *LLIRTargetLowering::EmitInstrWithCustomInserter(
@@ -484,6 +502,10 @@ const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const {
       return "LLIRISD::ALLOCA";
     case LLIRISD::RDTSC:
       return "LLIRISD::RDTSC";
+    case LLIRISD::LL:
+      return "LLIRISD::LL";
+    case LLIRISD::SC:
+      return "LLIRISD::SC";
   }
   llvm_unreachable("invalid opcode");
 }
@@ -670,6 +692,12 @@ SDValue LLIRTargetLowering::LowerReturn(
 
 LLIRTargetLowering::AtomicExpansionKind
 LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
+  if (Subtarget->isX86_64()) {
+    return AtomicExpansionKind::None;
+  }
+  if (Subtarget->isAArch64()) {
+    return AtomicExpansionKind::LLSC;
+  }
   llvm_unreachable("not implemented");
 }
 
@@ -704,4 +732,49 @@ bool LLIRTargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
     default:
       return false;
   }
+}
+
+Value *LLIRTargetLowering::emitLoadLinked(IRBuilder<> &Builder, Value *Addr,
+                                             AtomicOrdering Ord) const {
+  if (Subtarget->isAArch64()) {
+    return emitLoadLinkedAArch64(Builder, Addr, Ord);
+  }
+  llvm_unreachable("not implemented");
+}
+
+
+Value *LLIRTargetLowering::emitStoreConditional(IRBuilder<> &Builder, Value *Val,
+                                              Value *Addr,
+                                              AtomicOrdering Ord) const {
+  if (Subtarget->isAArch64()) {
+    return emitStoreConditionalAArch64(Builder, Val, Addr, Ord);
+  }
+  llvm_unreachable("not implemented");
+}
+
+Value *LLIRTargetLowering::emitLoadLinkedAArch64(IRBuilder<> &Builder,
+                                               Value *Addr,
+                                               AtomicOrdering Ord) const {
+  Module *M = Builder.GetInsertBlock()->getParent()->getParent();
+  bool IsAcquire = isAcquireOrStronger(Ord);
+
+  Type *ValTy = cast<PointerType>(Addr->getType())->getElementType();
+  Type *Tys[] = {ValTy, Addr->getType()};
+  Intrinsic::ID Int = IsAcquire ? Intrinsic::llir_ldaxr : Intrinsic::llir_ldxr;
+  Function *Ldxr = Intrinsic::getDeclaration(M, Int, Tys);
+
+  return Builder.CreateCall(Ldxr, Addr);
+}
+
+Value *LLIRTargetLowering::emitStoreConditionalAArch64(
+    IRBuilder<> &Builder, Value *Val, Value *Addr, AtomicOrdering Ord) const {
+  Module *M = Builder.GetInsertBlock()->getParent()->getParent();
+  bool IsRelease = isReleaseOrStronger(Ord);
+  Intrinsic::ID Int = IsRelease ? Intrinsic::llir_stlxr : Intrinsic::llir_stxr;
+
+  Type *ValTy = cast<PointerType>(Addr->getType())->getElementType();
+  Type *Tys[] = {ValTy, Addr->getType()};
+  Function *Stxr = Intrinsic::getDeclaration(M, Int, Tys);
+
+  return Builder.CreateCall(Stxr, {Val, Addr});
 }

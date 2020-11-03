@@ -273,7 +273,7 @@ let hasSideEffects = 1 in
       < (outs I64:$res)
       , (ins)
       , [(set I64:$res, LLIRrdtsc)]
-      , "x86_rdtsc.i64\t$res"
+      , "rdtsc.i64\t$res"
       , 0x15
     >;
 
