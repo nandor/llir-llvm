@@ -54,6 +54,14 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
 
   bool enableMachineScheduler() const override;
 
+  bool isX86_64() const {
+    return TargetTriple.getArch() == llvm::Triple::llir_x86_64;
+  }
+
+  bool isAArch64() const {
+    return TargetTriple.getArch() == llvm::Triple::llir_aarch64;
+  }
+
  private:
   void ParseSubtargetFeatures(StringRef CPU, StringRef TrueCPU, StringRef FS);
 
