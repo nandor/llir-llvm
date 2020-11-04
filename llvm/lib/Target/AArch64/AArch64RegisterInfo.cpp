@@ -217,15 +217,15 @@ AArch64RegisterInfo::getDarwinCallPreservedMask(const MachineFunction &MF,
 const uint32_t *
 AArch64RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                           CallingConv::ID CC) const {
-  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML)
+  if (CC == CallingConv::LLIR_CAML)
     return CSR_LLIR_Caml_RegMask;
-  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_EXT)
+  if (CC == CallingConv::LLIR_CAML_EXT)
     return CSR_LLIR_Caml_Ext_RegMask;
-  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_ALLOC)
+  if (CC == CallingConv::LLIR_CAML_ALLOC)
     return CSR_LLIR_Caml_Alloc_RegMask;
-  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML_GC)
+  if (CC == CallingConv::LLIR_CAML_GC)
     return CSR_LLIR_Caml_Gc_RegMask;
-  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_SETJMP)
+  if (CC == CallingConv::LLIR_SETJMP)
     return CSR_LLIR_Setjmp_RegMask;
   bool SCS = MF.getFunction().hasFnAttribute(Attribute::ShadowCallStack);
   if (CC == CallingConv::GHC)
