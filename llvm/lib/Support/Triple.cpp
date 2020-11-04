@@ -1671,6 +1671,9 @@ bool Triple::isLittleEndian() const {
   case Triple::x86:
   case Triple::x86_64:
   case Triple::xcore:
+  case Triple::llir_x86_64:
+  case Triple::llir_aarch64:
+  case Triple::llir_ppc64le:
     return true;
   default:
     return false;

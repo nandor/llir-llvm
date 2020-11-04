@@ -233,7 +233,12 @@ void LLIRInstPrinter::printOperand(const MCInst *MI, int opNum,
   }
 
   if (MO.isImm()) {
-    OS << MO.getImm();
+    int64_t imm = MO.getImm();
+    if (imm < 256) {
+      OS << imm;
+    } else {
+      OS << format("0x%016" PRIx64, MO.getImm());
+    }
     return;
   }
 
