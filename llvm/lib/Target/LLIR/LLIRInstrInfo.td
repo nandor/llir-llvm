@@ -90,6 +90,7 @@ def i8imm_op   : LLIROperand<i8,   "OPERAND_I8IMM">;
 def i16imm_op  : LLIROperand<i16,  "OPERAND_I16IMM">;
 def i32imm_op  : LLIROperand<i32,  "OPERAND_I32IMM">;
 def i64imm_op  : LLIROperand<i64,  "OPERAND_I64IMM">;
+def i128imm_op : LLIROperand<i128, "OPERAND_I128IMM">;
 def i32off_op  : LLIROperand<i32,  "OPERAND_I32OFF">;
 def i64addr_op : LLIROperand<i64,  "OPERAND_I64FUNC">;
 def f32imm_op  : LLIROperand<f32,  "OPERAND_F32IMM">;
@@ -139,6 +140,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , []
     , "mov.i64\t$dst, $src"
     , 0x0A
+    >;
+
+  def MOV_I128 : I
+    < (outs I128:$dst)
+    , (ins I128:$src)
+    , []
+    , "mov.i128\t$dst, $src"
+    , 0x09
     >;
 
   def MOV_F32 : I
@@ -261,6 +270,11 @@ def : Pat
 
 def : Pat
   < (LLIRsymbol texternalsym:$addr)
+  , (ADDR_I64 i64addr_op:$addr)
+  >;
+
+def : Pat
+  < (LLIRsymbol tconstpool:$addr)
   , (ADDR_I64 i64addr_op:$addr)
   >;
 

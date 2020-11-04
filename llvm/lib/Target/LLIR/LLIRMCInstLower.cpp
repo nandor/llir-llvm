@@ -122,6 +122,11 @@ void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const {
         MCOp = LowerSymbolOperand(GetSymbolFromOperand(MO), 0, true, true);
         break;
       }
+      case MachineOperand::MO_ConstantPoolIndex: {
+        // TODO(nand): remove hardcoded symbols.
+        MCOp = LowerSymbolOperand(Printer.GetCPISymbol(MO.getIndex()), 0, true, true);
+        break;
+      }
       default: {
         MI->print(errs());
         llvm_unreachable("unknown operand type");

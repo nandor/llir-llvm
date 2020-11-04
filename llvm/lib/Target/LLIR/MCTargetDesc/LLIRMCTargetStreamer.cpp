@@ -48,6 +48,7 @@ static StringRef LLIRTypeName(MVT VT)
     case MVT::i16:  return "i16";
     case MVT::i32:  return "i32";
     case MVT::i64:  return "i64";
+    case MVT::i128: return "i128";
     case MVT::f32:  return "f32";
     case MVT::f64:  return "f64";
     case MVT::f80:  return "f80";

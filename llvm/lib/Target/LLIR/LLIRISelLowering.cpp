@@ -64,7 +64,11 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   if (Subtarget->isX86_64()) {
     addRegisterClass(MVT::f80, &LLIR::F80RegClass);
   }
-  if (Subtarget->isAArch64() || Subtarget->isPPC64le()) {
+  if (Subtarget->isAArch64()) {
+    addRegisterClass(MVT::i128, &LLIR::I128RegClass);
+    addRegisterClass(MVT::f128, &LLIR::F128RegClass);
+  }
+  if (Subtarget->isPPC64le()) {
     addRegisterClass(MVT::f128, &LLIR::F128RegClass);
   }
   computeRegisterProperties(Subtarget->getRegisterInfo());
@@ -107,9 +111,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       llvm_unreachable("invalid subtarget");
     }
 
-    // Always lower constants to mov.f
-    setOperationAction(ISD::ConstantFP, T, Legal);
-
     // Expand conditionals.
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
@@ -147,7 +148,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   }
 
   // Disable some integer operations.
-  for (auto T : {MVT::i8, MVT::i16, MVT::i32, MVT::i64}) {
+  for (auto T : {MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::i128}) {
     // Custom lowering for some actions.
     setOperationAction(ISD::SADDO, T, Custom);
     setOperationAction(ISD::UADDO, T, Custom);
@@ -213,6 +214,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setLoadExtAction(ISD::EXTLOAD, MVT::f128, MVT::f32, Expand);
   setLoadExtAction(ISD::EXTLOAD, MVT::f80,  MVT::f64, Expand);
   setLoadExtAction(ISD::EXTLOAD, MVT::f128, MVT::f64, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f128, MVT::f80, Expand);
   setTruncStoreAction(MVT::f64,  MVT::f32, Expand);
   setTruncStoreAction(MVT::f80,  MVT::f32, Expand);
   setTruncStoreAction(MVT::f80,  MVT::f64, Expand);
@@ -226,6 +228,22 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setLoadExtAction(Ext, T, MVT::i1, Promote);
     }
   }
+
+  // Only allow constants smaller than 64 bits.
+  setOperationAction(ISD::ConstantFP, MVT::f32, Legal);
+  setOperationAction(ISD::ConstantFP, MVT::f64, Legal);
+  setOperationAction(ISD::ConstantFP, MVT::f80, Expand);
+  setOperationAction(ISD::ConstantFP, MVT::f128, Expand);
+  setOperationAction(ISD::ConstantPool, MVT::f80, Custom);
+  setOperationAction(ISD::ConstantPool, MVT::f128, Custom);
+  setOperationAction(ISD::Constant, MVT::i8, Legal);
+  setOperationAction(ISD::Constant, MVT::i16, Legal);
+  setOperationAction(ISD::Constant, MVT::i32, Legal);
+  setOperationAction(ISD::Constant, MVT::i64, Legal);
+  setOperationAction(ISD::Constant, MVT::i128, Expand);
+
+  // Lower constant pools.
+  setOperationAction(ISD::ConstantPool, MVT::i64, Custom);
 
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
@@ -254,6 +272,8 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return LowerJumpTable(Op, DAG);
     case ISD::BR_JT:
       return LowerBR_JT(Op, DAG);
+    case ISD::ConstantPool:
+      return LowerConstantPool(Op, DAG);
     case ISD::DYNAMIC_STACKALLOC:
       return LowerDynamicStackalloc(Op, DAG);
     case ISD::VASTART:
@@ -351,6 +371,21 @@ SDValue LLIRTargetLowering::LowerGlobalAddress(SDValue Op,
   return DAG.getNode(
       LLIRISD::SYMBOL, DL, VT,
       DAG.getTargetGlobalAddress(GA->getGlobal(), DL, VT, GA->getOffset()));
+}
+
+SDValue LLIRTargetLowering::LowerConstantPool(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+
+  const auto *CP = cast<ConstantPoolSDNode>(Op);
+  if (CP->getTargetFlags() != 0) {
+    Fail(DL, DAG, "Unexpected target flags");
+  }
+
+  EVT VT = Op.getValueType();
+  return DAG.getNode(LLIRISD::SYMBOL, DL, VT,
+                     DAG.getTargetConstantPool(CP->getConstVal(), VT,
+                                               CP->getAlign(), CP->getOffset()));
 }
 
 SDValue LLIRTargetLowering::LowerExternalSymbol(SDValue Op,

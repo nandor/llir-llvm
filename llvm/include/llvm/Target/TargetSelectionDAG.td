@@ -956,6 +956,10 @@ def extloadi32 : PatFrag<(ops node:$ptr), (extload node:$ptr)> {
   let IsLoad = 1;
   let MemoryVT = i32;
 }
+def extloadi64 : PatFrag<(ops node:$ptr), (extload node:$ptr)> {
+  let IsLoad = 1;
+  let MemoryVT = i64;
+}
 def extloadf16 : PatFrag<(ops node:$ptr), (extload node:$ptr)> {
   let IsLoad = 1;
   let MemoryVT = f16;
@@ -985,6 +989,10 @@ def sextloadi32 : PatFrag<(ops node:$ptr), (sextload node:$ptr)> {
   let IsLoad = 1;
   let MemoryVT = i32;
 }
+def sextloadi64 : PatFrag<(ops node:$ptr), (sextload node:$ptr)> {
+  let IsLoad = 1;
+  let MemoryVT = i64;
+}
 
 def zextloadi1  : PatFrag<(ops node:$ptr), (zextload node:$ptr)> {
   let IsLoad = 1;
@@ -1001,6 +1009,10 @@ def zextloadi16 : PatFrag<(ops node:$ptr), (zextload node:$ptr)> {
 def zextloadi32 : PatFrag<(ops node:$ptr), (zextload node:$ptr)> {
   let IsLoad = 1;
   let MemoryVT = i32;
+}
+def zextloadi64 : PatFrag<(ops node:$ptr), (zextload node:$ptr)> {
+  let IsLoad = 1;
+  let MemoryVT = i64;
 }
 
 def extloadvi1  : PatFrag<(ops node:$ptr), (extload node:$ptr)> {
@@ -1094,6 +1106,11 @@ def truncstorei32 : PatFrag<(ops node:$val, node:$ptr),
                             (truncstore node:$val, node:$ptr)> {
   let IsStore = 1;
   let MemoryVT = i32;
+}
+def truncstorei64 : PatFrag<(ops node:$val, node:$ptr),
+                            (truncstore node:$val, node:$ptr)> {
+  let IsStore = 1;
+  let MemoryVT = i64;
 }
 def truncstoref16 : PatFrag<(ops node:$val, node:$ptr),
                             (truncstore node:$val, node:$ptr)> {

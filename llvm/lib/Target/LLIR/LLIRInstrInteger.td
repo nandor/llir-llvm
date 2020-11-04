@@ -49,6 +49,14 @@ multiclass UnaryInt
     , !strconcat(name, ".i64\t$dst, $arg")
     , b
     >;
+
+  def _I128 : I
+    < (outs I128:$dst)
+    , (ins I128:$arg)
+    , [(set I128:$dst, (node I128:$arg))]
+    , !strconcat(name, ".i64\t$dst, $arg")
+    , b
+    >;
 }
 
 multiclass BinaryInt
@@ -88,6 +96,14 @@ multiclass BinaryInt
     , !strconcat(name, ".i64\t$dst, $lhs, $rhs")
     , b
     >;
+
+  def _I128 : I
+    < (outs I128:$dst)
+    , (ins I128:$lhs, I128:$rhs)
+    , [(set I128:$dst, (node I128:$lhs, I128:$rhs))]
+    , !strconcat(name, ".i128\t$dst, $lhs, $rhs")
+    , b
+    >;
 }
 
 multiclass ShiftInt
@@ -125,6 +141,14 @@ multiclass ShiftInt
     , (ins I64:$lhs, I8:$rhs)
     , [(set I64:$dst, (node I64:$lhs, I8:$rhs))]
     , !strconcat(name, ".i64\t$dst, $lhs, $rhs")
+    , b
+    >;
+
+  def _I128 : I
+    < (outs I128:$dst)
+    , (ins I128:$lhs, I8:$rhs)
+    , [(set I128:$dst, (node I128:$lhs, I8:$rhs))]
+    , !strconcat(name, ".i128\t$dst, $lhs, $rhs")
     , b
     >;
 }
@@ -173,6 +197,14 @@ multiclass CmpInt
     < (outs I8:$dst)
     , (ins I64:$lhs, I64:$rhs)
     , [(set I8:$dst, (setcc I64:$lhs, I64:$rhs, cond))]
+    , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
+    , b
+    >;
+
+  def _I128 : I
+    < (outs I8:$dst)
+    , (ins I128:$lhs, I128:$rhs)
+    , [(set I8:$dst, (setcc I128:$lhs, I128:$rhs, cond))]
     , !strconcat("cmp.", !strconcat(name, ".i8\t$dst, $lhs, $rhs"))
     , b
     >;
@@ -238,6 +270,17 @@ multiclass TernaryInt
       )
     , b
     >;
+
+  def _I128 : I
+    < (outs I128:$dst)
+    , (ins I8:$op, I128:$lhs, I128:$rhs)
+    , [(set I128:$dst, (node I8:$op, I128:$lhs, I128:$rhs))]
+    , !strconcat(
+          !strconcat(name, "."),
+          !strconcat(type, "128\t$dst, $op, $lhs, $rhs")
+      )
+    , b
+    >;
 }
 
 multiclass OverflowInt
@@ -274,6 +317,14 @@ multiclass OverflowInt
     < (outs I8:$dst)
     , (ins I64:$lhs, I64:$rhs)
     , [(set I8:$dst, (node I64:$lhs, I64:$rhs))]
+    , !strconcat(name, ".i8\t$dst, $lhs, $rhs")
+    , b
+    >;
+
+  def _I128 : I
+    < (outs I8:$dst)
+    , (ins I128:$lhs, I128:$rhs)
+    , [(set I8:$dst, (node I128:$lhs, I128:$rhs))]
     , !strconcat(name, ".i8\t$dst, $lhs, $rhs")
     , b
     >;
@@ -333,6 +384,10 @@ def : Pat
   < (select (i8 (setne I8:$cond, 0)), I64:$lhs, I64:$rhs)
   , (SELECT_I64 I8:$cond, I64:$lhs, I64:$rhs)
   >;
+def : Pat
+  < (select (i8 (setne I8:$cond, 0)), I128:$lhs, I128:$rhs)
+  , (SELECT_I128 I8:$cond, I128:$lhs, I128:$rhs)
+  >;
 
 def : Pat
   < (select (i8 (seteq I8:$cond, 0)), I8:$lhs, I8:$rhs)
@@ -349,6 +404,10 @@ def : Pat
 def : Pat
   < (select (i8 (seteq I8:$cond, 0)), I64:$lhs, I64:$rhs)
   , (SELECT_I64 I8:$cond, I64:$rhs, I64:$lhs)
+  >;
+def : Pat
+  < (select (i8 (seteq I8:$cond, 0)), I128:$lhs, I128:$rhs)
+  , (SELECT_I128 I8:$cond, I128:$rhs, I128:$lhs)
   >;
 
 defm SADDO : OverflowInt<LLIRsaddo, "saddo", 0x70>;

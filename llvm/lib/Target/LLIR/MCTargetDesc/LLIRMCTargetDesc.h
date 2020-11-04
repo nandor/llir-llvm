@@ -52,6 +52,8 @@ enum OperandType {
   OPERAND_I32IMM,
   // 64-bit integer immediate.
   OPERAND_I64IMM,
+  // 128-bit integer immediate.
+  OPERAND_I128IMM,
   // 32-bit float immediate.
   OPERAND_F32IMM,
   // 64-bit float immediate.

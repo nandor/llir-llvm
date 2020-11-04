@@ -126,6 +126,12 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
     case LLIR::CALL_I64_VA:
       printCall("call.i64", OS, MI, STI, 0, 1, 0);
       break;
+    case LLIR::CALL_I128:
+      printCall("call.i128", OS, MI, STI, 0, 0, 0);
+      break;
+    case LLIR::CALL_I128_VA:
+      printCall("call.i128", OS, MI, STI, 0, 1, 0);
+      break;
     case LLIR::CALL_F64:
       printCall("call.f64", OS, MI, STI, 0, 0, 0);
       break;
@@ -135,11 +141,11 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
     case LLIR::CALL_F80:
       printCall("call.f80", OS, MI, STI, 0, 0, 0);
       break;
-    case LLIR::CALL_F128:
-      printCall("call.f128", OS, MI, STI, 0, 0, 0);
-      break;
     case LLIR::CALL_F80_VA:
       printCall("call.f80", OS, MI, STI, 0, 1, 0);
+      break;
+    case LLIR::CALL_F128:
+      printCall("call.f128", OS, MI, STI, 0, 0, 0);
       break;
     case LLIR::CALL_F128_VA:
       printCall("call.f128", OS, MI, STI, 0, 1, 0);
@@ -181,6 +187,12 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
     case LLIR::TCALL_I64_VA:
       printCall("tcall.i64", OS, MI, STI, 0, 1, 1);
       break;
+    case LLIR::TCALL_I128:
+      printCall("tcall.i128", OS, MI, STI, 0, 0, 1);
+      break;
+    case LLIR::TCALL_I128_VA:
+      printCall("tcall.i128", OS, MI, STI, 0, 1, 1);
+      break;
     case LLIR::TCALL_F64:
       printCall("tcall.f64", OS, MI, STI, 0, 0, 1);
       break;
@@ -190,11 +202,11 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
     case LLIR::TCALL_F80:
       printCall("tcall.f80", OS, MI, STI, 0, 0, 1);
       break;
-    case LLIR::TCALL_F128:
-      printCall("tcall.f128", OS, MI, STI, 0, 0, 1);
-      break;
     case LLIR::TCALL_F80_VA:
       printCall("tcall.f80", OS, MI, STI, 0, 1, 1);
+      break;
+    case LLIR::TCALL_F128:
+      printCall("tcall.f128", OS, MI, STI, 0, 0, 1);
       break;
     case LLIR::TCALL_F128_VA:
       printCall("tcall.f128", OS, MI, STI, 0, 1, 1);
