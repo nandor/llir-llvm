@@ -61,7 +61,12 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::i64, &LLIR::I64RegClass);
   addRegisterClass(MVT::f32, &LLIR::F32RegClass);
   addRegisterClass(MVT::f64, &LLIR::F64RegClass);
-  addRegisterClass(MVT::f80, &LLIR::F80RegClass);
+  if (Subtarget->isX86_64()) {
+    addRegisterClass(MVT::f80, &LLIR::F80RegClass);
+  }
+  if (Subtarget->isAArch64() || Subtarget->isPPC64le()) {
+    addRegisterClass(MVT::f128, &LLIR::F128RegClass);
+  }
   computeRegisterProperties(Subtarget->getRegisterInfo());
 
   // Custom lowerings for most operations.
@@ -89,40 +94,56 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::VAEND, MVT::Other, Expand);
 
   // Deal with floating point operations.
-  for (auto T : {MVT::f32, MVT::f64, MVT::f80}) {
-    setOperationAction(ISD::ConstantFP, T, Legal);
-    setOperationAction(ISD::FEXP, T, Legal);
-    setOperationAction(ISD::FEXP2, T, Legal);
-    setOperationAction(ISD::FLOG, T, Legal);
-    setOperationAction(ISD::FLOG2, T, Legal);
-    setOperationAction(ISD::FLOG10, T, Legal);
-
-    // Expand floating-point comparisons.
-    for (auto CC : {ISD::SETO, ISD::SETUO}) {
-      setCondCodeAction(CC, T, Expand);
+  for (auto T : {MVT::f32, MVT::f64, MVT::f80, MVT::f128}) {
+    // Decide what to do with funky float operations based on target.
+    LegalizeAction Op = Legal;
+    if (Subtarget->isX86_64()) {
+      Op = Legal;
+    } else if (Subtarget->isAArch64()) {
+      Op = T != MVT::f128 ? Legal : Custom;
+    } else if (Subtarget->isPPC64le()) {
+      Op = Legal;
+    } else {
+      llvm_unreachable("invalid subtarget");
     }
 
-    // Allow ftrunc.
-    setOperationAction(ISD::FTRUNC, T, Legal);
-
-    // Expand operations which are not yet supported.
-    setOperationAction(ISD::FMA, T, Expand);
-    setOperationAction(ISD::STRICT_FMA, T, Expand);
-
-    // SETCC/SETCCS are legal.
-    setOperationAction(ISD::STRICT_FSETCC, T, Legal);
-    setOperationAction(ISD::STRICT_FSETCCS, T, Legal);
+    // Always lower constants to mov.f
+    setOperationAction(ISD::ConstantFP, T, Legal);
 
     // Expand conditionals.
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
 
-    // Allow strict instructions.
-    setOperationAction(ISD::STRICT_FADD, T, Legal);
-    setOperationAction(ISD::STRICT_FSUB, T, Legal);
-    setOperationAction(ISD::STRICT_FMUL, T, Legal);
-    setOperationAction(ISD::STRICT_FDIV, T, Legal);
-    setOperationAction(ISD::STRICT_FREM, T, Legal);
+    // Expand operations which are not yet supported.
+    setOperationAction(ISD::FMA, T, Expand);
+    setOperationAction(ISD::STRICT_FMA, T, Expand);
+
+    // Custom lowerings.
+    setOperationAction(ISD::FP_ROUND, T, Custom);
+    setOperationAction(ISD::STRICT_FP_ROUND, T, Custom);
+
+    // Decide whether to allow f128 operations.
+    setOperationAction(ISD::FEXP, T, Op);
+    setOperationAction(ISD::FEXP2, T, Op);
+    setOperationAction(ISD::FLOG, T, Op);
+    setOperationAction(ISD::FLOG2, T, Op);
+    setOperationAction(ISD::FLOG10, T, Op);
+    setOperationAction(ISD::FP_EXTEND, T, Op);
+    setOperationAction(ISD::FTRUNC, T, Op);
+    setOperationAction(ISD::STRICT_FTRUNC, T, Op);
+    setOperationAction(ISD::FADD, T, Op);
+    setOperationAction(ISD::STRICT_FADD, T, Op);
+    setOperationAction(ISD::FSUB, T, Op);
+    setOperationAction(ISD::STRICT_FSUB, T, Op);
+    setOperationAction(ISD::FMUL, T, Op);
+    setOperationAction(ISD::STRICT_FMUL, T, Op);
+    setOperationAction(ISD::FDIV, T, Op);
+    setOperationAction(ISD::STRICT_FDIV, T, Op);
+    setOperationAction(ISD::FREM, T, Op);
+    setOperationAction(ISD::STRICT_FREM, T, Op);
+    setOperationAction(ISD::SETCC, T, Op);
+    setOperationAction(ISD::STRICT_FSETCC, T, Op);
+    setOperationAction(ISD::STRICT_FSETCCS, T, Op);
   }
 
   // Disable some integer operations.
@@ -155,17 +176,30 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
 
-    // Allow casts.
-    setOperationAction(ISD::SINT_TO_FP, T, Legal);
-    setOperationAction(ISD::UINT_TO_FP, T, Legal);
-    setOperationAction(ISD::FP_TO_UINT, T, Legal);
-    setOperationAction(ISD::FP_TO_SINT, T, Legal);
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_64()) {
+        Op = Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = Custom;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Legal;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
 
-    // Allow strict instructions.
-    setOperationAction(ISD::STRICT_SINT_TO_FP, T, Legal);
-    setOperationAction(ISD::STRICT_UINT_TO_FP, T, Legal);
-    setOperationAction(ISD::STRICT_FP_TO_SINT, T, Legal);
-    setOperationAction(ISD::STRICT_FP_TO_UINT, T, Legal);
+      // Allow casts.
+      setOperationAction(ISD::SINT_TO_FP, T, Custom);
+      setOperationAction(ISD::UINT_TO_FP, T, Custom);
+      setOperationAction(ISD::FP_TO_UINT, T, Custom);
+      setOperationAction(ISD::FP_TO_SINT, T, Custom);
+
+      // Allow strict instructions.
+      setOperationAction(ISD::STRICT_SINT_TO_FP, T, Custom);
+      setOperationAction(ISD::STRICT_UINT_TO_FP, T, Custom);
+      setOperationAction(ISD::STRICT_FP_TO_SINT, T, Custom);
+      setOperationAction(ISD::STRICT_FP_TO_UINT, T, Custom);
+    }
   }
 
   // Disable in-register sign extension.
@@ -174,12 +208,17 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   }
 
   // Expand extending loads and stores.
-  setLoadExtAction(ISD::EXTLOAD, MVT::f64, MVT::f32, Expand);
-  setLoadExtAction(ISD::EXTLOAD, MVT::f80, MVT::f32, Expand);
-  setLoadExtAction(ISD::EXTLOAD, MVT::f80, MVT::f64, Expand);
-  setTruncStoreAction(MVT::f64, MVT::f32, Expand);
-  setTruncStoreAction(MVT::f80, MVT::f32, Expand);
-  setTruncStoreAction(MVT::f80, MVT::f64, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f64,  MVT::f32, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f80,  MVT::f32, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f128, MVT::f32, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f80,  MVT::f64, Expand);
+  setLoadExtAction(ISD::EXTLOAD, MVT::f128, MVT::f64, Expand);
+  setTruncStoreAction(MVT::f64,  MVT::f32, Expand);
+  setTruncStoreAction(MVT::f80,  MVT::f32, Expand);
+  setTruncStoreAction(MVT::f80,  MVT::f64, Expand);
+  setTruncStoreAction(MVT::f128, MVT::f32, Expand);
+  setTruncStoreAction(MVT::f128, MVT::f64, Expand);
+  setTruncStoreAction(MVT::f128, MVT::f80, Expand);
 
   // Disable extending from bits.
   for (auto T : MVT::integer_valuetypes()) {
@@ -245,7 +284,39 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return LowerINTRINSIC_VOID(Op, DAG);
     case ISD::READCYCLECOUNTER:
       return LowerREADCYCLECOUNTER(Op, DAG);
+    case ISD::FP_EXTEND:
+      return LowerFP_EXTEND(Op, DAG);
+    case ISD::FP_ROUND:
+    case ISD::STRICT_FP_ROUND:
+      return LowerFP_ROUND(Op, DAG);
+    case ISD::FADD:
+    case ISD::STRICT_FADD:
+      return LowerF128Call(Op, DAG, RTLIB::ADD_F128);
+    case ISD::FSUB:
+    case ISD::STRICT_FSUB:
+      return LowerF128Call(Op, DAG, RTLIB::SUB_F128);
+    case ISD::FMUL:
+    case ISD::STRICT_FMUL:
+      return LowerF128Call(Op, DAG, RTLIB::MUL_F128);
+    case ISD::FDIV:
+    case ISD::STRICT_FDIV:
+      return LowerF128Call(Op, DAG, RTLIB::DIV_F128);
+    case ISD::SETCC:
+    case ISD::STRICT_FSETCC:
+    case ISD::STRICT_FSETCCS:
+      return LowerSETCC(Op, DAG);
+    case ISD::SINT_TO_FP:
+    case ISD::UINT_TO_FP:
+    case ISD::STRICT_SINT_TO_FP:
+    case ISD::STRICT_UINT_TO_FP:
+      return LowerINT_TO_FP(Op, DAG);
+    case ISD::FP_TO_SINT:
+    case ISD::FP_TO_UINT:
+    case ISD::STRICT_FP_TO_SINT:
+    case ISD::STRICT_FP_TO_UINT:
+      return LowerFP_TO_INT(Op, DAG);
     default: {
+      Op.dump();
       llvm_unreachable("unimplemented operation lowering");
       return SDValue();
     }
@@ -804,4 +875,127 @@ Value *LLIRTargetLowering::emitStoreConditionalAArch64(
   Function *Stxr = Intrinsic::getDeclaration(M, Int, Tys);
 
   return Builder.CreateCall(Stxr, {Val, Addr});
+}
+
+SDValue LLIRTargetLowering::LowerF128Call(SDValue Op, SelectionDAG &DAG,
+                                          RTLIB::Libcall Call) const {
+  bool IsStrict = Op->isStrictFPOpcode();
+  unsigned Offset = IsStrict ? 1 : 0;
+  SDValue Chain = IsStrict ? Op.getOperand(0) : SDValue();
+  SmallVector<SDValue, 2> Ops(Op->op_begin() + Offset, Op->op_end());
+  MakeLibCallOptions CallOptions;
+  SDValue Result;
+  SDLoc dl(Op);
+  std::tie(Result, Chain) =
+      makeLibCall(DAG, Call, Op.getValueType(), Ops, CallOptions, dl, Chain);
+  return IsStrict ? DAG.getMergeValues({Result, Chain}, dl) : Result;
+}
+
+SDValue LLIRTargetLowering::LowerSETCC(SDValue Op, SelectionDAG &DAG) const {
+  bool IsStrict = Op->isStrictFPOpcode();
+  bool IsSignaling = Op.getOpcode() == ISD::STRICT_FSETCCS;
+  unsigned OpNo = IsStrict ? 1 : 0;
+  SDValue Chain;
+  if (IsStrict)
+    Chain = Op.getOperand(0);
+  SDValue LHS = Op.getOperand(OpNo + 0);
+  SDValue RHS = Op.getOperand(OpNo + 1);
+  ISD::CondCode CC = cast<CondCodeSDNode>(Op.getOperand(OpNo + 2))->get();
+  EVT VT = Op.getValueType();
+  SDLoc dl(Op);
+
+  assert(LHS.getValueType() == MVT::f128);
+  softenSetCCOperands(DAG, MVT::f128, LHS, RHS, CC, dl, LHS, RHS, Chain,
+                      IsSignaling);
+
+  // If softenSetCCOperands returned a scalar, use it.
+  if (!RHS.getNode()) {
+    assert(LHS.getValueType() == Op.getValueType() &&
+           "Unexpected setcc expansion!");
+    return IsStrict ? DAG.getMergeValues({LHS, Chain}, dl) : LHS;
+  }
+
+  if (LHS.getValueType().isInteger()) {
+    SDValue Res = DAG.getSetCC(dl, VT, LHS, RHS, CC, SDValue(), IsSignaling);
+    return IsStrict ? DAG.getMergeValues({Res, Chain}, dl) : Res;
+  }
+
+  llvm_unreachable("not implemented");
+}
+
+SDValue LLIRTargetLowering::LowerFP_EXTEND(SDValue Op,
+                                           SelectionDAG &DAG) const {
+  assert(Op.getValueType() == MVT::f128 && "Unexpected lowering");
+  RTLIB::Libcall LC;
+  LC = RTLIB::getFPEXT(Op.getOperand(0).getValueType(), Op.getValueType());
+  return LowerF128Call(Op, DAG, LC);
+}
+
+SDValue LLIRTargetLowering::LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const {
+  bool IsStrict = Op->isStrictFPOpcode();
+  SDValue SrcVal = Op.getOperand(IsStrict ? 1 : 0);
+  EVT SrcVT = SrcVal.getValueType();
+
+  RTLIB::Libcall LC;
+  LC = RTLIB::getFPROUND(SrcVT, Op.getValueType());
+
+  if (SrcVT != MVT::f128) {
+    // It's legal except when f128 is involved
+    return Op;
+  }
+
+  // FP_ROUND node has a second operand indicating whether it is known to be
+  // precise. That doesn't take part in the LibCall so we can't directly use
+  // LowerF128Call.
+  MakeLibCallOptions CallOptions;
+  SDValue Chain = IsStrict ? Op.getOperand(0) : SDValue();
+  SDValue Result;
+  SDLoc dl(Op);
+  std::tie(Result, Chain) = makeLibCall(DAG, LC, Op.getValueType(), SrcVal,
+                                        CallOptions, dl, Chain);
+  return IsStrict ? DAG.getMergeValues({Result, Chain}, dl) : Result;
+}
+
+SDValue LLIRTargetLowering::LowerINT_TO_FP(SDValue Op,
+                                            SelectionDAG &DAG) const {
+  bool IsStrict = Op->isStrictFPOpcode();
+  SDValue SrcVal = Op.getOperand(IsStrict ? 1 : 0);
+
+  // i128 conversions are libcalls.
+  if (SrcVal.getValueType() == MVT::i128)
+    return SDValue();
+
+  // Other conversions are legal, unless it's to the completely software-based
+  // fp128.
+  if (Op.getValueType() != MVT::f128)
+    return Op;
+
+  RTLIB::Libcall LC;
+  if (Op.getOpcode() == ISD::SINT_TO_FP ||
+      Op.getOpcode() == ISD::STRICT_SINT_TO_FP)
+    LC = RTLIB::getSINTTOFP(SrcVal.getValueType(), Op.getValueType());
+  else
+    LC = RTLIB::getUINTTOFP(SrcVal.getValueType(), Op.getValueType());
+
+  return LowerF128Call(Op, DAG, LC);
+}
+
+SDValue LLIRTargetLowering::LowerFP_TO_INT(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  bool IsStrict = Op->isStrictFPOpcode();
+  SDValue SrcVal = Op.getOperand(IsStrict ? 1 : 0);
+
+  if (SrcVal.getValueType() != MVT::f128) {
+    // It's legal except when f128 is involved
+    return Op;
+  }
+
+  RTLIB::Libcall LC;
+  if (Op.getOpcode() == ISD::FP_TO_SINT ||
+      Op.getOpcode() == ISD::STRICT_FP_TO_SINT)
+    LC = RTLIB::getFPTOSINT(SrcVal.getValueType(), Op.getValueType());
+  else
+    LC = RTLIB::getFPTOUINT(SrcVal.getValueType(), Op.getValueType());
+
+  return LowerF128Call(Op, DAG, LC);
 }

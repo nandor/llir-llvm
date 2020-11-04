@@ -106,6 +106,15 @@ public:
   SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
 
+  SDValue LowerF128Call(SDValue Op, SelectionDAG &DAG,
+                        RTLIB::Libcall Call) const;
+
+  SDValue LowerSETCC(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerFP_EXTEND(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerFP_TO_INT(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerINT_TO_FP(SDValue Op, SelectionDAG &DAG) const;
+
   bool CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
                       bool isVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,

@@ -86,15 +86,16 @@ class LLIROperand<ValueType ty, string type> : Operand<ty>
 
 
 def bb_op      : LLIROperand<OtherVT, "OPERAND_BASIC_BLOCK">;
-def i8imm_op   : LLIROperand<i8,  "OPERAND_I8IMM">;
-def i16imm_op  : LLIROperand<i16, "OPERAND_I16IMM">;
-def i32imm_op  : LLIROperand<i32, "OPERAND_I32IMM">;
-def i64imm_op  : LLIROperand<i64, "OPERAND_I64IMM">;
-def i32off_op  : LLIROperand<i32, "OPERAND_I32OFF">;
-def i64addr_op : LLIROperand<i64, "OPERAND_I64FUNC">;
-def f32imm_op  : LLIROperand<f32, "OPERAND_F32IMM">;
-def f64imm_op  : LLIROperand<f64, "OPERAND_F64IMM">;
-def f80imm_op  : LLIROperand<f80, "OPERAND_F80IMM">;
+def i8imm_op   : LLIROperand<i8,   "OPERAND_I8IMM">;
+def i16imm_op  : LLIROperand<i16,  "OPERAND_I16IMM">;
+def i32imm_op  : LLIROperand<i32,  "OPERAND_I32IMM">;
+def i64imm_op  : LLIROperand<i64,  "OPERAND_I64IMM">;
+def i32off_op  : LLIROperand<i32,  "OPERAND_I32OFF">;
+def i64addr_op : LLIROperand<i64,  "OPERAND_I64FUNC">;
+def f32imm_op  : LLIROperand<f32,  "OPERAND_F32IMM">;
+def f64imm_op  : LLIROperand<f64,  "OPERAND_F64IMM">;
+def f80imm_op  : LLIROperand<f80,  "OPERAND_F80IMM">;
+def f128imm_op : LLIROperand<f128, "OPERAND_F128IMM">;
 
 //===----------------------------------------------------------------------===//
 // LLIR Instruction Format Definitions.
@@ -161,6 +162,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
     , (ins F80:$src)
     , []
     , "mov.f80\t$dst, $src"
+    , 0x0C
+    >;
+
+  def MOV_F128 : I
+    < (outs F128:$dst)
+    , (ins F128:$src)
+    , []
+    , "mov.f128\t$dst, $src"
     , 0x0C
     >;
 
@@ -233,6 +242,14 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
       , (ins)
       , [(set F80:$res, undef)]
       , "undef.f80\t$res"
+      , 0x14
+      >;
+
+  def UNDEF_F128 : I
+      < (outs F128:$res)
+      , (ins)
+      , [(set F128:$res, undef)]
+      , "undef.f128\t$res"
       , 0x14
       >;
 }

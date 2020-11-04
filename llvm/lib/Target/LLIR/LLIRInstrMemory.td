@@ -31,13 +31,14 @@ class LLIRSt
 }
 
 
-def ST_1_I8   : LLIRSt<I8,  store, 0x30>;
-def ST_2_I16  : LLIRSt<I16, store, 0x30>;
-def ST_4_I32  : LLIRSt<I32, store, 0x30>;
-def ST_8_I64  : LLIRSt<I64, store, 0x30>;
-def ST_4_F32  : LLIRSt<F32, store, 0x30>;
-def ST_8_F64  : LLIRSt<F64, store, 0x30>;
-def ST_10_F80 : LLIRSt<F80, store, 0x30>;
+def ST_1_I8    : LLIRSt<I8,   store, 0x30>;
+def ST_2_I16   : LLIRSt<I16,  store, 0x30>;
+def ST_4_I32   : LLIRSt<I32,  store, 0x30>;
+def ST_8_I64   : LLIRSt<I64,  store, 0x30>;
+def ST_4_F32   : LLIRSt<F32,  store, 0x30>;
+def ST_8_F64   : LLIRSt<F64,  store, 0x30>;
+def ST_10_F80  : LLIRSt<F80,  store, 0x30>;
+def ST_16_F128 : LLIRSt<F128, store, 0x30>;
 
 def ST_4_I32_ATOMIC : LLIRSt<I32, atomic_store_32, 0x4D>;
 def ST_8_I64_ATOMIC : LLIRSt<I64, atomic_store_64, 0x4E>;
@@ -63,13 +64,14 @@ class LLIRLd<LLIRRegClass R, PatFrag Node, string Name, int Opcode>
   let mayLoad = 1;
 }
 
-def LD_1_I8   : LLIRLd<I8,  load, "i8",  0x40>;
-def LD_2_I16  : LLIRLd<I16, load, "i16", 0x40>;
-def LD_4_I32  : LLIRLd<I32, load, "i32", 0x40>;
-def LD_8_I64  : LLIRLd<I64, load, "i64", 0x40>;
-def LD_4_F32  : LLIRLd<F32, load, "f32", 0x40>;
-def LD_8_F64  : LLIRLd<F64, load, "f64", 0x40>;
-def LD_10_F80 : LLIRLd<F80, load, "f80", 0x40>;
+def LD_1_I8    : LLIRLd<I8,   load, "i8",  0x40>;
+def LD_2_I16   : LLIRLd<I16,  load, "i16", 0x40>;
+def LD_4_I32   : LLIRLd<I32,  load, "i32", 0x40>;
+def LD_8_I64   : LLIRLd<I64,  load, "i64", 0x40>;
+def LD_4_F32   : LLIRLd<F32,  load, "f32", 0x40>;
+def LD_8_F64   : LLIRLd<F64,  load, "f64", 0x40>;
+def LD_10_F80  : LLIRLd<F80,  load, "f80", 0x40>;
+def LD_16_F128 : LLIRLd<F128, load, "f128", 0x40>;
 
 
 def : Pat<(i16 (extloadi8   I64:$addr)), (XEXT_I8_I16  (LD_1_I8  I64:$addr))>;

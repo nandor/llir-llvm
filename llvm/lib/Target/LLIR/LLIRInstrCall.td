@@ -32,13 +32,14 @@ multiclass CALL<LLIRRegClass vt, SDNode node, SDNode node_va>
     >;
 }
 
-defm CALL_I8  : CALL<I8, LLIRcall, LLIRcall_va>;
-defm CALL_I16 : CALL<I16, LLIRcall, LLIRcall_va>;
-defm CALL_I32 : CALL<I32, LLIRcall, LLIRcall_va>;
-defm CALL_I64 : CALL<I64, LLIRcall, LLIRcall_va>;
-defm CALL_F32 : CALL<F32, LLIRcall, LLIRcall_va>;
-defm CALL_F64 : CALL<F64, LLIRcall, LLIRcall_va>;
-defm CALL_F80 : CALL<F80, LLIRcall, LLIRcall_va>;
+defm CALL_I8   : CALL<I8,   LLIRcall, LLIRcall_va>;
+defm CALL_I16  : CALL<I16,  LLIRcall, LLIRcall_va>;
+defm CALL_I32  : CALL<I32,  LLIRcall, LLIRcall_va>;
+defm CALL_I64  : CALL<I64,  LLIRcall, LLIRcall_va>;
+defm CALL_F32  : CALL<F32,  LLIRcall, LLIRcall_va>;
+defm CALL_F64  : CALL<F64,  LLIRcall, LLIRcall_va>;
+defm CALL_F80  : CALL<F80,  LLIRcall, LLIRcall_va>;
+defm CALL_F128 : CALL<F128, LLIRcall, LLIRcall_va>;
 
 def CALL_VOID : CallInst
   < (outs)
@@ -83,13 +84,14 @@ multiclass TCALL<LLIRRegClass vt, SDNode node, SDNode node_va>
   }
 }
 
-defm TCALL_I8  : TCALL<I8,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_I16 : TCALL<I16, LLIRtcall, LLIRtcall_va>;
-defm TCALL_I32 : TCALL<I32, LLIRtcall, LLIRtcall_va>;
-defm TCALL_I64 : TCALL<I64, LLIRtcall, LLIRtcall_va>;
-defm TCALL_F32 : TCALL<F32, LLIRtcall, LLIRtcall_va>;
-defm TCALL_F64 : TCALL<F64, LLIRtcall, LLIRtcall_va>;
-defm TCALL_F80 : TCALL<F80, LLIRtcall, LLIRtcall_va>;
+defm TCALL_I8   : TCALL<I8,   LLIRtcall, LLIRtcall_va>;
+defm TCALL_I16  : TCALL<I16,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_I32  : TCALL<I32,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_I64  : TCALL<I64,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_F32  : TCALL<F32,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_F64  : TCALL<F64,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_F80  : TCALL<F80,  LLIRtcall, LLIRtcall_va>;
+defm TCALL_F128 : TCALL<F128, LLIRtcall, LLIRtcall_va>;
 
 def TCALL_VOID : CallInst
   < (outs)

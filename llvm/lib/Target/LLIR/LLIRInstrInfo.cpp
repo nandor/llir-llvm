@@ -157,6 +157,8 @@ void LLIRInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
         Op = LLIR::MOV_F64;
       } else if (&LLIR::F80RegClass == DstCls) {
         Op = LLIR::MOV_F80;
+      } else  if (&LLIR::F128RegClass == DstCls) {
+        Op = LLIR::MOV_F128;
       } else {
         llvm_unreachable("copy kind not supported");
       }

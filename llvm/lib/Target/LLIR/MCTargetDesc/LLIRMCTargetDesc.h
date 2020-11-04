@@ -58,6 +58,8 @@ enum OperandType {
   OPERAND_F64IMM,
   // 80-bit float immediate.
   OPERAND_F80IMM,
+  // 128-bit float immediate.
+  OPERAND_F128IMM,
   // 32-bit integer offset.
   OPERAND_I32OFF,
   // 32-bit function identifier.
