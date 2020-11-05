@@ -16,7 +16,9 @@
      defined(_M_X64)) &&                                                       \
     (defined(__GNUC__) || defined(__clang__) || defined(_MSC_VER))
 
+#ifndef NDEBUG
 #include <assert.h>
+#endif
 
 #define bool int
 #define true 1
@@ -724,7 +726,9 @@ int CONSTRUCTOR_ATTRIBUTE __cpu_indicator_init(void) {
   // Find available features.
   getAvailableFeatures(ECX, EDX, MaxLeaf, &Features[0]);
 
+#ifndef NDEBUG
   assert((sizeof(Features)/sizeof(Features[0])) == 2);
+#endif
   __cpu_model.__cpu_features[0] = Features[0];
   __cpu_features2 = Features[1];
 
@@ -743,10 +747,11 @@ int CONSTRUCTOR_ATTRIBUTE __cpu_indicator_init(void) {
   } else
     __cpu_model.__cpu_vendor = VENDOR_OTHER;
 
+#ifndef NDEBUG
   assert(__cpu_model.__cpu_vendor < VENDOR_MAX);
   assert(__cpu_model.__cpu_type < CPU_TYPE_MAX);
   assert(__cpu_model.__cpu_subtype < CPU_SUBTYPE_MAX);
-
+#endif
   return 0;
 }
 
