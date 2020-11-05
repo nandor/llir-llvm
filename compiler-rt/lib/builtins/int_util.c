@@ -51,23 +51,14 @@ void __compilerrt_abort_impl(const char *file, int line, const char *function) {
   __builtin_trap();
 }
 
-#elif __llir__
-
-void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-  __builtin_trap();
-}
-
 #else
-
-// Get the system definition of abort()
-#include <stdlib.h>
 
 #ifndef _WIN32
 __attribute__((weak))
 __attribute__((visibility("hidden")))
 #endif
 void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-  abort();
+  __builtin_trap();
 }
 
 #endif
