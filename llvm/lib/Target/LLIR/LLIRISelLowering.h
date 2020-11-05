@@ -109,6 +109,8 @@ public:
 
   SDValue LowerF128Call(SDValue Op, SelectionDAG &DAG,
                         RTLIB::Libcall Call) const;
+  SDValue LowerI128Call(SDValue Op, SelectionDAG &DAG,
+                        RTLIB::Libcall Call) const;
 
   SDValue LowerSETCC(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFP_EXTEND(SDValue Op, SelectionDAG &DAG) const;

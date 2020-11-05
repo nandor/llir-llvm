@@ -189,17 +189,24 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
         llvm_unreachable("invalid subtarget");
       }
 
-      // Allow casts.
+      // Handle casts.
       setOperationAction(ISD::SINT_TO_FP, T, Custom);
       setOperationAction(ISD::UINT_TO_FP, T, Custom);
-      setOperationAction(ISD::FP_TO_UINT, T, Custom);
-      setOperationAction(ISD::FP_TO_SINT, T, Custom);
-
-      // Allow strict instructions.
       setOperationAction(ISD::STRICT_SINT_TO_FP, T, Custom);
       setOperationAction(ISD::STRICT_UINT_TO_FP, T, Custom);
+      setOperationAction(ISD::FP_TO_UINT, T, Custom);
+      setOperationAction(ISD::FP_TO_SINT, T, Custom);
       setOperationAction(ISD::STRICT_FP_TO_SINT, T, Custom);
       setOperationAction(ISD::STRICT_FP_TO_UINT, T, Custom);
+    }
+
+    {
+      LegalizeAction Op = T == MVT::i128 ? Expand : Legal;
+      setOperationAction(ISD::SDIV, T, Op);
+      setOperationAction(ISD::UDIV, T, Op);
+      setOperationAction(ISD::SREM, T, Op);
+      setOperationAction(ISD::UREM, T, Op);
+      setOperationAction(ISD::MUL, T, Op);
     }
   }
 
@@ -924,6 +931,19 @@ SDValue LLIRTargetLowering::LowerF128Call(SDValue Op, SelectionDAG &DAG,
   std::tie(Result, Chain) =
       makeLibCall(DAG, Call, Op.getValueType(), Ops, CallOptions, dl, Chain);
   return IsStrict ? DAG.getMergeValues({Result, Chain}, dl) : Result;
+}
+
+SDValue LLIRTargetLowering::LowerI128Call(SDValue Op, SelectionDAG &DAG,
+                                          RTLIB::Libcall Call) const {
+  SmallVector<SDValue, 2> Ops(Op->op_begin(), Op->op_end());
+  MakeLibCallOptions CallOptions;
+
+  SDValue Result;
+  SDValue Chain;
+  SDLoc dl(Op);
+  std::tie(Result, Chain) =
+      makeLibCall(DAG, Call, Op.getValueType(), Ops, CallOptions, dl);
+  return Result;
 }
 
 SDValue LLIRTargetLowering::LowerSETCC(SDValue Op, SelectionDAG &DAG) const {
