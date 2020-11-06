@@ -254,4 +254,12 @@ void InterferenceCache::Entry::update(unsigned MBBNum) {
       BI->Last = RegMaskSlots[i-1].getDeadSlot();
       break;
     }
+
+  // Extend past GC frames.
+  if (MachineInstr *MI = Indexes->getInstructionFromIndex(BI->Last)) {
+    MachineBasicBlock::iterator NextMI = MI->getIterator();
+    while (++NextMI != MI->getParent()->end() && NextMI->isGCFrame()) {
+      BI->Last = Indexes->getInstructionIndex(*NextMI);
+    }
+  }
 }
