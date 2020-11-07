@@ -32,7 +32,8 @@ class Target;
 
 Target &getTheLLIR_X86_64Target();
 Target &getTheLLIR_AArch64Target();
-Target &getTheLLIR_PPC64Target();
+Target &getTheLLIR_PPC64LETarget();
+Target &getTheLLIR_RISCV64Target();
 
 MCAsmBackend *createLLIRAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                    const MCRegisterInfo &MRI,

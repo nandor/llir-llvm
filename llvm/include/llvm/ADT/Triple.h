@@ -102,6 +102,7 @@ public:
     llir_x86_64,    // LLIR for X86-64
     llir_aarch64,   // LLIR for aarch64
     llir_ppc64le,   // LLIR for ppc64le
+    llir_riscv64,   // LLIR fpr Risc-V (64-bit)
     LastArchType = ve
   };
   enum SubArchType {

@@ -648,6 +648,14 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
     default:
       return new LLIR_PPC64TargetInfo(Triple, Opts);
     }
+
+  case llvm::Triple::llir_riscv64:
+    switch (os) {
+    case llvm::Triple::Linux:
+      return new LinuxTargetInfo<LLIR_RISCV64TargetInfo>(Triple, Opts);
+    default:
+      return new LLIR_RISCV64TargetInfo(Triple, Opts);
+    }
   }
 }
 } // namespace targets

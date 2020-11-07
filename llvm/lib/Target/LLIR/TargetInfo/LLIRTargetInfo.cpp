@@ -22,16 +22,23 @@ Target &llvm::getTheLLIR_AArch64Target() {
   return TheLLIR_AArch64_Target;
 }
 
-Target &llvm::getTheLLIR_PPC64Target() {
-  static Target TheLLIR_AArch64_Target;
-  return TheLLIR_AArch64_Target;
+Target &llvm::getTheLLIR_PPC64LETarget() {
+  static Target TheLLIR_PPC64LE_Target;
+  return TheLLIR_PPC64LE_Target;
+}
+
+Target &llvm::getTheLLIR_RISCV64Target() {
+  static Target TheLLIR_RiscV64_Target;
+  return TheLLIR_RiscV64_Target;
 }
 
 extern "C" void LLVMInitializeLLIRTargetInfo() {
-  RegisterTarget<Triple::llir_x86_64, false> X(
+  RegisterTarget<Triple::llir_x86_64, false> A(
       getTheLLIR_X86_64Target(), "llir-x86-64", "LLIR over x86-64", "LLIR");
-  RegisterTarget<Triple::llir_aarch64, false> Y(
+  RegisterTarget<Triple::llir_aarch64, false> B(
       getTheLLIR_AArch64Target(), "llir-aarch64", "LLIR over aarch64", "LLIR");
-  RegisterTarget<Triple::llir_ppc64le, false> Z(
-      getTheLLIR_PPC64Target(), "llir-ppc64le", "LLIR over ppc64le", "LLIR");
+  RegisterTarget<Triple::llir_ppc64le, false> C(
+      getTheLLIR_PPC64LETarget(), "llir-ppc64le", "LLIR over ppc64le", "LLIR");
+  RegisterTarget<Triple::llir_riscv64, false> D(
+      getTheLLIR_RISCV64Target(), "llir-riscv64", "LLIR over riscv64", "LLIR");
 }

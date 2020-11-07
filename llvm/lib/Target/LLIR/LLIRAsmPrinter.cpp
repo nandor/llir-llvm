@@ -130,7 +130,8 @@ LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer() {
 
 // Force static initialization.
 extern "C" void LLVMInitializeLLIRAsmPrinter() {
-  RegisterAsmPrinter<LLIRAsmPrinter> X(getTheLLIR_X86_64Target());
-  RegisterAsmPrinter<LLIRAsmPrinter> Y(getTheLLIR_AArch64Target());
-  RegisterAsmPrinter<LLIRAsmPrinter> Z(getTheLLIR_PPC64Target());
+  RegisterAsmPrinter<LLIRAsmPrinter> A(getTheLLIR_X86_64Target());
+  RegisterAsmPrinter<LLIRAsmPrinter> B(getTheLLIR_AArch64Target());
+  RegisterAsmPrinter<LLIRAsmPrinter> C(getTheLLIR_PPC64LETarget());
+  RegisterAsmPrinter<LLIRAsmPrinter> D(getTheLLIR_RISCV64Target());
 }

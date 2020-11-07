@@ -634,6 +634,20 @@ set(powerpc64_SOURCES
   ppc/multc3.c
   ${GENERIC_SOURCES}
 )
+set(llir_powerpc64_SOURCES
+  ppc/divtc3.c
+  ppc/fixtfdi.c
+  ppc/fixunstfdi.c
+  ppc/floatditf.c
+  ppc/floatunditf.c
+  ppc/gcc_qadd.c
+  ppc/gcc_qdiv.c
+  ppc/gcc_qmul.c
+  ppc/gcc_qsub.c
+  ppc/multc3.c
+  ${GENERIC_SOURCES}
+)
+
 # These routines require __int128, which isn't supported on AIX.
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "AIX")
   set(powerpc64_SOURCES
@@ -642,16 +656,32 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "AIX")
     ppc/fixunstfti.c
     ${powerpc64_SOURCES}
   )
+  set(llir_powerpc64_SOURCES
+    ppc/floattitf.c
+    ppc/fixtfti.c
+    ppc/fixunstfti.c
+    ${powerpc64_SOURCES}
+  )
 endif()
 set(powerpc64le_SOURCES ${powerpc64_SOURCES})
+set(llir_powerpc64le_SOURCES ${powerpc64_SOURCES})
 
 set(riscv_SOURCES ${GENERIC_SOURCES} ${GENERIC_TF_SOURCES})
+set(llir_riscv_SOURCES ${GENERIC_SOURCES} ${GENERIC_TF_SOURCES})
 set(riscv32_SOURCES
   riscv/mulsi3.S
   ${riscv_SOURCES}
 )
+set(llir_riscv32_SOURCES
+  llir/riscv/mulsi3.S
+  ${riscv_SOURCES}
+)
 set(riscv64_SOURCES
   riscv/muldi3.S
+  ${riscv_SOURCES}
+)
+set(llir_riscv64_SOURCES
+  llir/riscv/muldi3.S
   ${riscv_SOURCES}
 )
 

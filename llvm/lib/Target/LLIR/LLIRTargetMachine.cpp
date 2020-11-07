@@ -81,8 +81,10 @@ public:
 extern "C" void LLVMInitializeLLIRTarget()
 {
   // Register the target.
-  RegisterTargetMachine<LLIRTargetMachine> X(getTheLLIR_X86_64Target());
-  RegisterTargetMachine<LLIRTargetMachine> Y(getTheLLIR_AArch64Target());
+  RegisterTargetMachine<LLIRTargetMachine> A(getTheLLIR_X86_64Target());
+  RegisterTargetMachine<LLIRTargetMachine> B(getTheLLIR_AArch64Target());
+  RegisterTargetMachine<LLIRTargetMachine> C(getTheLLIR_PPC64LETarget());
+  RegisterTargetMachine<LLIRTargetMachine> D(getTheLLIR_RISCV64Target());
 
   // Register backend passes.
   auto &PR = *PassRegistry::getPassRegistry();
@@ -187,6 +189,15 @@ static std::string computeDataLayoutPPC64(const Triple &TT) {
   return Ret;
 }
 
+static std::string computeDataLayoutRISCV64(const Triple &TT) {
+  if (TT.isArch64Bit()) {
+    return "e-m:e-p:64:64-i64:64-i128:128-n64-S128";
+  } else {
+    assert(TT.isArch32Bit() && "only RV32 and RV64 are currently supported");
+    return "e-m:e-p:32:32-i64:64-n32-S128";
+  }
+}
+
 static std::string computeDataLayout(const Triple &TT, StringRef CPU,
                                      StringRef FS) {
   switch (TT.getArch()) {
@@ -196,6 +207,8 @@ static std::string computeDataLayout(const Triple &TT, StringRef CPU,
     return computeDataLayoutAArch64(TT);
   case Triple::llir_ppc64le:
     return computeDataLayoutPPC64(TT);
+  case Triple::llir_riscv64:
+    return computeDataLayoutRISCV64(TT);
   default: {
     llvm_unreachable("invalid LLIR target");
   }

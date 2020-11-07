@@ -79,6 +79,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case llir_x86_64:    return "llir_x86_64";
   case llir_aarch64:   return "llir_aarch64";
   case llir_ppc64le:   return "llir_ppc64le";
+  case llir_riscv64:   return "llir_riscv64";
   }
 
   llvm_unreachable("Invalid ArchType!");
@@ -329,6 +330,7 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("llir_aarch64", llir_aarch64)
     .Case("llir_x86_64", llir_x86_64)
     .Case("llir_ppc64le", llir_ppc64le)
+    .Case("llir_riscv", llir_riscv64)
     .Default(UnknownArch);
 }
 
@@ -463,6 +465,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("llir_x86_64", Triple::llir_x86_64)
     .Case("llir_aarch64", Triple::llir_aarch64)
     .Case("llir_ppc64le", Triple::llir_ppc64le)
+    .Case("llir_riscv64", Triple::llir_riscv64)
     .Default(Triple::UnknownArch);
 
   // Some architectures require special parsing logic just to compute the
@@ -747,6 +750,7 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
   case Triple::llir_ppc64le:
+  case Triple::llir_riscv64:
     return Triple::LLIR;
   }
   llvm_unreachable("unknown architecture");
@@ -1324,6 +1328,7 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
   case llvm::Triple::llir_x86_64:
   case llvm::Triple::llir_aarch64:
   case llvm::Triple::llir_ppc64le:
+  case llvm::Triple::llir_riscv64:
     return 64;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1400,6 +1405,7 @@ bool Triple::isLLIR() const {
   case llvm::Triple::llir_x86_64:
   case llvm::Triple::llir_aarch64:
   case llvm::Triple::llir_ppc64le:
+  case llvm::Triple::llir_riscv64:
     return true;
   }
   llvm_unreachable("Invalid architecture value");
@@ -1420,6 +1426,7 @@ Triple Triple::get32BitArchVariant() const {
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
   case Triple::llir_ppc64le:
+  case Triple::llir_riscv64:
     T.setArch(UnknownArch);
     break;
 
@@ -1518,6 +1525,7 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
   case Triple::llir_ppc64le:
+  case Triple::llir_riscv64:
     // Already 64-bit.
     break;
 
@@ -1674,6 +1682,7 @@ bool Triple::isLittleEndian() const {
   case Triple::llir_x86_64:
   case Triple::llir_aarch64:
   case Triple::llir_ppc64le:
+  case Triple::llir_riscv64:
     return true;
   default:
     return false;

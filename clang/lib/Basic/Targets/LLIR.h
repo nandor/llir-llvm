@@ -17,6 +17,7 @@
 #include "X86.h"
 #include "AArch64.h"
 #include "PPC.h"
+#include "RISCV.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/TargetOptions.h"
 #include "llvm/ADT/Triple.h"
@@ -82,6 +83,20 @@ public:
   void getTargetDefines(const LangOptions &Opts,
                         MacroBuilder &Builder) const override {
     PPC64TargetInfo::getTargetDefines(Opts, Builder);
+    Builder.defineMacro("__llir__");
+  }
+};
+
+// llir ppc64 generic target
+class LLVM_LIBRARY_VISIBILITY LLIR_RISCV64TargetInfo
+    : public RISCV64TargetInfo {
+public:
+  LLIR_RISCV64TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
+      : RISCV64TargetInfo(Triple, Opts) {}
+
+  void getTargetDefines(const LangOptions &Opts,
+                        MacroBuilder &Builder) const override {
+    RISCV64TargetInfo::getTargetDefines(Opts, Builder);
     Builder.defineMacro("__llir__");
   }
 };

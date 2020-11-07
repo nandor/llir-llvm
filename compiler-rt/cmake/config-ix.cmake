@@ -289,6 +289,8 @@ set(WASM32 wasm32)
 set(WASM64 wasm64)
 set(LLIR_X86_64 llir_x86_64)
 set(LLIR_AARCH64 llir_aarch64)
+set(LLIR_RISCV64 llir_riscv64)
+set(LLIR_PPC64 llir_powerpc64 llir_powerpc64le)
 
 if(APPLE)
   set(ARM64 arm64)
