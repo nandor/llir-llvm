@@ -1117,7 +1117,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN "LICENSE.TXT"
     )
 
-  foreach(arch X86 AArch64)
+  foreach(arch X86 AArch64 RISCV)
     install(DIRECTORY lib/Target/${arch}
       DESTINATION include/llvm/Target
       COMPONENT llvm-headers
@@ -1137,12 +1137,9 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
     install(FILES
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmMatcher.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenFastISel.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmWriter.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenGlobalISel.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmWriter1.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenInstrInfo.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenCallingConv.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterBank.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenDAGISel.inc
         ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterInfo.inc
@@ -1154,6 +1151,12 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
   install(FILES
       ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenEVEX2VEXTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenFastISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter1.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenFastISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenAsmWriter1.inc
     DESTINATION include/llvm/Target/X86/MCTargetDesc
   )
 

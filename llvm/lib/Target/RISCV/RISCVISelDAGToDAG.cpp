@@ -23,7 +23,23 @@ using namespace llvm;
 
 #define DEBUG_TYPE "riscv-isel"
 
-void RISCVDAGToDAGISel::PostprocessISelDAG() {
+RISCVDAGMatcher::RISCVDAGMatcher(
+    RISCVTargetMachine &tm,
+    CodeGenOpt::Level OL,
+    const RISCVSubtarget *Subtarget)
+  : DAGMatcher(tm, new SelectionDAG(tm, OL), OL)
+  , Subtarget(Subtarget)
+{
+}
+
+RISCVDAGToDAGISel::RISCVDAGToDAGISel(RISCVTargetMachine &tm)
+  : DAGMatcher(tm, new SelectionDAG(tm, CodeGenOpt::Default), CodeGenOpt::Default)
+  , RISCVDAGMatcher(tm, CodeGenOpt::Default)
+  , SelectionDAGISel(tm, CodeGenOpt::Default)
+{
+}
+
+void RISCVDAGMatcher::PostprocessISelDAG() {
   doPeepholeLoadStoreADDI();
 }
 
@@ -59,7 +75,7 @@ static bool isConstantMask(SDNode *Node, uint64_t &Mask) {
   return false;
 }
 
-void RISCVDAGToDAGISel::Select(SDNode *Node) {
+void RISCVDAGMatcher::Select(SDNode *Node) {
   // If we have a custom node, we have already selected.
   if (Node->isMachineOpcode()) {
     LLVM_DEBUG(dbgs() << "== "; Node->dump(CurDAG); dbgs() << "\n");
@@ -156,7 +172,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
   SelectCode(Node);
 }
 
-bool RISCVDAGToDAGISel::SelectInlineAsmMemoryOperand(
+bool RISCVDAGMatcher::SelectInlineAsmMemoryOperand(
     const SDValue &Op, unsigned ConstraintID, std::vector<SDValue> &OutOps) {
   switch (ConstraintID) {
   case InlineAsm::Constraint_m:
@@ -174,7 +190,7 @@ bool RISCVDAGToDAGISel::SelectInlineAsmMemoryOperand(
   return true;
 }
 
-bool RISCVDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
+bool RISCVDAGMatcher::SelectAddrFI(SDValue Addr, SDValue &Base) {
   if (auto FIN = dyn_cast<FrameIndexSDNode>(Addr)) {
     Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), Subtarget->getXLenVT());
     return true;
@@ -192,7 +208,7 @@ bool RISCVDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
 //
 //  VC1 == maskTrailingOnes<uint64_t>(VC2)
 
-bool RISCVDAGToDAGISel::SelectSLOI(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectSLOI(SDValue N, SDValue &RS1, SDValue &Shamt) {
   MVT XLenVT = Subtarget->getXLenVT();
   if (N.getOpcode() == ISD::OR) {
     SDValue Or = N;
@@ -236,7 +252,7 @@ bool RISCVDAGToDAGISel::SelectSLOI(SDValue N, SDValue &RS1, SDValue &Shamt) {
 //
 //  VC1 == maskLeadingOnes<uint64_t>(VC2)
 
-bool RISCVDAGToDAGISel::SelectSROI(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectSROI(SDValue N, SDValue &RS1, SDValue &Shamt) {
   MVT XLenVT = Subtarget->getXLenVT();
   if (N.getOpcode() == ISD::OR) {
     SDValue Or = N;
@@ -270,6 +286,44 @@ bool RISCVDAGToDAGISel::SelectSROI(SDValue N, SDValue &RS1, SDValue &Shamt) {
   return false;
 }
 
+// Check that it is a RORI (Rotate Right Immediate). We first check that
+// it is the right node tree:
+//
+//  (ROTL RS1, VC)
+//
+// The compiler translates immediate rotations to the right given by the call
+// to the rotateright32/rotateright64 intrinsics as rotations to the left.
+// Since the rotation to the left can be easily emulated as a rotation to the
+// right by negating the constant, there is no encoding for ROLI.
+// We then select the immediate left rotations as RORI by the complementary
+// constant:
+//
+//  Shamt == XLen - VC
+
+bool RISCVDAGMatcher::SelectRORI(SDValue N, SDValue &RS1, SDValue &Shamt) {
+  MVT XLenVT = Subtarget->getXLenVT();
+  if (N.getOpcode() == ISD::ROTL) {
+    if (isa<ConstantSDNode>(N.getOperand(1))) {
+      if (XLenVT == MVT::i64) {
+        uint64_t VC = N.getConstantOperandVal(1);
+        Shamt = CurDAG->getTargetConstant((64 - VC), SDLoc(N),
+                                          N.getOperand(1).getValueType());
+        RS1 = N.getOperand(0);
+        return true;
+      }
+      if (XLenVT == MVT::i32) {
+        uint32_t VC = N.getConstantOperandVal(1);
+        Shamt = CurDAG->getTargetConstant((32 - VC), SDLoc(N),
+                                          N.getOperand(1).getValueType());
+        RS1 = N.getOperand(0);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
 // Check that it is a SLLIUW (Shift Logical Left Immediate Unsigned i32
 // on RV64).
 // SLLIUW is the same as SLLI except for the fact that it clears the bits
@@ -285,7 +339,7 @@ bool RISCVDAGToDAGISel::SelectSROI(SDValue N, SDValue &RS1, SDValue &Shamt) {
 //
 //  VC1 == (0xFFFFFFFF << VC2)
 
-bool RISCVDAGToDAGISel::SelectSLLIUW(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectSLLIUW(SDValue N, SDValue &RS1, SDValue &Shamt) {
   if (N.getOpcode() == ISD::AND && Subtarget->getXLenVT() == MVT::i64) {
     SDValue And = N;
     if (And.getOperand(0).getOpcode() == ISD::SHL) {
@@ -316,7 +370,7 @@ bool RISCVDAGToDAGISel::SelectSLLIUW(SDValue N, SDValue &RS1, SDValue &Shamt) {
 //
 //  VC1 == maskTrailingOnes<uint32_t>(VC2)
 
-bool RISCVDAGToDAGISel::SelectSLOIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectSLOIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
   if (Subtarget->getXLenVT() == MVT::i64 &&
       N.getOpcode() == ISD::SIGN_EXTEND_INREG &&
       cast<VTSDNode>(N.getOperand(1))->getVT() == MVT::i32) {
@@ -351,7 +405,7 @@ bool RISCVDAGToDAGISel::SelectSLOIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
 //
 //  VC1 == maskLeadingOnes<uint32_t>(VC2)
 
-bool RISCVDAGToDAGISel::SelectSROIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectSROIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
   if (N.getOpcode() == ISD::OR && Subtarget->getXLenVT() == MVT::i64) {
     SDValue Or = N;
     if (Or.getOperand(0).getOpcode() == ISD::SRL) {
@@ -387,7 +441,7 @@ bool RISCVDAGToDAGISel::SelectSROIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
 // and VC3 being 0xffffffff after accounting for SimplifyDemandedBits removing
 // some bits due to the right shift.
 
-bool RISCVDAGToDAGISel::SelectRORIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
+bool RISCVDAGMatcher::SelectRORIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
   if (N.getOpcode() == ISD::SIGN_EXTEND_INREG &&
       Subtarget->getXLenVT() == MVT::i64 &&
       cast<VTSDNode>(N.getOperand(1))->getVT() == MVT::i32) {
@@ -432,7 +486,7 @@ bool RISCVDAGToDAGISel::SelectRORIW(SDValue N, SDValue &RS1, SDValue &Shamt) {
 // (load (addi base, off1), off2) -> (load base, off1+off2)
 // (store val, (addi base, off1), off2) -> (store val, base, off1+off2)
 // This is possible when off1+off2 fits a 12-bit immediate.
-void RISCVDAGToDAGISel::doPeepholeLoadStoreADDI() {
+void RISCVDAGMatcher::doPeepholeLoadStoreADDI() {
   SelectionDAG::allnodes_iterator Position(CurDAG->getRoot().getNode());
   ++Position;
 
