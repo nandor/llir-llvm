@@ -151,6 +151,8 @@ void LLIRInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
         Op = LLIR::MOV_I32;
       } else if (&LLIR::I64RegClass == DstCls) {
         Op = LLIR::MOV_I64;
+      } else if (&LLIR::I128RegClass == DstCls) {
+        Op = LLIR::MOV_I128;
       } else if (&LLIR::F32RegClass == DstCls) {
         Op = LLIR::MOV_F32;
       } else if (&LLIR::F64RegClass == DstCls) {
