@@ -17,6 +17,7 @@
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/SelectionDAG.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
+#include "llvm/CodeGen/FunctionLoweringInfo.h"
 #include "llvm/IR/BasicBlock.h"
 #include <memory>
 
@@ -44,6 +45,8 @@ public:
   MachineFunction *MF;
   const TargetLowering *TLI;
   const TargetInstrInfo *TII;
+  std::unique_ptr<FunctionLoweringInfo> FuncInfo;
+  MachineRegisterInfo *RegInfo;
 
   virtual void emitFunctionEntryCode() {}
 
@@ -177,6 +180,7 @@ public:
     , OptLevel(OptLevel)
     , TLI(TLI)
     , TII(TII)
+    , FuncInfo(new FunctionLoweringInfo())
   {
   }
 
@@ -320,9 +324,7 @@ private:
 class SelectionDAGISel : virtual public DAGMatcher, public MachineFunctionPass {
 public:
   const TargetLibraryInfo *LibInfo;
-  std::unique_ptr<FunctionLoweringInfo> FuncInfo;
   SwiftErrorValueTracking *SwiftError;
-  MachineRegisterInfo *RegInfo;
   std::unique_ptr<SelectionDAGBuilder> SDB;
   AAResults *AA;
   GCFunctionInfo *GFI;

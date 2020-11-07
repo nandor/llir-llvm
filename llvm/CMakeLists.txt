@@ -1117,7 +1117,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
     PATTERN "LICENSE.TXT"
     )
 
-  foreach(arch X86 AArch64 RISCV)
+  foreach(arch X86 AArch64 RISCV PowerPC)
     install(DIRECTORY lib/Target/${arch}
       DESTINATION include/llvm/Target
       COMPONENT llvm-headers
@@ -1134,31 +1134,78 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
       PATTERN "*.inc"
       PATTERN "CMakeFiles" EXCLUDE
       )
-
-    install(FILES
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmMatcher.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenAsmWriter.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenGlobalISel.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenInstrInfo.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterBank.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenDAGISel.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenRegisterInfo.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenDisassemblerTables.inc
-        ${CMAKE_BINARY_DIR}/lib/Target/${arch}/${arch}GenSubtargetInfo.inc
-      DESTINATION include/llvm/Target/${arch}/MCTargetDesc
-      )
   endforeach()
 
   install(FILES
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmMatcher.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenGlobalISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenInstrInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterBank.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDAGISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenRegisterInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenDisassemblerTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
       ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenEVEX2VEXTables.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenFastISel.inc
       ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenFastISel.inc
       ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenAsmWriter1.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenFastISel.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenCallingConv.inc
-      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenAsmWriter1.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/X86/X86GenSubtargetInfo.inc
     DESTINATION include/llvm/Target/X86/MCTargetDesc
-  )
+    )
+
+  install(FILES
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenAsmMatcher.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenAsmWriter.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenGlobalISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenInstrInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenRegisterBank.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenDAGISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenRegisterInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenDisassemblerTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenFastISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenAsmWriter1.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/AArch64/AArch64GenSubtargetInfo.inc
+    DESTINATION include/llvm/Target/AArch64/MCTargetDesc
+    )
+
+  install(FILES
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenAsmMatcher.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenAsmWriter.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenGlobalISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenInstrInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenRegisterBank.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenDAGISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenRegisterInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenDisassemblerTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/RISCV/RISCVGenSubtargetInfo.inc
+    DESTINATION include/llvm/Target/RISCV/MCTargetDesc
+    )
+
+  install(FILES
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenAsmMatcher.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenAsmWriter.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenGlobalISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenInstrInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenRegisterBank.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenDAGISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenRegisterInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenDisassemblerTables.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenSubtargetInfo.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenCallingConv.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenFastISel.inc
+      ${CMAKE_BINARY_DIR}/lib/Target/PowerPC/PPCGenSubtargetInfo.inc
+    DESTINATION include/llvm/Target/PowerPC/MCTargetDesc
+    )
 
   install(DIRECTORY lib/CodeGen/SelectionDAG
     DESTINATION include/llvm/CodeGen

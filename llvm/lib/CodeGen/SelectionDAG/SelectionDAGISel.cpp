@@ -34,7 +34,6 @@
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/CodeGen/FastISel.h"
-#include "llvm/CodeGen/FunctionLoweringInfo.h"
 #include "llvm/CodeGen/GCMetadata.h"
 #include "llvm/CodeGen/ISDOpcodes.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
@@ -310,7 +309,7 @@ void TargetLowering::AdjustInstrPostInstrSelection(MachineInstr &MI,
 
 SelectionDAGISel::SelectionDAGISel(TargetMachine &tm, CodeGenOpt::Level OL)
     : DAGMatcher(tm, new SelectionDAG(tm, OL), OL),
-      MachineFunctionPass(ID), FuncInfo(new FunctionLoweringInfo()),
+      MachineFunctionPass(ID),
       SwiftError(new SwiftErrorValueTracking()),
       SDB(std::make_unique<SelectionDAGBuilder>(*CurDAG, *FuncInfo, *SwiftError,
                                                 OL)),
