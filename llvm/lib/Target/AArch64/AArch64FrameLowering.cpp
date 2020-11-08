@@ -2237,6 +2237,16 @@ static void computeCalleeSaveRegisterPairs(
       // Set extra alignment on the x21 object (the only unpaired register)
       // to create the gap above it.
       MFI.setObjectAlignment(RPI.FrameIdx, Align(16));
+    } else if (CC == CallingConv::LLIR_CAML) {
+      assert((RPI.Reg2 != AArch64::LR) && "invalid LR placement");
+      if (RPI.Reg1 == AArch64::LR && !RPI.Reg2) {
+        // If LR is unpaired, explicitly align it to a 16-byte boundary to
+        // ensure it ends up at SP - 16 for the OCaml stack walk.
+        ByteOffset += 8 * StackFillDir;
+        assert(ByteOffset % 16 == 0);
+        assert(MFI.getObjectAlign(RPI.FrameIdx) <= Align(16));
+        MFI.setObjectAlignment(RPI.FrameIdx, Align(16));
+      }
     }
 
     int OffsetPost = RPI.isScalable() ? ScalableByteOffset : ByteOffset;
@@ -2280,6 +2290,7 @@ bool AArch64FrameLowering::spillCalleeSavedRegisters(
     MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
     ArrayRef<CalleeSavedInfo> CSI, const TargetRegisterInfo *TRI) const {
   MachineFunction &MF = *MBB.getParent();
+  CallingConv::ID CC = MF.getFunction().getCallingConv();
   const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
   bool NeedsWinCFI = needsWinCFI(MF);
   DebugLoc DL;
@@ -2348,6 +2359,11 @@ bool AArch64FrameLowering::spillCalleeSavedRegisters(
        StrOpc = RPI.isPaired() ? AArch64::STPXi : AArch64::STRXui;
        Size = 8;
        Alignment = Align(8);
+       if (CC == CallingConv::LLIR_CAML) {
+         if (!RPI.isPaired() && RPI.Reg1 == AArch64::LR) {
+           Alignment = Align(16);
+         }
+       }
        break;
     case RegPairInfo::FPR64:
        StrOpc = RPI.isPaired() ? AArch64::STPDi : AArch64::STRDui;

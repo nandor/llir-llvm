@@ -512,7 +512,7 @@ def CSR_AArch64_AAPCS_SCS
 
 
 // LLIR: OCaml call which does not preserve any integer registers.
-def CSR_LLIR_Caml : CalleeSavedRegs<
+def CSR_LLIR_Caml_Call : CalleeSavedRegs<
   (add
     LR,
     (sequence "D%u", 8, 15)
@@ -530,8 +530,8 @@ def CSR_LLIR_Caml_Ext : CalleeSavedRegs<
 // LLIR: OCaml allocation call, does not preserve 25-28
 def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
   (add
+    LR,
     (sequence "X%u", 0, 24),
-    FP, LR,
     (sequence "D%u", 0, 31)
   )
 >;
@@ -539,8 +539,8 @@ def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
 // LLIR: OCaml GC trampoline call, preserves all registers.
 def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
   (add
+    LR,
     (sequence "X%u", 0, 24),
-    FP, LR,
     (sequence "D%u", 0, 31)
   )
 >;

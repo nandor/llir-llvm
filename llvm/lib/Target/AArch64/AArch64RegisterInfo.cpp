@@ -75,7 +75,7 @@ AArch64RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   assert(MF && "Invalid MachineFunction pointer.");
 
   if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML)
-    return CSR_LLIR_Caml_SaveList;
+    return CSR_LLIR_Caml_Call_SaveList;
   if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML_EXT)
     return CSR_LLIR_Caml_Ext_SaveList;
   if (MF->getFunction().getCallingConv() == CallingConv::LLIR_CAML_ALLOC)
@@ -218,7 +218,7 @@ const uint32_t *
 AArch64RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                           CallingConv::ID CC) const {
   if (CC == CallingConv::LLIR_CAML)
-    return CSR_LLIR_Caml_RegMask;
+    return CSR_LLIR_Caml_Call_RegMask;
   if (CC == CallingConv::LLIR_CAML_EXT)
     return CSR_LLIR_Caml_Ext_RegMask;
   if (CC == CallingConv::LLIR_CAML_ALLOC)
