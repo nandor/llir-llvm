@@ -20,7 +20,7 @@
 // RISCV-specific code to select RISCV machine instructions for
 // SelectionDAG operations.
 namespace llvm {
-class RISCVDAGMatcher : public DAGMatcher {
+class RISCVDAGMatcher : public virtual DAGMatcher {
   const RISCVSubtarget *Subtarget = nullptr;
 
  public:
