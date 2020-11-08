@@ -66,6 +66,10 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
     return TargetTriple.getArch() == llvm::Triple::llir_ppc64le;
   }
 
+  bool isRISCV() const {
+    return TargetTriple.getArch() == llvm::Triple::llir_riscv64;
+  }
+
   bool isTargetDarwin() const { return TargetTriple.isOSDarwin(); }
 
   bool isTargetWindows() const { return TargetTriple.isOSWindows(); }
