@@ -21,6 +21,7 @@
 // SelectionDAG operations.
 namespace llvm {
 class RISCVDAGMatcher : public virtual DAGMatcher {
+ protected:
   const RISCVSubtarget *Subtarget = nullptr;
 
  public:
@@ -53,8 +54,6 @@ class RISCVDAGMatcher : public virtual DAGMatcher {
 };
 
 class RISCVDAGToDAGISel : public RISCVDAGMatcher, public SelectionDAGISel {
-  const RISCVSubtarget *Subtarget = nullptr;
-
  public:
   explicit RISCVDAGToDAGISel(RISCVTargetMachine &TargetMachine);
 
