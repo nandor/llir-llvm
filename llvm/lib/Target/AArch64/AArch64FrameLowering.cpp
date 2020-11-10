@@ -295,6 +295,9 @@ bool AArch64FrameLowering::canUseRedZone(const MachineFunction &MF) const {
 /// hasFP - Return true if the specified function should have a dedicated frame
 /// pointer register.
 bool AArch64FrameLowering::hasFP(const MachineFunction &MF) const {
+  // OCaml functions must use SP.
+  if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML)
+    return false;
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
   // Win64 EH requires a frame pointer if funclets are present, as the locals
