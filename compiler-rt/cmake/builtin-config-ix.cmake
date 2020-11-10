@@ -55,7 +55,7 @@ set(ALL_BUILTIN_SUPPORTED_ARCH
   ${HEXAGON} ${MIPS32} ${MIPS64} ${PPC32} ${PPC64}
   ${RISCV32} ${RISCV64} ${SPARC} ${SPARCV9}
   ${WASM32} ${WASM64} ${VE}
-  ${LLIR_X86_64} ${LLIR_AARCH64})
+  ${LLIR_X86_64} ${LLIR_AARCH64} ${LLIR_RISCV} ${LLIR_PPC64})
 
 include(CompilerRTUtils)
 include(CompilerRTDarwinUtils)
