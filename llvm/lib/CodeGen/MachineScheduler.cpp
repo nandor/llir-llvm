@@ -529,6 +529,9 @@ void MachineSchedulerBase::scheduleRegions(ScheduleDAGInstrs &Scheduler,
   // loop tree. Then we can optionally compute global RegPressure.
   for (MachineFunction::iterator MBB = MF->begin(), MBBEnd = MF->end();
        MBB != MBBEnd; ++MBB) {
+    // Skip very large functions.
+    if (MBB->size() > 10000)
+      continue;
 
     Scheduler.startBlock(&*MBB);
 
