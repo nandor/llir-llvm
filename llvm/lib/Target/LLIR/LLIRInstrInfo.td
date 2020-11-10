@@ -300,14 +300,6 @@ let hasSideEffects = 1 in
     , 0x0F
     >;
 
-  def RDTSC_I64 : I
-      < (outs I64:$res)
-      , (ins)
-      , [(set I64:$res, LLIRrdtsc)]
-      , "rdtsc.i64\t$res"
-      , 0x15
-    >;
-
   def GET_I64 : I
     < (outs I64:$dst)
     , (ins R64:$src)
@@ -331,7 +323,6 @@ let hasSideEffects = 1 in
 //===----------------------------------------------------------------------===//
 
 include "LLIRInstrArg.td"
-include "LLIRInstrAtomic.td"
 include "LLIRInstrCall.td"
 include "LLIRInstrConst.td"
 include "LLIRInstrConv.td"
@@ -339,4 +330,5 @@ include "LLIRInstrMemory.td"
 include "LLIRInstrControl.td"
 include "LLIRInstrInteger.td"
 include "LLIRInstrFloat.td"
-
+include "LLIRInstrX86.td"
+include "LLIRInstrAArch64.td"
