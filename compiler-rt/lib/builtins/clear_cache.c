@@ -7,10 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "int_lib.h"
-#ifndef __llir__
-#ifndef NDEBUG
 #include <assert.h>
-#endif
 #include <stddef.h>
 
 #if __APPLE__
@@ -88,9 +85,7 @@ void __clear_cache(void *start, void *end) {
   __asm __volatile("svc 0x0"
                    : "=r"(start_reg)
                    : "r"(syscall_nr), "r"(start_reg), "r"(end_reg), "r"(flags));
-#ifndef NDEBUG
   assert(start_reg == 0 && "Cache flush syscall failed.");
-#endif
 #else
   compilerrt_abort();
 #endif
@@ -167,9 +162,7 @@ void __clear_cache(void *start, void *end) {
   __asm __volatile("ecall"
                    : "=r"(start_reg)
                    : "r"(start_reg), "r"(end_reg), "r"(flags), "r"(syscall_nr));
-#ifndef NDEBUG
   assert(start_reg == 0 && "Cache flush syscall failed.");
-#endif
 #else
 #if __APPLE__
   // On Darwin, sys_icache_invalidate() provides this functionality
@@ -179,4 +172,3 @@ void __clear_cache(void *start, void *end) {
 #endif
 #endif
 }
-#endif
