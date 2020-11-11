@@ -493,6 +493,9 @@ SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const {
   if (Subtarget->isPPC64le()) {
     return DAG.expandVACopy(Op.getNode());
   }
+  if (Subtarget->isRISCV()) {
+    return DAG.expandVACopy(Op.getNode());
+  }
   llvm_unreachable("invalid architecture");
 }
 
