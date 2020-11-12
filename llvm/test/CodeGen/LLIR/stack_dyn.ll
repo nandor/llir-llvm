@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=llir -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=llir_x86_64 -verify-machineinstrs < %s | FileCheck %s
 
 declare void @ext_func(i64* %ptr)
 declare void @ext_func_i32(i32* %ptr)

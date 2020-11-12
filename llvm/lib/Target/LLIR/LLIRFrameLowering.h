@@ -34,8 +34,8 @@ class LLIRFrameLowering : public TargetFrameLowering {
   bool hasFP(const MachineFunction &MF) const override;
   bool hasReservedCallFrame(const MachineFunction &MF) const override;
 
-  int getFrameIndexReference(const MachineFunction &MF, int FI,
-                             Register &FrameReg) const override;
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
 
   bool targetHandlesStackFrameRounding() const override { return true; }
 };

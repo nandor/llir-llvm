@@ -26,7 +26,7 @@ class LLIRRegClass<list<ValueType> regTypes, int alignment, dag regList>
 // Special registers.
 //===----------------------------------------------------------------------===//
 
-def RSP : LLIRReg<"%rsp">;
+def RSP : LLIRReg<"%sp">;
 def FRAME_ADDR : LLIRReg<"%frame_addr">;
 
 def R64 : LLIRRegClass<[i64], 64, (add RSP, FRAME_ADDR)>;

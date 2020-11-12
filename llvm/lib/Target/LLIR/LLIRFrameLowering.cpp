@@ -60,12 +60,12 @@ bool LLIRFrameLowering::hasFP(const MachineFunction &MF) const {
   return MFI.isFrameAddressTaken() || MFI.hasVarSizedObjects();
 }
 
-int LLIRFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
-                                              Register &FrameReg) const {
+StackOffset LLIRFrameLowering::getFrameIndexReference(
+    const MachineFunction &MF, int FI, Register &FrameReg) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RI = MF.getSubtarget().getRegisterInfo();
 
   int Offset = MFI.getObjectOffset(FI) + MF.getFrameInfo().getStackSize();
   FrameReg = RI->getFrameRegister(MF);
-  return Offset;
+  return StackOffset::getFixed(Offset);
 }

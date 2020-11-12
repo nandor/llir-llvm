@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=llir -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=llir_x86_64 -verify-machineinstrs < %s | FileCheck %s
 
 ; CHECK-LABEL: test1:
 define i32 *@test1(i1 %a, i32* %b) {

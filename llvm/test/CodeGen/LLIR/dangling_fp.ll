@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=llir -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=llir_x86_64 -verify-machineinstrs < %s | FileCheck %s
 
 
 %struct.compare_stack = type { [8 x i32], i32* }

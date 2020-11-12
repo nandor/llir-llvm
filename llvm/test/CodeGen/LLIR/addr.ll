@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=llir -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=llir_x86_64 -verify-machineinstrs < %s | FileCheck %s
 
 @caml_atom_table = external global [0 x i64], align 8
 

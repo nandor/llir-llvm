@@ -1,4 +1,4 @@
-; RUN: llc -mtriple=llir -verify-machineinstrs < %s | FileCheck %s
+; RUN: llc -mtriple=llir_x86_64 -verify-machineinstrs < %s | FileCheck %s
 
 %struct.__sFILE = type opaque
 %struct.__va_list_tag = type { i32, i32, i8*, i8* }
