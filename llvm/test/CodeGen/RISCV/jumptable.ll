@@ -5,35 +5,40 @@
 define void @jt(i32 %in, i32* %out) nounwind {
 ; RV32I-LABEL: jt:
 ; RV32I:       # %bb.0: # %entry
-; RV32I-NEXT:    addi a2, zero, 2
-; RV32I-NEXT:    blt a2, a0, .LBB0_4
-; RV32I-NEXT:  # %bb.1: # %entry
-; RV32I-NEXT:    addi a2, zero, 1
-; RV32I-NEXT:    beq a0, a2, .LBB0_7
-; RV32I-NEXT:  # %bb.2: # %entry
-; RV32I-NEXT:    addi a2, zero, 2
-; RV32I-NEXT:    bne a0, a2, .LBB0_10
-; RV32I-NEXT:  # %bb.3: # %bb2
-; RV32I-NEXT:    addi a0, zero, 3
-; RV32I-NEXT:    j .LBB0_9
-; RV32I-NEXT:  .LBB0_4: # %entry
-; RV32I-NEXT:    addi a2, zero, 3
-; RV32I-NEXT:    beq a0, a2, .LBB0_8
-; RV32I-NEXT:  # %bb.5: # %entry
-; RV32I-NEXT:    addi a2, zero, 4
-; RV32I-NEXT:    bne a0, a2, .LBB0_10
-; RV32I-NEXT:  # %bb.6: # %bb4
-; RV32I-NEXT:    addi a0, zero, 1
-; RV32I-NEXT:    j .LBB0_9
-; RV32I-NEXT:  .LBB0_7: # %bb1
-; RV32I-NEXT:    addi a0, zero, 4
-; RV32I-NEXT:    j .LBB0_9
-; RV32I-NEXT:  .LBB0_8: # %bb3
-; RV32I-NEXT:    addi a0, zero, 2
-; RV32I-NEXT:  .LBB0_9: # %exit
-; RV32I-NEXT:    sw a0, 0(a1)
-; RV32I-NEXT:  .LBB0_10: # %exit
-; RV32I-NEXT:    ret
+; RV32I-NEXT:   addi  a0, a0, -1
+; RV32I-NEXT:   addi  a2, zero, 3
+; RV32I-NEXT:   bltu  a2, a0, .LBB0_7
+; RV32I-NEXT: # %bb.1:                                # %entry
+; RV32I-NEXT:   slli  a0, a0, 2
+; RV32I-NEXT:   lui a2, %hi(.LJTI0_0)
+; RV32I-NEXT:   addi  a2, a2, %lo(.LJTI0_0)
+; RV32I-NEXT:   add a0, a0, a2
+; RV32I-NEXT:   lw  a0, 0(a0)
+; RV32I-NEXT:   jr  a0
+; RV32I-NEXT: .LBB0_2:                                # %bb1
+; RV32I-NEXT:   addi  a0, zero, 4
+; RV32I-NEXT:   j .LBB0_6
+; RV32I-NEXT: .LBB0_3:                                # %bb2
+; RV32I-NEXT:   addi  a0, zero, 3
+; RV32I-NEXT:   j .LBB0_6
+; RV32I-NEXT: .LBB0_4:                                # %bb3
+; RV32I-NEXT:   addi  a0, zero, 2
+; RV32I-NEXT:   j .LBB0_6
+; RV32I-NEXT: .LBB0_5:                                # %bb4
+; RV32I-NEXT:   addi  a0, zero, 1
+; RV32I-NEXT: .LBB0_6:                                # %exit
+; RV32I-NEXT:   sw  a0, 0(a1)
+; RV32I-NEXT: .LBB0_7:                                # %exit
+; RV32I-NEXT:   ret
+; RV32I-NEXT: .Lfunc_end0:
+; RV32I-NEXT:   .size jt, .Lfunc_end0-jt
+; RV32I-NEXT:   .section  .rodata,"a",@progbits
+; RV32I-NEXT:   .p2align  2
+; RV32I-NEXT: .LJTI0_0:
+; RV32I-NEXT:   .word .LBB0_2
+; RV32I-NEXT:   .word .LBB0_3
+; RV32I-NEXT:   .word .LBB0_4
+; RV32I-NEXT:   .word .LBB0_5
 entry:
   switch i32 %in, label %exit [
     i32 1, label %bb1
