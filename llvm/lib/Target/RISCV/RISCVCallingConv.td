@@ -63,3 +63,62 @@ def CSR_XLEN_F64_Interrupt: CalleeSavedRegs<(add X1,
     (sequence "F%u_D", 28, 31),
     (sequence "F%u_D", 8, 9),
     (sequence "F%u_D", 18, 27))>;
+
+// LLIR: OCaml call which does not preserve any integer registers.
+def CSR_LLIR_Caml_Call_ILP32_LP64 : CalleeSavedRegs<
+  (add
+  )
+>;
+def CSR_LLIR_Caml_Call_ILP32F_LP64F : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Call_ILP32_LP64
+  )
+>;
+def CSR_LLIR_Caml_Call_ILP32D_LP64D : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Call_ILP32_LP64
+  )
+>;
+
+// LLIR: OCaml-to-C call which respects the C calling convention.
+def CSR_LLIR_Caml_Ext_ILP32_LP64 : CalleeSavedRegs<
+  (add
+  )
+>;
+def CSR_LLIR_Caml_Ext_ILP32F_LP64F : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Ext_ILP32_LP64
+  )
+>;
+def CSR_LLIR_Caml_Ext_ILP32D_LP64D: CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Ext_ILP32_LP64
+  )
+>;
+
+// LLIR: OCaml allocation call, does not preserve 25-28
+def CSR_LLIR_Caml_Alloc_ILP32_LP64 : CalleeSavedRegs<
+  (add
+  )
+>;
+def CSR_LLIR_Caml_Alloc_ILP32F_LP64F : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Alloc_ILP32_LP64
+  )
+>;
+def CSR_LLIR_Caml_Alloc_ILP32D_LP64D : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Alloc_ILP32_LP64
+  )
+>;
+
+// LLIR: OCaml GC trampoline call, preserves all registers.
+def CSR_LLIR_Caml_Gc_ILP32_LP64 : CalleeSavedRegs<
+  (add
+  )
+>;
+def CSR_LLIR_Caml_Gc_ILP32F_LP64F : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Gc_ILP32_LP64
+  )
+>;
+def CSR_LLIR_Caml_Gc_ILP32D_LP64D : CalleeSavedRegs<
+  (add CSR_LLIR_Caml_Gc_ILP32_LP64
+  )
+>;
+
+// LLIR: setjmp, does not preserve any registers.
+def CSR_LLIR_Setjmp : CalleeSavedRegs<(add)>;

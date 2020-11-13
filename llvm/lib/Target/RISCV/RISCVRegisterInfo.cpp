@@ -44,7 +44,77 @@ RISCVRegisterInfo::RISCVRegisterInfo(unsigned HwMode)
 
 const MCPhysReg *
 RISCVRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
+  assert(MF && "Invalid MachineFunction pointer");
+
   auto &Subtarget = MF->getSubtarget<RISCVSubtarget>();
+  switch (MF->getFunction().getCallingConv()) {
+    default:
+      break;
+    case CallingConv::LLIR_CAML: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Call_ILP32_LP64_SaveList;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Call_ILP32F_LP64F_SaveList;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Call_ILP32D_LP64D_SaveList;
+      }
+    }
+    case CallingConv::LLIR_CAML_EXT: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Ext_ILP32_LP64_SaveList;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Ext_ILP32F_LP64F_SaveList;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Ext_ILP32D_LP64D_SaveList;
+      }
+    }
+    case CallingConv::LLIR_CAML_ALLOC: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Alloc_ILP32_LP64_SaveList;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Alloc_ILP32F_LP64F_SaveList;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Alloc_ILP32D_LP64D_SaveList;
+      }
+    }
+    case CallingConv::LLIR_CAML_GC: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Gc_ILP32_LP64_SaveList;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Gc_ILP32F_LP64F_SaveList;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Gc_ILP32D_LP64D_SaveList;
+      }
+    }
+    case CallingConv::LLIR_SETJMP: {
+      return CSR_LLIR_Setjmp_SaveList;
+    }
+  }
+
   if (MF->getFunction().hasFnAttribute("interrupt")) {
     if (Subtarget.hasStdExtD())
       return CSR_XLEN_F64_Interrupt_SaveList;
@@ -193,6 +263,73 @@ const uint32_t *
 RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
                                         CallingConv::ID /*CC*/) const {
   auto &Subtarget = MF.getSubtarget<RISCVSubtarget>();
+  switch (MF.getFunction().getCallingConv()) {
+    default:
+      break;
+    case CallingConv::LLIR_CAML: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Call_ILP32_LP64_RegMask;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Call_ILP32F_LP64F_RegMask;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Call_ILP32D_LP64D_RegMask;
+      }
+    }
+    case CallingConv::LLIR_CAML_EXT: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Ext_ILP32_LP64_RegMask;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Ext_ILP32F_LP64F_RegMask;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Ext_ILP32D_LP64D_RegMask;
+      }
+    }
+    case CallingConv::LLIR_CAML_ALLOC: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Alloc_ILP32_LP64_RegMask;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Alloc_ILP32F_LP64F_RegMask;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Alloc_ILP32D_LP64D_RegMask;
+      }
+    }
+    case CallingConv::LLIR_CAML_GC: {
+      switch (Subtarget.getTargetABI()) {
+      default:
+        llvm_unreachable("Unrecognized ABI");
+      case RISCVABI::ABI_ILP32:
+      case RISCVABI::ABI_LP64:
+        return CSR_LLIR_Caml_Gc_ILP32_LP64_RegMask;
+      case RISCVABI::ABI_ILP32F:
+      case RISCVABI::ABI_LP64F:
+        return CSR_LLIR_Caml_Gc_ILP32F_LP64F_RegMask;
+      case RISCVABI::ABI_ILP32D:
+      case RISCVABI::ABI_LP64D:
+        return CSR_LLIR_Caml_Gc_ILP32D_LP64D_RegMask;
+      }
+    }
+    case CallingConv::LLIR_SETJMP: {
+      return CSR_LLIR_Setjmp_RegMask;
+    }
+  }
 
   switch (Subtarget.getTargetABI()) {
   default:
