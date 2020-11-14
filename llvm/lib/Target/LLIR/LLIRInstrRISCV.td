@@ -11,22 +11,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-let Predicates = [IsX86_64] in {
+let Predicates = [IsRISCV] in {
 
-def X86_ATOMIC_XCHG_64 : I
+def RISCV_ATOMIC_XCHG_32 : I
   < (outs I64:$dst)
   , (ins I64:$addr, I64:$src)
-  , [(set I64:$dst, (atomic_swap_64 I64:$addr, I64:$src))]
-  , "x86_xchg.i64\t$dst, $addr, $src"
+  , [(set I64:$dst, (atomic_swap_32 I64:$addr, I64:$src))]
+  , "riscv_xchg.i64\t$dst, $addr, $src"
   , 0xE1
   >;
 
-def X86_RDTSC_I64 : I
-  < (outs I64:$res)
-  , (ins)
-  , [(set I64:$res, LLIRrdtsc)]
-  , "x86_rdtsc.i64\t$res"
-  , 0x15
+def RISCV_ATOMIC_XCHG_64 : I
+  < (outs I64:$dst)
+  , (ins I64:$addr, I64:$src)
+  , [(set I64:$dst, (atomic_swap_64 I64:$addr, I64:$src))]
+  , "riscv_xchg.i64\t$dst, $addr, $src"
+  , 0xE1
   >;
 
 }

@@ -334,10 +334,12 @@ static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   case llvm::Triple::ppc:
   case llvm::Triple::ppc64:
   case llvm::Triple::ppc64le:
+  case llvm::Triple::llir_ppc64le:
     ppc::getPPCTargetFeatures(D, Triple, Args, Features);
     break;
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::llir_riscv64:
     riscv::getRISCVTargetFeatures(D, Triple, Args, Features);
     break;
   case llvm::Triple::systemz:
@@ -346,10 +348,12 @@ static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
+  case llvm::Triple::llir_aarch64:
     aarch64::getAArch64TargetFeatures(D, Triple, Args, Features);
     break;
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86_64:
     x86::getX86TargetFeatures(D, Triple, Args, Features);
     break;
   case llvm::Triple::hexagon:

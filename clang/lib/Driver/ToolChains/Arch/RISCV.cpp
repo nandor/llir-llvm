@@ -451,7 +451,8 @@ static void getRISCFeaturesFromMcpu(const Driver &D, const llvm::Triple &Triple,
                                     const llvm::opt::ArgList &Args,
                                     const llvm::opt::Arg *A, StringRef Mcpu,
                                     std::vector<StringRef> &Features) {
-  bool Is64Bit = (Triple.getArch() == llvm::Triple::riscv64);
+  bool Is64Bit = (Triple.getArch() == llvm::Triple::riscv64 ||
+                  Triple.getArch() == llvm::Triple::llir_riscv64);
   llvm::RISCV::CPUKind CPUKind = llvm::RISCV::parseCPUKind(Mcpu);
   if (!llvm::RISCV::checkCPUKind(CPUKind, Is64Bit) ||
       !llvm::RISCV::getCPUFeaturesExceptStdExt(CPUKind, Features)) {
@@ -556,7 +557,8 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
 
 StringRef riscv::getRISCVABI(const ArgList &Args, const llvm::Triple &Triple) {
   assert((Triple.getArch() == llvm::Triple::riscv32 ||
-          Triple.getArch() == llvm::Triple::riscv64) &&
+          Triple.getArch() == llvm::Triple::riscv64 ||
+          Triple.getArch() == llvm::Triple::llir_riscv64) &&
          "Unexpected triple");
 
   // GCC's logic around choosing a default `-mabi=` is complex. If GCC is not
@@ -629,7 +631,8 @@ StringRef riscv::getRISCVABI(const ArgList &Args, const llvm::Triple &Triple) {
 StringRef riscv::getRISCVArch(const llvm::opt::ArgList &Args,
                               const llvm::Triple &Triple) {
   assert((Triple.getArch() == llvm::Triple::riscv32 ||
-          Triple.getArch() == llvm::Triple::riscv64) &&
+          Triple.getArch() == llvm::Triple::riscv64 ||
+          Triple.getArch() == llvm::Triple::llir_riscv64) &&
          "Unexpected triple");
 
   // GCC's logic around choosing a default `-march=` is complex. If GCC is not

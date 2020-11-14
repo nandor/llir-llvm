@@ -248,9 +248,9 @@ Register RISCVRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
 
 const uint32_t *
 RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
-                                        CallingConv::ID /*CC*/) const {
+                                        CallingConv::ID CC) const {
   auto &Subtarget = MF.getSubtarget<RISCVSubtarget>();
-  switch (MF.getFunction().getCallingConv()) {
+  switch (CC) {
     default:
       break;
     case CallingConv::LLIR_CAML:

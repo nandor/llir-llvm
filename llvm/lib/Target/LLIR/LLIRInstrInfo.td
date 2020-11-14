@@ -17,6 +17,7 @@
 
 def IsX86_64      : Predicate<"Subtarget->isX86_64()">;
 def IsAArch64     : Predicate<"Subtarget->isAArch64()">;
+def IsRISCV       : Predicate<"Subtarget->isRISCV()">;
 
 
 //===----------------------------------------------------------------------===//
@@ -332,3 +333,4 @@ include "LLIRInstrInteger.td"
 include "LLIRInstrFloat.td"
 include "LLIRInstrX86.td"
 include "LLIRInstrAArch64.td"
+include "LLIRInstrRISCV.td"

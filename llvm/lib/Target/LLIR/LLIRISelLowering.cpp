@@ -845,6 +845,15 @@ LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   if (Subtarget->isAArch64()) {
     return AtomicExpansionKind::LLSC;
   }
+  if (Subtarget->isRISCV()) {
+    if (AI->isFloatingPointOperation())
+      return AtomicExpansionKind::CmpXChg;
+
+    unsigned Size = AI->getType()->getPrimitiveSizeInBits();
+    if (Size == 8 || Size == 16)
+      return AtomicExpansionKind::MaskedIntrinsic;
+    return AtomicExpansionKind::None;
+  }
   llvm_unreachable("not implemented");
 }
 

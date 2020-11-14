@@ -2421,7 +2421,7 @@ unsigned ASTContext::getPreferredTypeAlign(const Type *T) const {
   // The preferred alignment of member pointers is that of a pointer.
   if (T->isMemberPointerType())
     return getPreferredTypeAlign(getPointerDiffType().getTypePtr());
- 
+
   if (!Target->allowsLargerPreferedTypeAlignment())
     return ABIAlign;
 
