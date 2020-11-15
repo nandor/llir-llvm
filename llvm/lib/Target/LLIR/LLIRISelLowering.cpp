@@ -666,14 +666,22 @@ LLIRTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
       default:
         break;
       case 'r':
-        if (VT.getSizeInBits() == 8)
-          return std::make_pair(0U, &LLIR::I8RegClass);
-        if (VT.getSizeInBits() == 16)
-          return std::make_pair(0U, &LLIR::I16RegClass);
-        if (VT.getSizeInBits() == 32)
-          return std::make_pair(0U, &LLIR::I32RegClass);
-        if (VT.getSizeInBits() == 64)
-          return std::make_pair(0U, &LLIR::I64RegClass);
+        switch (VT.SimpleTy) {
+          default:
+            llvm_unreachable("unknown type");
+          case MVT::i8:
+            return std::make_pair(0U, &LLIR::I8RegClass);
+          case MVT::i16:
+            return std::make_pair(0U, &LLIR::I16RegClass);
+          case MVT::i32:
+            return std::make_pair(0U, &LLIR::I32RegClass);
+          case MVT::i64:
+            return std::make_pair(0U, &LLIR::I64RegClass);
+          case MVT::f32:
+            return std::make_pair(0U, &LLIR::F32RegClass);
+          case MVT::f64:
+            return std::make_pair(0U, &LLIR::F64RegClass);
+        }
         break;
     }
   }
