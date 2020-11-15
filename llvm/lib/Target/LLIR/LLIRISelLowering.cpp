@@ -99,20 +99,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
   // Deal with floating point operations.
   for (auto T : {MVT::f32, MVT::f64, MVT::f80, MVT::f128}) {
-    // Decide what to do with funky float operations based on target.
-    LegalizeAction Op = Legal;
-    if (Subtarget->isX86_64()) {
-      Op = Legal;
-    } else if (Subtarget->isAArch64()) {
-      Op = T != MVT::f128 ? Legal : Custom;
-    } else if (Subtarget->isPPC64le()) {
-      Op = Legal;
-    } else if (Subtarget->isRISCV()) {
-      Op = Legal;
-    } else {
-      llvm_unreachable("invalid subtarget");
-    }
-
     // Expand conditionals.
     setOperationAction(ISD::BR_CC, T, Expand);
     setOperationAction(ISD::SELECT_CC, T, Expand);
@@ -125,28 +111,61 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::FP_ROUND, T, Custom);
     setOperationAction(ISD::STRICT_FP_ROUND, T, Custom);
 
-    // Decide whether to allow f128 operations.
-    setOperationAction(ISD::FEXP, T, Op);
-    setOperationAction(ISD::FEXP2, T, Op);
-    setOperationAction(ISD::FLOG, T, Op);
-    setOperationAction(ISD::FLOG2, T, Op);
-    setOperationAction(ISD::FLOG10, T, Op);
-    setOperationAction(ISD::FP_EXTEND, T, Op);
-    setOperationAction(ISD::FTRUNC, T, Op);
-    setOperationAction(ISD::STRICT_FTRUNC, T, Op);
-    setOperationAction(ISD::FADD, T, Op);
-    setOperationAction(ISD::STRICT_FADD, T, Op);
-    setOperationAction(ISD::FSUB, T, Op);
-    setOperationAction(ISD::STRICT_FSUB, T, Op);
-    setOperationAction(ISD::FMUL, T, Op);
-    setOperationAction(ISD::STRICT_FMUL, T, Op);
-    setOperationAction(ISD::FDIV, T, Op);
-    setOperationAction(ISD::STRICT_FDIV, T, Op);
-    setOperationAction(ISD::FREM, T, Op);
-    setOperationAction(ISD::STRICT_FREM, T, Op);
-    setOperationAction(ISD::SETCC, T, Op);
-    setOperationAction(ISD::STRICT_FSETCC, T, Op);
-    setOperationAction(ISD::STRICT_FSETCCS, T, Op);
+    // Decide what to do with funky float operations based on target.
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_64()) {
+        Op = Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = T != MVT::f128 ? Legal : Custom;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Legal;
+      } else if (Subtarget->isRISCV()) {
+        Op = Legal;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
+
+      // Decide whether to allow f128 operations.
+      setOperationAction(ISD::FEXP, T, Op);
+      setOperationAction(ISD::FEXP2, T, Op);
+      setOperationAction(ISD::FLOG, T, Op);
+      setOperationAction(ISD::FLOG2, T, Op);
+      setOperationAction(ISD::FLOG10, T, Op);
+      setOperationAction(ISD::FP_EXTEND, T, Op);
+      setOperationAction(ISD::FADD, T, Op);
+      setOperationAction(ISD::STRICT_FADD, T, Op);
+      setOperationAction(ISD::FSUB, T, Op);
+      setOperationAction(ISD::STRICT_FSUB, T, Op);
+      setOperationAction(ISD::FMUL, T, Op);
+      setOperationAction(ISD::STRICT_FMUL, T, Op);
+      setOperationAction(ISD::FDIV, T, Op);
+      setOperationAction(ISD::STRICT_FDIV, T, Op);
+      setOperationAction(ISD::FREM, T, Op);
+      setOperationAction(ISD::STRICT_FREM, T, Op);
+      setOperationAction(ISD::SETCC, T, Op);
+      setOperationAction(ISD::STRICT_FSETCC, T, Op);
+      setOperationAction(ISD::STRICT_FSETCCS, T, Op);
+    }
+
+    // Disable some operations on some platforms.
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_64()) {
+        Op = Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = T != MVT::f128 ? Legal : Custom;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Legal;
+      } else if (Subtarget->isRISCV()) {
+        Op = Expand;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
+
+      setOperationAction(ISD::FTRUNC, T, Op);
+      setOperationAction(ISD::STRICT_FTRUNC, T, Op);
+    }
   }
 
   // Disable some integer operations.
