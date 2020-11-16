@@ -411,7 +411,8 @@ public:
       LongDoubleWidth = 64;
       LongDoubleAlign = DoubleAlign = 32;
       LongDoubleFormat = &llvm::APFloat::IEEEdouble();
-    } else if ((Triple.getArch() == llvm::Triple::ppc64le)) {
+    } else if (Triple.getArch() == llvm::Triple::ppc64le ||
+               Triple.getArch() == llvm::Triple::llir_ppc64le) {
       DataLayout = "e-m:e-i64:64-n32:64";
       ABI = "elfv2";
     } else {
@@ -419,7 +420,8 @@ public:
       ABI = "elfv1";
     }
 
-    if (Triple.isOSFreeBSD() || Triple.isOSOpenBSD() || Triple.isMusl()) {
+    if (Triple.isOSFreeBSD() || Triple.isOSOpenBSD() || Triple.isMusl() ||
+        Triple.isLLIR()) {
       LongDoubleWidth = LongDoubleAlign = 64;
       LongDoubleFormat = &llvm::APFloat::IEEEdouble();
     }

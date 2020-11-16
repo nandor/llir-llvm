@@ -464,7 +464,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("llir_arm64", Triple::llir_aarch64)
     .Case("llir_x86_64", Triple::llir_x86_64)
     .Case("llir_aarch64", Triple::llir_aarch64)
-    .Case("llir_ppc64le", Triple::llir_ppc64le)
+    .Cases("llir_powerpc64le", "llir_ppc64le", Triple::llir_ppc64le)
     .Case("llir_riscv64", Triple::llir_riscv64)
     .Default(Triple::UnknownArch);
 

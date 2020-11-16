@@ -137,10 +137,12 @@ static cl::opt<ICmpInGPRType> CmpInGPR(
 PPCDAGMatcher::PPCDAGMatcher(
     PPCTargetMachine &tm,
     CodeGenOpt::Level OL,
+    const PPCTargetLowering *Lowering,
     const PPCSubtarget *Subtarget)
   : DAGMatcher(tm, new SelectionDAG(tm, OL), OL)
   , TM(tm)
   , PPCSubTarget(Subtarget)
+  , PPCLowering(Lowering)
   , Subtarget(Subtarget)
 {
 }

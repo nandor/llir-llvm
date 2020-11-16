@@ -36,6 +36,7 @@ protected:
 
 public:
   explicit PPCDAGMatcher(PPCTargetMachine &tm, CodeGenOpt::Level OptLevel,
+                         const PPCTargetLowering *Lowering = nullptr,
                          const PPCSubtarget *Subtarget = nullptr);
 
   void PreprocessISelDAG() override;
