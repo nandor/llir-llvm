@@ -265,8 +265,28 @@ bool ShrinkWrap::useOrDefCSROrFI(const MachineInstr &MI,
   //         are known to not access the stack.
   //       - Further, data dependency and alias analysis can validate
   //         that load and stores never derive from the stack pointer.
-  if (MI.mayLoadOrStore())
-    return true;
+  if (MI.mayLoadOrStore()) {
+    const MachineFunction &MF = *MI.getParent()->getParent();
+    if (MF.getFunction().getCallingConv() != CallingConv::LLIR_CAML)
+      return true;
+
+    for (auto *mop : MI.memoperands()) {
+      if (auto *pseudo = mop->getPseudoValue()) {
+        switch (pseudo->kind()) {
+          case PseudoSourceValue::Stack:
+          case PseudoSourceValue::FixedStack:
+            return true;
+          case PseudoSourceValue::GOT:
+          case PseudoSourceValue::JumpTable:
+          case PseudoSourceValue::ConstantPool:
+          case PseudoSourceValue::GlobalValueCallEntry:
+          case PseudoSourceValue::ExternalSymbolCallEntry:
+          case PseudoSourceValue::TargetCustom:
+            continue;
+        }
+      }
+    }
+  }
 
   if (MI.getOpcode() == FrameSetupOpcode ||
       MI.getOpcode() == FrameDestroyOpcode) {
