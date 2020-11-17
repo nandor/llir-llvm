@@ -142,8 +142,8 @@ PPCDAGMatcher::PPCDAGMatcher(
   : DAGMatcher(tm, new SelectionDAG(tm, OL), OL)
   , TM(tm)
   , PPCSubTarget(Subtarget)
-  , PPCLowering(Lowering)
   , Subtarget(Subtarget)
+  , PPCLowering(Lowering)
 {
 }
 
