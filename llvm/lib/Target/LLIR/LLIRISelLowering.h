@@ -118,6 +118,9 @@ public:
   SDValue LowerFP_TO_INT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINT_TO_FP(SDValue Op, SelectionDAG &DAG) const;
 
+  void ReplaceNodeResults(SDNode *N, SmallVectorImpl<SDValue>&Results,
+                          SelectionDAG &DAG) const override;
+
   bool CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
                       bool isVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,

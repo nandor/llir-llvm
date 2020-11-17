@@ -213,14 +213,14 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       }
 
       // Handle casts.
-      setOperationAction(ISD::SINT_TO_FP, T, Custom);
-      setOperationAction(ISD::UINT_TO_FP, T, Custom);
-      setOperationAction(ISD::STRICT_SINT_TO_FP, T, Custom);
-      setOperationAction(ISD::STRICT_UINT_TO_FP, T, Custom);
-      setOperationAction(ISD::FP_TO_UINT, T, Custom);
-      setOperationAction(ISD::FP_TO_SINT, T, Custom);
-      setOperationAction(ISD::STRICT_FP_TO_SINT, T, Custom);
-      setOperationAction(ISD::STRICT_FP_TO_UINT, T, Custom);
+      setOperationAction(ISD::SINT_TO_FP, T, Op);
+      setOperationAction(ISD::UINT_TO_FP, T, Op);
+      setOperationAction(ISD::STRICT_SINT_TO_FP, T, Op);
+      setOperationAction(ISD::STRICT_UINT_TO_FP, T, Op);
+      setOperationAction(ISD::FP_TO_UINT, T, Op);
+      setOperationAction(ISD::FP_TO_SINT, T, Op);
+      setOperationAction(ISD::STRICT_FP_TO_SINT, T, Op);
+      setOperationAction(ISD::STRICT_FP_TO_UINT, T, Op);
     }
 
     {
@@ -866,6 +866,16 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
       InVals.push_back(Call);
       return Call.getValue(1);
     }
+  }
+}
+
+void LLIRTargetLowering::ReplaceNodeResults(SDNode *N,
+                                            SmallVectorImpl<SDValue> &Results,
+                                            SelectionDAG &DAG) const {
+  SDLoc dl(N);
+  switch (N->getOpcode()) {
+  default:
+    llvm_unreachable("Do not know how to custom type legalize this operation!");
   }
 }
 
