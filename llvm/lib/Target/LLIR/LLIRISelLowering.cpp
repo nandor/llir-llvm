@@ -285,6 +285,33 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
   // Custom lowering for some buildings.
   setOperationAction(ISD::READCYCLECOUNTER, MVT::i64, Custom);
+
+  // Expansion of memset/memcpy/memmove
+  if (Subtarget->isX86_64()) {
+    MaxStoresPerMemset = 16;
+    MaxStoresPerMemsetOptSize = 8;
+    MaxStoresPerMemcpy = 8;
+    MaxStoresPerMemcpyOptSize = 4;
+    MaxStoresPerMemmove = 8;
+    MaxStoresPerMemmoveOptSize = 4;
+    MaxLoadsPerMemcmp = 2;
+    MaxLoadsPerMemcmpOptSize = 2;
+  } else if (Subtarget->isAArch64()) {
+    MaxStoresPerMemsetOptSize = 8;
+    MaxStoresPerMemset = MaxStoresPerMemsetOptSize;
+    MaxGluedStoresPerMemcpy = 4;
+    MaxStoresPerMemcpyOptSize = 4;
+    MaxStoresPerMemcpy = MaxStoresPerMemcpyOptSize;
+    MaxStoresPerMemmoveOptSize = MaxStoresPerMemmove = 4;
+    MaxLoadsPerMemcmpOptSize = 4;
+    MaxLoadsPerMemcmp =  MaxLoadsPerMemcmpOptSize;
+  } else if (Subtarget->isPPC64le()) {
+    // No specialisation.
+  } else if (Subtarget->isRISCV()) {
+    // No specialisation.
+  } else {
+    llvm_unreachable("unknown architecture");
+  }
 }
 
 SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
