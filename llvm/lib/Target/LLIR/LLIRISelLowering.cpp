@@ -912,11 +912,10 @@ LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   if (Subtarget->isRISCV()) {
     if (AI->isFloatingPointOperation())
       return AtomicExpansionKind::CmpXChg;
-
-    unsigned Size = AI->getType()->getPrimitiveSizeInBits();
-    if (Size == 8 || Size == 16)
-      return AtomicExpansionKind::MaskedIntrinsic;
     return AtomicExpansionKind::None;
+  }
+  if (Subtarget->isPPC64le()) {
+    return AtomicExpansionKind::LLSC;
   }
   llvm_unreachable("not implemented");
 }
@@ -956,25 +955,6 @@ bool LLIRTargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
 
 Value *LLIRTargetLowering::emitLoadLinked(IRBuilder<> &Builder, Value *Addr,
                                              AtomicOrdering Ord) const {
-  if (Subtarget->isAArch64()) {
-    return emitLoadLinkedAArch64(Builder, Addr, Ord);
-  }
-  llvm_unreachable("not implemented");
-}
-
-
-Value *LLIRTargetLowering::emitStoreConditional(IRBuilder<> &Builder, Value *Val,
-                                              Value *Addr,
-                                              AtomicOrdering Ord) const {
-  if (Subtarget->isAArch64()) {
-    return emitStoreConditionalAArch64(Builder, Val, Addr, Ord);
-  }
-  llvm_unreachable("not implemented");
-}
-
-Value *LLIRTargetLowering::emitLoadLinkedAArch64(IRBuilder<> &Builder,
-                                               Value *Addr,
-                                               AtomicOrdering Ord) const {
   Module *M = Builder.GetInsertBlock()->getParent()->getParent();
   bool IsAcquire = isAcquireOrStronger(Ord);
 
@@ -986,8 +966,10 @@ Value *LLIRTargetLowering::emitLoadLinkedAArch64(IRBuilder<> &Builder,
   return Builder.CreateCall(Ldxr, Addr);
 }
 
-Value *LLIRTargetLowering::emitStoreConditionalAArch64(
-    IRBuilder<> &Builder, Value *Val, Value *Addr, AtomicOrdering Ord) const {
+
+Value *LLIRTargetLowering::emitStoreConditional(IRBuilder<> &Builder, Value *Val,
+                                              Value *Addr,
+                                              AtomicOrdering Ord) const {
   Module *M = Builder.GetInsertBlock()->getParent()->getParent();
   bool IsRelease = isReleaseOrStronger(Ord);
   Intrinsic::ID Int = IsRelease ? Intrinsic::llir_stlxr : Intrinsic::llir_stxr;

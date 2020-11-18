@@ -139,12 +139,6 @@ public:
   Value *emitStoreConditional(IRBuilder<> &Builder, Value *Val, Value *Addr,
                               AtomicOrdering Ord) const override;
 
-  Value *emitLoadLinkedAArch64(IRBuilder<> &Builder, Value *Addr,
-                               AtomicOrdering Ord) const;
-  Value *emitStoreConditionalAArch64(IRBuilder<> &Builder, Value *Val,
-                                     Value *Addr,
-                                     AtomicOrdering Ord) const;
-
   bool mayBeEmittedAsTailCall(const CallInst *CI) const override;
 
 private:
