@@ -207,7 +207,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       } else if (Subtarget->isPPC64le()) {
         Op = Legal;
       } else if (Subtarget->isRISCV()) {
-        Op = Legal;
+        Op = Custom;
       } else {
         llvm_unreachable("invalid subtarget");
       }
