@@ -12,6 +12,7 @@
 #include <system_error>
 
 #include "Arch/RISCV.h"
+#include "Arch/PPC.h"
 #include "CommonArgs.h"
 #include "Linux.h"
 #include "clang/Config/config.h"
@@ -70,6 +71,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   ArgStringList CmdArgs;
 
   // Forward architecture flags.
+  std::vector<StringRef> Features;
   switch (getToolChain().getArch()) {
   default:
     llvm_unreachable("invalid LLIR architecture");
@@ -77,27 +79,20 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     break;
   case llvm::Triple::llir_aarch64:
     break;
-  case llvm::Triple::llir_ppc64le:
+  case llvm::Triple::llir_ppc64le: {
+    llvm::Triple BaseTriple(Triple);
+    BaseTriple.setArch(llvm::Triple::ppc64le);
+    ppc::getPPCTargetFeatures(TC.getDriver(), BaseTriple, Args, Features);
     break;
+  }
   case llvm::Triple::llir_riscv64: {
     llvm::Triple BaseTriple(Triple);
     BaseTriple.setArch(llvm::Triple::riscv64);
+    riscv::getRISCVTargetFeatures(TC.getDriver(), BaseTriple, Args, Features);
 
     StringRef ABIName = riscv::getRISCVABI(Args, BaseTriple);
     CmdArgs.push_back("-mabi");
     CmdArgs.push_back(ABIName.data());
-
-    std::string FS;
-    std::vector<StringRef> Features;
-    riscv::getRISCVTargetFeatures(TC.getDriver(), BaseTriple, Args, Features);
-    for (StringRef Feature : Features) {
-      if (!FS.empty()) {
-        FS += ",";
-      }
-      FS += Feature;
-    }
-    CmdArgs.push_back("-mfs");
-    CmdArgs.push_back(Args.MakeArgString(FS));
 
     CmdArgs.push_back("-mcpu");
     if (const Arg *A = Args.getLastArg(options::OPT_mcpu_EQ)) {
@@ -107,6 +102,18 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     }
     break;
   }
+  }
+
+  if (!Features.empty()) {
+    std::string FS;
+    for (StringRef Feature : Features) {
+      if (!FS.empty()) {
+        FS += ",";
+      }
+      FS += Feature;
+    }
+    CmdArgs.push_back("-mfs");
+    CmdArgs.push_back(Args.MakeArgString(FS));
   }
 
   // Forward the optimisation level.
