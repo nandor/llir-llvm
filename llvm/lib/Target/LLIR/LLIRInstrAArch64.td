@@ -41,7 +41,7 @@ def AARCH64_ATOMIC_LDAXR_64 : I
   < (outs I64:$dst)
   , (ins I64:$addr)
   , [(set I64:$dst, (int_llir_ldaxr I64:$addr))]
-  , "aarch64_ll.i32\t$dst, $addr"
+  , "aarch64_ll.i64\t$dst, $addr"
   , 0xE1
   >;
 
