@@ -78,7 +78,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case xcore:          return "xcore";
   case llir_x86_64:    return "llir_x86_64";
   case llir_aarch64:   return "llir_aarch64";
-  case llir_ppc64le:   return "llir_ppc64le";
+  case llir_ppc64le:   return "llir_powerpc64le";
   case llir_riscv64:   return "llir_riscv64";
   }
 
