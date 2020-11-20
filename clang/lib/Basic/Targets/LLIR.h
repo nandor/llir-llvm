@@ -56,6 +56,7 @@ class LLVM_LIBRARY_VISIBILITY LLIR_X86_64TargetInfo : public X86_64TargetInfo {
                         MacroBuilder &Builder) const override {
     X86_64TargetInfo::getTargetDefines(Opts, Builder);
     Builder.defineMacro("__llir__");
+    Builder.defineMacro("__llir_x86_64__");
   }
 };
 
@@ -70,6 +71,7 @@ public:
                         MacroBuilder &Builder) const override {
     AArch64leTargetInfo::getTargetDefines(Opts, Builder);
     Builder.defineMacro("__llir__");
+    Builder.defineMacro("__llir_aarch64__");
   }
 };
 
@@ -84,6 +86,7 @@ public:
                         MacroBuilder &Builder) const override {
     PPC64TargetInfo::getTargetDefines(Opts, Builder);
     Builder.defineMacro("__llir__");
+    Builder.defineMacro("__llir_powerpc64__");
   }
 };
 
@@ -98,6 +101,7 @@ public:
                         MacroBuilder &Builder) const override {
     RISCV64TargetInfo::getTargetDefines(Opts, Builder);
     Builder.defineMacro("__llir__");
+    Builder.defineMacro("__llir_riscv64__");
   }
 };
 
