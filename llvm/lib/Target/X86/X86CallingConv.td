@@ -1171,8 +1171,20 @@ def CSR_SysV64_RegCall       : CalleeSavedRegs<(add CSR_SysV64_RegCall_NoSSE,
 // LLIR: OCaml call which does not preserve any registers.
 def CSR_LLIR_Caml : CalleeSavedRegs<(add)>;
 
+// LLIR: OCaml-to-C invoke which does not preserve any regs.
+def CSR_LLIR_Caml_Ext_Invoke : CalleeSavedRegs<(add)>;
+
 // LLIR: OCaml-to-C call which respects the System-V convention.
-def CSR_LLIR_Caml_Ext : CalleeSavedRegs<(add)>;
+def CSR_LLIR_Caml_Ext_Call : CalleeSavedRegs<
+  (add
+    RBX,
+    R12,
+    R13,
+    R14,
+    R15,
+    RBP
+  )
+>;
 
 // LLIR: OCaml allocation call, does not preserve r14 and r15.
 def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<

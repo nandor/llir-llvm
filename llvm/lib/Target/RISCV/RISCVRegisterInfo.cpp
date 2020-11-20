@@ -52,19 +52,21 @@ RISCVRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
       break;
     case CallingConv::LLIR_CAML:
       return CSR_LLIR_Caml_Call_SaveList;
-    case CallingConv::LLIR_CAML_EXT: {
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_SaveList;
+    case CallingConv::LLIR_CAML_EXT_CALL: {
       switch (Subtarget.getTargetABI()) {
       default:
         llvm_unreachable("Unrecognized ABI");
       case RISCVABI::ABI_ILP32:
       case RISCVABI::ABI_LP64:
-        return CSR_LLIR_Caml_Ext_ILP32_LP64_SaveList;
+        return CSR_LLIR_Caml_Ext_Call_ILP32_LP64_SaveList;
       case RISCVABI::ABI_ILP32F:
       case RISCVABI::ABI_LP64F:
-        return CSR_LLIR_Caml_Ext_ILP32F_LP64F_SaveList;
+        return CSR_LLIR_Caml_Ext_Call_ILP32F_LP64F_SaveList;
       case RISCVABI::ABI_ILP32D:
       case RISCVABI::ABI_LP64D:
-        return CSR_LLIR_Caml_Ext_ILP32D_LP64D_SaveList;
+        return CSR_LLIR_Caml_Ext_Call_ILP32D_LP64D_SaveList;
       }
     }
     case CallingConv::LLIR_CAML_ALLOC: {
@@ -255,19 +257,21 @@ RISCVRegisterInfo::getCallPreservedMask(const MachineFunction & MF,
       break;
     case CallingConv::LLIR_CAML:
       return CSR_LLIR_Caml_Call_RegMask;
-    case CallingConv::LLIR_CAML_EXT: {
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_RegMask;
+    case CallingConv::LLIR_CAML_EXT_CALL: {
       switch (Subtarget.getTargetABI()) {
       default:
         llvm_unreachable("Unrecognized ABI");
       case RISCVABI::ABI_ILP32:
       case RISCVABI::ABI_LP64:
-        return CSR_LLIR_Caml_Ext_ILP32_LP64_RegMask;
+        return CSR_LLIR_Caml_Ext_Call_ILP32_LP64_RegMask;
       case RISCVABI::ABI_ILP32F:
       case RISCVABI::ABI_LP64F:
-        return CSR_LLIR_Caml_Ext_ILP32F_LP64F_RegMask;
+        return CSR_LLIR_Caml_Ext_Call_ILP32F_LP64F_RegMask;
       case RISCVABI::ABI_ILP32D:
       case RISCVABI::ABI_LP64D:
-        return CSR_LLIR_Caml_Ext_ILP32D_LP64D_RegMask;
+        return CSR_LLIR_Caml_Ext_Call_ILP32D_LP64D_RegMask;
       }
     }
     case CallingConv::LLIR_CAML_ALLOC: {

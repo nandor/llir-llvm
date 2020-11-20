@@ -71,23 +71,22 @@ def CSR_LLIR_Caml_Call : CalleeSavedRegs<
   )
 >;
 
-// LLIR: OCaml-to-C call which respects the C calling convention.
-def CSR_LLIR_Caml_Ext_ILP32_LP64 : CalleeSavedRegs<
+// LLIR: OCaml-to-C invoke which which does not preserve any regs.
+def CSR_LLIR_Caml_Ext_Invoke : CalleeSavedRegs<
   (add
       X1, X3, X4
   )
 >;
-def CSR_LLIR_Caml_Ext_ILP32F_LP64F : CalleeSavedRegs<
-  (add
-    CSR_LLIR_Caml_Ext_ILP32_LP64,
-    F8_F, F9_F, (sequence "F%u_F", 18, 31)
-  )
+
+// LLIR: OCaml-to-C call which respects the C calling convention.
+def CSR_LLIR_Caml_Ext_Call_ILP32_LP64 : CalleeSavedRegs<
+  (add CSR_ILP32_LP64)
 >;
-def CSR_LLIR_Caml_Ext_ILP32D_LP64D: CalleeSavedRegs<
-  (add
-    CSR_LLIR_Caml_Ext_ILP32_LP64,
-    F8_D, F9_D, (sequence "F%u_D", 18, 31)
-  )
+def CSR_LLIR_Caml_Ext_Call_ILP32F_LP64F : CalleeSavedRegs<
+  (add CSR_ILP32F_LP64F)
+>;
+def CSR_LLIR_Caml_Ext_Call_ILP32D_LP64D: CalleeSavedRegs<
+  (add CSR_ILP32D_LP64D)
 >;
 
 // LLIR: OCaml allocation call, does not preserve 25-28

@@ -247,20 +247,23 @@ namespace CallingConv {
     /// Calling convention to call OCaml functions.
     LLIR_CAML = 101,
 
-    /// Calling convention for C from OCaml.
-    LLIR_CAML_EXT = 102,
+    /// Calling convention for C from OCaml - regular call.
+    LLIR_CAML_EXT_CALL = 102,
+
+    /// Calling convention for C from OCaml - invoke call.
+    LLIR_CAML_EXT_INVOKE = 103,
 
     /// Calling convention of the OCaml allocation function.
-    LLIR_CAML_ALLOC = 103,
+    LLIR_CAML_ALLOC = 104,
 
     /// Calling convention for the OCaml gc trampoline.
-    LLIR_CAML_GC = 104,
+    LLIR_CAML_GC = 105,
 
     /// Calling convention for the OCaml gc trampoline.
-    LLIR_CAML_RAISE = 105,
+    LLIR_CAML_RAISE = 106,
 
     /// Calling convention for LLIR setjmp.
-    LLIR_SETJMP = 106,
+    LLIR_SETJMP = 107,
 
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023

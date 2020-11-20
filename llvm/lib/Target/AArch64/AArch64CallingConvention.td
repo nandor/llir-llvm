@@ -519,10 +519,16 @@ def CSR_LLIR_Caml_Call : CalleeSavedRegs<
   )
 >;
 
+// LLIR: OCaml-to-C invoke which does not preserve any registers.
+def CSR_LLIR_Caml_Ext_Invoke : CalleeSavedRegs<
+  (add LR)
+>;
+
 // LLIR: OCaml-to-C call which respects the C calling convention.
-def CSR_LLIR_Caml_Ext : CalleeSavedRegs<
+def CSR_LLIR_Caml_Ext_Call : CalleeSavedRegs<
   (add
-    LR,
+    LR, FP,
+    X19, X20, X21, X22, X23, X24, X25, X26, X27, X28,
     (sequence "D%u", 8, 15)
   )
 >;

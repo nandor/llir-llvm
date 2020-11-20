@@ -79,8 +79,10 @@ AArch64RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
       break;
     case CallingConv::LLIR_CAML:
       return CSR_LLIR_Caml_Call_SaveList;
-    case CallingConv::LLIR_CAML_EXT:
-      return CSR_LLIR_Caml_Ext_SaveList;
+    case CallingConv::LLIR_CAML_EXT_CALL:
+      return CSR_LLIR_Caml_Ext_Call_SaveList;
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_SaveList;
     case CallingConv::LLIR_CAML_ALLOC:
       return CSR_LLIR_Caml_Alloc_SaveList;
     case CallingConv::LLIR_CAML_GC:
@@ -226,8 +228,10 @@ AArch64RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
       break;
     case CallingConv::LLIR_CAML:
       return CSR_LLIR_Caml_Call_RegMask;
-    case CallingConv::LLIR_CAML_EXT:
-      return CSR_LLIR_Caml_Ext_RegMask;
+    case CallingConv::LLIR_CAML_EXT_CALL:
+      return CSR_LLIR_Caml_Ext_Call_RegMask;
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_RegMask;
     case CallingConv::LLIR_CAML_ALLOC:
       return CSR_LLIR_Caml_Alloc_RegMask;
     case CallingConv::LLIR_CAML_GC:
