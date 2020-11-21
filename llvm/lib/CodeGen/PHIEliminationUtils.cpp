@@ -58,6 +58,10 @@ llvm::findPHICopyInsertPoint(MachineBasicBlock* MBB, MachineBasicBlock* SuccMBB,
     }
   }
 
+  // Skip past GC frames.
+  while (InsertPoint->isGCFrame())
+    InsertPoint++;
+
   // Make sure the copy goes after any phi nodes but before
   // any debug nodes.
   return MBB->SkipPHIsAndLabels(InsertPoint);
