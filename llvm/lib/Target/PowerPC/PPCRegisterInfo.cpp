@@ -155,6 +155,23 @@ PPCRegisterInfo::getPointerRegClass(const MachineFunction &MF, unsigned Kind)
 
 const MCPhysReg*
 PPCRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
+  switch (MF->getFunction().getCallingConv()) {
+    default:
+      break;
+    case CallingConv::LLIR_CAML:
+      return CSR_LLIR_Caml_SaveList;
+    case CallingConv::LLIR_CAML_EXT_CALL:
+      return CSR_LLIR_Caml_Ext_Call_SaveList;
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_SaveList;
+    case CallingConv::LLIR_CAML_ALLOC:
+      return CSR_LLIR_Caml_Alloc_SaveList;
+    case CallingConv::LLIR_CAML_GC:
+      return CSR_LLIR_Caml_Gc_SaveList;
+    case CallingConv::LLIR_SETJMP:
+      return CSR_LLIR_Setjmp_SaveList;
+  }
+
   const PPCSubtarget &Subtarget = MF->getSubtarget<PPCSubtarget>();
   if (MF->getFunction().getCallingConv() == CallingConv::AnyReg) {
     if (!TM.isPPC64() && Subtarget.isAIXABI())
@@ -214,6 +231,24 @@ PPCRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
 const uint32_t *
 PPCRegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                       CallingConv::ID CC) const {
+  switch (CC) {
+    default:
+      break;
+    case CallingConv::LLIR_CAML:
+      return CSR_LLIR_Caml_RegMask;
+    case CallingConv::LLIR_CAML_EXT_CALL:
+      return CSR_LLIR_Caml_Ext_Call_RegMask;
+    case CallingConv::LLIR_CAML_EXT_INVOKE:
+      return CSR_LLIR_Caml_Ext_Invoke_RegMask;
+    case CallingConv::LLIR_CAML_ALLOC:
+      return CSR_LLIR_Caml_Alloc_RegMask;
+    case CallingConv::LLIR_CAML_GC:
+      return CSR_LLIR_Caml_Gc_RegMask;
+    case CallingConv::LLIR_SETJMP:
+      return CSR_LLIR_Setjmp_RegMask;
+  }
+
+
   const PPCSubtarget &Subtarget = MF.getSubtarget<PPCSubtarget>();
   if (CC == CallingConv::AnyReg) {
     if (Subtarget.hasVSX())

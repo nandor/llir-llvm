@@ -166,12 +166,12 @@ def CC_PPC32_SVR4_Common : CallingConv<[
   // The ABI requires i64 to be passed in two adjacent registers with the first
   // register having an odd register number.
   CCIfType<[i32],
-  CCIfSplit<CCIfSubtarget<"useSoftFloat()", 
+  CCIfSplit<CCIfSubtarget<"useSoftFloat()",
             CCIfOrigArgWasNotPPCF128<
             CCCustom<"CC_PPC32_SVR4_Custom_AlignArgRegs">>>>>,
-  
+
   CCIfType<[i32],
-  CCIfSplit<CCIfNotSubtarget<"useSoftFloat()", 
+  CCIfSplit<CCIfNotSubtarget<"useSoftFloat()",
                             CCCustom<"CC_PPC32_SVR4_Custom_AlignArgRegs">>>>,
   CCIfType<[f64],
   CCIfSubtarget<"hasSPE()",
@@ -189,7 +189,7 @@ def CC_PPC32_SVR4_Common : CallingConv<[
   // Make sure the i64 words from a long double are either both passed in
   // registers or both passed on the stack.
   CCIfType<[f64], CCIfSplit<CCCustom<"CC_PPC32_SVR4_Custom_AlignFPArgRegs">>>,
-  
+
   // FP values are passed in F1 - F8.
   CCIfType<[f32, f64],
            CCIfNotSubtarget<"hasSPE()",
@@ -203,9 +203,9 @@ def CC_PPC32_SVR4_Common : CallingConv<[
 
   // Split arguments have an alignment of 8 bytes on the stack.
   CCIfType<[i32], CCIfSplit<CCAssignToStack<4, 8>>>,
-  
+
   CCIfType<[i32], CCAssignToStack<4, 4>>,
-  
+
   // Floats are stored in double precision format, thus they have the same
   // alignment and size as doubles.
   // With SPE floats are stored as single precision, so have alignment and
@@ -240,9 +240,9 @@ def CC_PPC32_SVR4 : CallingConv<[
   CCIfType<[f128],
            CCIfSubtarget<"hasP9Vector()", CCAssignToReg<[V2, V3, V4, V5, V6, V7,
                           V8, V9, V10, V11, V12, V13]>>>,
-           
+
   CCDelegateTo<CC_PPC32_SVR4_Common>
-]>;  
+]>;
 
 // Helper "calling convention" to handle aggregate by value arguments.
 // Aggregate by value arguments are always placed in the local variable space
@@ -256,11 +256,11 @@ def CC_PPC32_SVR4 : CallingConv<[
 //
 // The only purpose of CC_PPC32_SVR4_Custom_Dummy is to skip arguments which are
 // not passed by value.
- 
+
 let Entry = 1 in
 def CC_PPC32_SVR4_ByVal : CallingConv<[
   CCIfByVal<CCPassByVal<4, 4>>,
-  
+
   CCCustom<"CC_PPC32_SVR4_Custom_Dummy">
 ]>;
 
@@ -356,3 +356,38 @@ def CSR_64_AllRegs_Altivec : CalleeSavedRegs<(add CSR_64_AllRegs,
 def CSR_64_AllRegs_VSX : CalleeSavedRegs<(add CSR_64_AllRegs_Altivec,
                                          (sequence "VSL%u", 0, 31))>;
 
+// LLIR: OCaml call which does not preserve any registers.
+def CSR_LLIR_Caml : CalleeSavedRegs<(add)>;
+
+// LLIR: OCaml-to-C invoke which does not preserve any regs.
+def CSR_LLIR_Caml_Ext_Invoke : CalleeSavedRegs<(add)>;
+
+// LLIR: OCaml-to-C call which respects the System-V convention.
+def CSR_LLIR_Caml_Ext_Call : CalleeSavedRegs<
+  (add
+      (sequence "X%u", 14, 27),
+      (sequence "F%u", 14, 31),
+      CR2, CR3, CR4
+  )
+>;
+
+// LLIR: OCaml allocation call, does not preserve r14 and r15.
+def CSR_LLIR_Caml_Alloc : CalleeSavedRegs<
+  (add
+      (sequence "X%u", 3, 27),
+      (sequence "F%u", 1, 31),
+      CR2, CR3, CR4
+  )
+>;
+
+// LLIR: OCaml GC trampoline call, preserves all registers.
+def CSR_LLIR_Caml_Gc : CalleeSavedRegs<
+  (add
+      (sequence "X%u", 3, 27),
+      (sequence "F%u", 1, 31),
+      CR2, CR3, CR4
+  )
+>;
+
+// LLIR: setjmp, does not preserve any registers.
+def CSR_LLIR_Setjmp : CalleeSavedRegs<(add)>;
