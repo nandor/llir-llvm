@@ -727,7 +727,8 @@ public:
 
   /// Tests whether the target is AArch64 (little and big endian).
   bool isAArch64() const {
-    return getArch() == Triple::aarch64 || getArch() == Triple::aarch64_be;
+    return getArch() == Triple::aarch64 || getArch() == Triple::aarch64_be ||
+           getArch() == Triple::llir_aarch64;
   }
 
   /// Tests whether the target is MIPS 32-bit (little and big endian).
@@ -747,12 +748,14 @@ public:
 
   /// Tests whether the target is 64-bit PowerPC (little and big endian).
   bool isPPC64() const {
-    return getArch() == Triple::ppc64 || getArch() == Triple::ppc64le;
+    return getArch() == Triple::ppc64 || getArch() == Triple::ppc64le ||
+           getArch() == Triple::llir_ppc64le;
   }
 
   /// Tests whether the target is RISC-V (32- and 64-bit).
   bool isRISCV() const {
-    return getArch() == Triple::riscv32 || getArch() == Triple::riscv64;
+    return getArch() == Triple::riscv32 || getArch() == Triple::riscv64 ||
+           getArch() == Triple::llir_riscv64;
   }
 
   /// Tests whether the target is SystemZ.
@@ -762,7 +765,8 @@ public:
 
   /// Tests whether the target is x86 (32- or 64-bit).
   bool isX86() const {
-    return getArch() == Triple::x86 || getArch() == Triple::x86_64;
+    return getArch() == Triple::x86 || getArch() == Triple::x86_64 ||
+           getArch() == Triple::llir_x86_64;
   }
 
   /// Tests whether the target is VE
