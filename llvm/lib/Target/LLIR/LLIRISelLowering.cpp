@@ -127,11 +127,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       }
 
       // Decide whether to allow f128 operations.
-      setOperationAction(ISD::FEXP, T, Op);
-      setOperationAction(ISD::FEXP2, T, Op);
-      setOperationAction(ISD::FLOG, T, Op);
-      setOperationAction(ISD::FLOG2, T, Op);
-      setOperationAction(ISD::FLOG10, T, Op);
       setOperationAction(ISD::FP_EXTEND, T, Op);
       setOperationAction(ISD::FADD, T, Op);
       setOperationAction(ISD::STRICT_FADD, T, Op);
