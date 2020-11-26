@@ -134,6 +134,8 @@ public:
            "TOC pointer used in a function using PC-Relative addressing!");
     if (skipFunction(MF.getFunction()))
       return false;
+    if (MF.getFunction().getCallingConv() == CallingConv::LLIR_CAML)
+      return false;
     return simplifyCode();
   }
 };
