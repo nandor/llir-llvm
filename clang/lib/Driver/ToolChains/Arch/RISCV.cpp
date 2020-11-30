@@ -684,9 +684,9 @@ StringRef riscv::getRISCVArch(const llvm::opt::ArgList &Args,
     if (MABI.equals_lower("ilp32e"))
       return "rv32e";
     else if (MABI.startswith_lower("ilp32"))
-      return "rv32imafdc";
+      return "rv32imafd";
     else if (MABI.startswith_lower("lp64"))
-      return "rv64imafdc";
+      return "rv64imafd";
   }
 
   // 4. Choose a default based on the triple
@@ -696,13 +696,13 @@ StringRef riscv::getRISCVArch(const llvm::opt::ArgList &Args,
   // - On all other OSs we use `rv{XLEN}imafdc` (equivalent to `rv{XLEN}gc`)
   if (Triple.getArch() == llvm::Triple::riscv32) {
     if (Triple.getOS() == llvm::Triple::UnknownOS)
-      return "rv32imac";
+      return "rv32ima";
     else
-      return "rv32imafdc";
+      return "rv32imafd";
   } else {
     if (Triple.getOS() == llvm::Triple::UnknownOS)
-      return "rv64imac";
+      return "rv64ima";
     else
-      return "rv64imafdc";
+      return "rv64imafd";
   }
 }
