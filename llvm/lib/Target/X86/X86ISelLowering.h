@@ -753,6 +753,9 @@ namespace llvm {
     STRICT_CVTPS2PH,
     STRICT_CVTPH2PS,
 
+    // Clear FP exceptions.
+    FNCLEX,
+
     // WARNING: Only add nodes here if they are stric FP nodes. Non-memory and
     // non-strict FP nodes should be above FIRST_TARGET_STRICTFP_OPCODE.
 
@@ -787,7 +790,6 @@ namespace llvm {
     FLDENVm,
     LDMXCSR32m,
     STMXCSR32m,
-    FNCLEX,
 
     /// This instruction implements FP_TO_SINT with the
     /// integer destination in memory and a FP reg source.  This corresponds
