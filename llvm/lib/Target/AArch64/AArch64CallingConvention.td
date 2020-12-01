@@ -513,10 +513,7 @@ def CSR_AArch64_AAPCS_SCS
 
 // LLIR: OCaml call which does not preserve any integer registers.
 def CSR_LLIR_Caml_Call : CalleeSavedRegs<
-  (add
-    LR,
-    (sequence "D%u", 8, 15)
-  )
+  (add LR)
 >;
 
 // LLIR: OCaml-to-C invoke which does not preserve any registers.
