@@ -2609,7 +2609,7 @@ SelectionDAGBuilder::visitSPDescriptorFailure(StackProtectorDescriptor &SPD) {
   // WebAssembly needs an unreachable instruction after a non-returning call,
   // because the function return type can be different from __stack_chk_fail's
   // return type (void).
-  if (TM.getTargetTriple().isWasm())
+  if (TM.getTargetTriple().isWasm() || TM.getTargetTriple().isLLIR())
     Chain = DAG.getNode(ISD::TRAP, getCurSDLoc(), MVT::Other, Chain);
 
   DAG.setRoot(Chain);
