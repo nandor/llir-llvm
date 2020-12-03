@@ -46,6 +46,7 @@
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCSectionCOFF.h"
 #include "llvm/MC/MCSectionELF.h"
+#include "llvm/MC/MCSectionLLIR.h"
 #include "llvm/MC/MCSectionMachO.h"
 #include "llvm/MC/MCSectionWasm.h"
 #include "llvm/MC/MCSectionXCOFF.h"
@@ -2367,7 +2368,10 @@ MCSection *TargetLoweringObjectFileLLIR::getSectionForConstant(
 
 MCSection *TargetLoweringObjectFileLLIR::getExplicitSectionGlobal(
     const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
-  llvm_unreachable("not implemented");
+  StringRef SectionName = GO->getSection();
+  if (isa<Function>(GO))
+    return getContext().getLLIRSection(SectionName, SectionKind::getText());
+  return getContext().getLLIRSection(SectionName, SectionKind::getData());
 }
 
 MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
