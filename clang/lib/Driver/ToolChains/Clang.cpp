@@ -565,6 +565,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
     case llvm::Triple::systemz:
     case llvm::Triple::x86:
     case llvm::Triple::x86_64:
+    case llvm::Triple::llir_x86_64:
       return !areOptimizationsEnabled(Args);
     default:
       return true;
@@ -576,6 +577,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
     case llvm::Triple::x86:
       return !areOptimizationsEnabled(Args);
     case llvm::Triple::x86_64:
+    case llvm::Triple::llir_x86_64:
       return Triple.isOSBinFormatMachO();
     case llvm::Triple::arm:
     case llvm::Triple::thumb:
@@ -1604,6 +1606,7 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
+  case llvm::Triple::llir_aarch64:
     AddAArch64TargetArgs(Args, CmdArgs);
     CmdArgs.push_back("-fallow-half-arguments-and-returns");
     break;
@@ -1618,11 +1621,13 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
   case llvm::Triple::ppc:
   case llvm::Triple::ppc64:
   case llvm::Triple::ppc64le:
+  case llvm::Triple::llir_ppc64le:
     AddPPCTargetArgs(Args, CmdArgs);
     break;
 
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::llir_riscv64:
     AddRISCVTargetArgs(Args, CmdArgs);
     break;
 
@@ -1638,6 +1643,7 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
 
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86_64:
     AddX86TargetArgs(Args, CmdArgs);
     break;
 
@@ -7130,6 +7136,7 @@ void ClangAs::ConstructJob(Compilation &C, const JobAction &JA,
 
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86_64:
     AddX86TargetArgs(Args, CmdArgs);
     break;
 
@@ -7149,6 +7156,7 @@ void ClangAs::ConstructJob(Compilation &C, const JobAction &JA,
   case llvm::Triple::aarch64:
   case llvm::Triple::aarch64_32:
   case llvm::Triple::aarch64_be:
+  case llvm::Triple::llir_aarch64:
     if (Args.hasArg(options::OPT_mmark_bti_property)) {
       CmdArgs.push_back("-mllvm");
       CmdArgs.push_back("-aarch64-mark-bti-property");
@@ -7157,6 +7165,7 @@ void ClangAs::ConstructJob(Compilation &C, const JobAction &JA,
 
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
+  case llvm::Triple::llir_riscv64:
     AddRISCVTargetArgs(Args, CmdArgs);
     break;
   }
