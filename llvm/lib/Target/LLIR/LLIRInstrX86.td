@@ -21,6 +21,16 @@ def X86_ATOMIC_XCHG_64 : I
   , 0xE1
   >;
 
+def : Pat<
+  (acquiring_load<atomic_load_32>  I64:$ptr),
+  (LD_4_I32 I64:$ptr)
+>;
+
+def : Pat<
+  (releasing_store<atomic_store_32> I64:$ptr, I32:$val),
+  (ST_4_I32 I64:$ptr, I32:$val)
+>;
+
 def X86_RDTSC_I64 : I
   < (outs I64:$res)
   , (ins)
