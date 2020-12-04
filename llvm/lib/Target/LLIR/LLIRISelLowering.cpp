@@ -899,7 +899,26 @@ SDValue LLIRTargetLowering::LowerReturn(
 LLIRTargetLowering::AtomicExpansionKind
 LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   if (Subtarget->isX86_64()) {
-    return AtomicExpansionKind::None;
+    AtomicRMWInst::BinOp Op = AI->getOperation();
+    switch (Op) {
+    default:
+      llvm_unreachable("Unknown atomic operation");
+    case AtomicRMWInst::Xchg:
+      return AtomicExpansionKind::CmpXChg;
+    case AtomicRMWInst::Add:
+    case AtomicRMWInst::Sub:
+    case AtomicRMWInst::Or:
+    case AtomicRMWInst::And:
+    case AtomicRMWInst::Xor:
+    case AtomicRMWInst::Nand:
+    case AtomicRMWInst::Max:
+    case AtomicRMWInst::Min:
+    case AtomicRMWInst::UMax:
+    case AtomicRMWInst::UMin:
+    case AtomicRMWInst::FAdd:
+    case AtomicRMWInst::FSub:
+      return AtomicExpansionKind::CmpXChg;
+    }
   }
   if (Subtarget->isAArch64()) {
     return AtomicExpansionKind::LLSC;
