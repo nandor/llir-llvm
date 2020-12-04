@@ -265,6 +265,9 @@ namespace CallingConv {
     /// Calling convention for LLIR setjmp.
     LLIR_SETJMP = 107,
 
+    /// Calling convention for Xen Hypercall.
+    LLIR_XEN = 108,
+
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023
   };
