@@ -27,7 +27,7 @@ LLIRMCAsmInfo::LLIRMCAsmInfo(const Triple &TheTriple) {
   WeakRefDirective = "\t.weak\t";
   HasFunctionAlignment = true;
   HasDotTypeDotSizeDirective = false;
-  HasNoDeadStrip = true;
+  HasNoDeadStrip = false;
   SupportsDebugInformation = false;
   HasIdentDirective = true;
   ExceptionsType = ExceptionHandling::None;
