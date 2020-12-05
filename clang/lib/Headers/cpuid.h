@@ -235,6 +235,9 @@
 
 
 #if __i386__
+#ifdef __llir__
+#error "not implemented"
+#else
 #define __cpuid(__leaf, __eax, __ebx, __ecx, __edx) \
     __asm("cpuid" : "=a"(__eax), "=b" (__ebx), "=c"(__ecx), "=d"(__edx) \
                   : "0"(__leaf))
@@ -242,7 +245,22 @@
 #define __cpuid_count(__leaf, __count, __eax, __ebx, __ecx, __edx) \
     __asm("cpuid" : "=a"(__eax), "=b" (__ebx), "=c"(__ecx), "=d"(__edx) \
                   : "0"(__leaf), "2"(__count))
+#endif /* __llir__ */
 #else
+#ifdef __llir__
+
+#define __cpuid(__leaf, __eax, __ebx, __ecx, __edx) \
+    __asm("x86_cpuid.i32.i32.i32.i32 %0, %1, %2, %3, %4" \
+        : "=r"(__eax), "=r" (__ebx), "=r"(__ecx), "=r"(__edx) \
+        : "r"(__leaf))
+
+#define __cpuid_count(__leaf, __count, __eax, __ebx, __ecx, __edx) \
+    __asm("x86_cpuid.i32.i32.i32.i32 %0, %1, %2, %3, %4, %5" \
+        : "=r"(__eax), "=r" (__ebx), "=r"(__ecx), "=r"(__edx) \
+        : "r"(__leaf), "r"(__count))
+
+#else
+
 /* x86-64 uses %rbx as the base register, so preserve it. */
 #define __cpuid(__leaf, __eax, __ebx, __ecx, __edx) \
     __asm("  xchgq  %%rbx,%q1\n" \
@@ -257,6 +275,7 @@
           "  xchgq  %%rbx,%q1" \
         : "=a"(__eax), "=r" (__ebx), "=c"(__ecx), "=d"(__edx) \
         : "0"(__leaf), "2"(__count))
+#endif /* __llir__ */
 #endif
 
 static __inline int __get_cpuid_max (unsigned int __leaf, unsigned int *__sig)
