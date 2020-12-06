@@ -72,7 +72,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Forward architecture flags.
   std::vector<StringRef> Features;
-  switch (getToolChain().getArch()) {
+  switch (Triple.getArch()) {
   default:
     llvm_unreachable("invalid LLIR architecture");
   case llvm::Triple::llir_x86_64:
@@ -156,20 +156,30 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   } else if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
   } else {
-    SmallString<128> SysRoot(TC.computeSysRoot());
+    switch (Triple.getEnvironment()) {
+    case llvm::Triple::Musl:
+    case llvm::Triple::MuslEABI:
+    case llvm::Triple::MuslEABIHF: {
+      SmallString<128> SysRoot(TC.computeSysRoot());
 
-    SmallString<128> LibDir(SysRoot);
-    llvm::sys::path::append(LibDir, "lib");
+      SmallString<128> LibDir(SysRoot);
+      llvm::sys::path::append(LibDir, "lib");
 
-    SmallString<128> DynamicLinkerPath(LibDir);
-    std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
-    llvm::sys::path::append(DynamicLinkerPath, Linker);
+      SmallString<128> DynamicLinkerPath(LibDir);
+      std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
+      llvm::sys::path::append(DynamicLinkerPath, Linker);
 
-    CmdArgs.push_back("-rpath");
-    CmdArgs.push_back(Args.MakeArgString(LibDir));
+      CmdArgs.push_back("-rpath");
+      CmdArgs.push_back(Args.MakeArgString(LibDir));
 
-    CmdArgs.push_back("-dynamic-linker");
-    CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+      CmdArgs.push_back("-dynamic-linker");
+      CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+      break;
+    }
+    default: {
+      break;
+    }
+    }
   }
 
   auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
@@ -207,15 +217,18 @@ Tool *LLIR::buildAssembler() const { return new tools::llir::Assembler(*this); }
 
 Tool *LLIR::buildLinker() const { return new tools::llir::Linker(*this); }
 
-void LLIR::AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                                     llvm::opt::ArgStringList &CC1Args) const {
-  SmallString<128> SysRootInclude(computeSysRoot());
-  llvm::sys::path::append(SysRootInclude, "include");
-  addExternCSystemInclude(DriverArgs, CC1Args, SysRootInclude);
-
-  SmallString<128> ResourceInclude(getDriver().ResourceDir);
-  llvm::sys::path::append(ResourceInclude, "include");
-  addSystemInclude(DriverArgs, CC1Args, ResourceInclude);
+void LLIR::AddClangSystemIncludeArgs(const ArgList &DriverArgs,
+                                     ArgStringList &CC1Args) const {
+  if (!DriverArgs.hasArg(options::OPT_nobuiltininc)) {
+    SmallString<128> ResourceInclude(getDriver().ResourceDir);
+    llvm::sys::path::append(ResourceInclude, "include");
+    addSystemInclude(DriverArgs, CC1Args, ResourceInclude);
+  }
+  if (!DriverArgs.hasArg(options::OPT_nostdinc)) {
+    SmallString<128> SysRootInclude(computeSysRoot());
+    llvm::sys::path::append(SysRootInclude, "include");
+    addExternCSystemInclude(DriverArgs, CC1Args, SysRootInclude);
+  }
 }
 
 void LLIR::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
