@@ -22,8 +22,15 @@ class LLIRMachineFunctionInfo : public MachineFunctionInfo {
 public:
   LLIRMachineFunctionInfo(const MachineFunction &MF);
 
-  void addParam(MVT VT) { Params.push_back(VT); }
-  const std::vector<MVT> &getParams() const { return Params; }
+  /// Information about parameters.
+  struct Parameter {
+    MVT VT;
+    uint64_t Flags;
+
+    Parameter(MVT VT, uint64_t Flags) : VT(VT), Flags(Flags) {}
+  };
+  void addParam(MVT VT, uint64_t Flags) { Params.emplace_back(VT, Flags); }
+  const std::vector<Parameter> &getParams() const { return Params; }
 
   void setGMReg(unsigned VReg, unsigned GMReg);
   unsigned getGMReg(unsigned VReg) const;
@@ -33,7 +40,7 @@ private:
   /// Reference to the machine function.
   const MachineFunction &MF;
   /// List of parameters to a function.
-  std::vector<MVT> Params;
+  std::vector<Parameter> Params;
   /// A mapping from CodeGen vreg index to WebAssembly register number.
   mutable std::vector<unsigned> GMRegs;
 };

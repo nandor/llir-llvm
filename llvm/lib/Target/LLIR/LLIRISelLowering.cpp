@@ -768,6 +768,20 @@ static bool isCallingConvSupported(CallingConv::ID ID) {
   }
 }
 
+static uint64_t EncodeFlags(const ISD::ArgFlagsTy &Flag) {
+  if (Flag.isByVal()) {
+    return (static_cast<uint64_t>(Flag.getByValSize()) << 32ull) |
+           (static_cast<uint64_t>(Flag.getNonZeroByValAlign().value() << 16ull)) |
+           (static_cast<uint64_t>(1));
+  } else if (Flag.isZExt()) {
+    return 2;
+  } else if (Flag.isSExt()) {
+    return 3;
+  } else {
+    return 0;
+  }
+}
+
 SDValue LLIRTargetLowering::LowerFormalArguments(
     SDValue Chain, CallingConv::ID CallConv, bool IsVarArg,
     const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
@@ -782,11 +796,10 @@ SDValue LLIRTargetLowering::LowerFormalArguments(
   }
 
   for (const auto &In : Ins) {
-    // TODO(nand): check for argument types.
     InVals.push_back(
         DAG.getNode(LLIRISD::ARGUMENT, DL, In.VT,
                     DAG.getTargetConstant(InVals.size(), DL, MVT::i32)));
-    MFI->addParam(In.VT);
+    MFI->addParam(In.VT, EncodeFlags(In.Flags));
   }
 
   return Chain;
@@ -835,29 +848,30 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   }
 
   // Add all arguments to the call.
+  // chain - flags - nargs - retflags - callee - args
   Ops.push_back(Chain);
-  Ops.push_back(Callee);
-  Ops.push_back(
-      DAG.getTargetConstant(static_cast<int>(CallConv), DL, MVT::i32));
+  unsigned callFlag = static_cast<int>(CallConv);
+  Ops.push_back(DAG.getTargetConstant(callFlag, DL, MVT::i32));
   if (CLI.IsVarArg) {
     Ops.push_back(DAG.getTargetConstant(NumFixedArgs, DL, MVT::i32));
   }
 
-  for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
-    const SDValue &Arg = CLI.OutVals[i];
-    const ISD::OutputArg &Out = CLI.Outs[i];
-    uint64_t flag = 0;
-    Ops.push_back(DAG.getTargetConstant(flag, DL, MVT::i64));
-    Ops.push_back(Arg);
-  }
-
-  // Collect the types of return values.
   SmallVector<EVT, 8> InTys;
   for (const auto &In : CLI.Ins) {
-    // TODO(nand): analyse argument types.
+    uint64_t flag = EncodeFlags(In.Flags);
+    Ops.push_back(DAG.getTargetConstant(flag, DL, MVT::i64));
     InTys.push_back(In.VT);
   }
   InTys.push_back(MVT::Other);
+  Ops.push_back(Callee);
+
+  for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
+    const SDValue &Arg = CLI.OutVals[i];
+    const ISD::OutputArg &Out = CLI.Outs[i];
+    uint64_t flag = EncodeFlags(Out.Flags);
+    Ops.push_back(DAG.getTargetConstant(flag, DL, MVT::i64));
+    Ops.push_back(Arg);
+  }
 
   // Construct the call node.
   if (CLI.Ins.empty()) {
@@ -906,9 +920,13 @@ SDValue LLIRTargetLowering::LowerReturn(
     Fail(DL, DAG, "calling convention not supported");
   }
 
-  SmallVector<SDValue, 4> RetOps(1, Chain);
-  RetOps.append(OutVals.begin(), OutVals.end());
-  Chain = DAG.getNode(LLIRISD::RETURN, DL, MVT::Other, RetOps);
+  SmallVector<SDValue, 4> Ops(1, Chain);
+  for (unsigned I = 0, N = Outs.size(); I < N; ++I) {
+    uint64_t flag = EncodeFlags(Outs[I].Flags);
+    Ops.push_back(DAG.getTargetConstant(flag, DL, MVT::i64));
+    Ops.push_back(OutVals[I]);
+  }
+  Chain = DAG.getNode(LLIRISD::RETURN, DL, MVT::Other, Ops);
 
   return Chain;
 }

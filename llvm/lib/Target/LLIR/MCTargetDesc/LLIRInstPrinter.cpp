@@ -68,6 +68,26 @@ static void printCallingConv(llvm::raw_ostream &OS, unsigned CallConv) {
   }
 }
 
+static void printFlags(llvm::raw_ostream &OS, uint64_t imm)
+{
+  switch (imm & 0xFF) {
+  case 0: return;
+  case 1: {
+    unsigned size = (imm >> 32) & 0xFFFF;
+    unsigned align = (imm >> 16) & 0xFFFF;
+    OS << ":byval:" << size << ":" << align;
+    return;
+  }
+  case 2:
+    OS << ":zext";
+    return;
+  case 3:
+    OS << ":sext";
+    return;
+  }
+  llvm_unreachable("invalid flag kind");
+}
+
 void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
                                 const MCInst *MI, const MCSubtargetInfo &STI,
                                 bool isVoid, bool isVA, bool isTail) {
@@ -81,16 +101,34 @@ void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
   OS << '\t';
 
   // Return value.
-  if (!isVoid && !isTail) {
-    printOperand(MI, 0, STI, OS);
-    OS << ", ";
+  if (!isVoid) {
+    if (!isTail) {
+      printOperand(MI, 0, STI, OS);
+      printFlags(OS, MI->getOperand(start++).getImm());
+      OS << ", ";
+    } else {
+      start++;
+    }
   }
   // Callee.
   printOperand(MI, start++, STI, OS);
   // Arguments.
-  for (unsigned i = start; i < MI->getNumOperands(); i += 2) {
+  for (unsigned i = start, n = MI->getNumOperands(); i < n; i += 2) {
     OS << ", ";
     printOperand(MI, i + 1, STI, OS);
+    printFlags(OS, MI->getOperand(i).getImm());
+  }
+}
+
+void LLIRInstPrinter::printReturn(llvm::raw_ostream &OS, const MCInst *MI,
+                                  const MCSubtargetInfo &STI) {
+  OS << "\tret\t";
+  for (unsigned i = 0, n = MI->getNumOperands(); i < n; i += 2) {
+    if (i != 0) {
+      OS << ", ";
+    }
+    printOperand(MI, i + 1, STI, OS);
+    printFlags(OS, MI->getOperand(i).getImm());
   }
 }
 
@@ -229,6 +267,10 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
       }
       break;
     }
+
+    case LLIR::RETURN:
+      printReturn(OS, MI, STI);
+      break;
 
     default: {
       printInstruction(MI, Address, STI, OS);

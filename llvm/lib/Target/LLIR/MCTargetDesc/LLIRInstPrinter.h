@@ -39,9 +39,12 @@ class LLIRInstPrinter : public MCInstPrinter {
   static const char *getRegisterName(unsigned RegNo);
 
  private:
-  void printCall(const char *Op, llvm::raw_ostream &OS, const MCInst *MI,
-                 const MCSubtargetInfo &STI, bool isVoid, bool isVA,
-                 bool isTail);
+   void printReturn(llvm::raw_ostream &OS, const MCInst *MI,
+                    const MCSubtargetInfo &STI);
+
+   void printCall(const char *Op, llvm::raw_ostream &OS, const MCInst *MI,
+                  const MCSubtargetInfo &STI, bool isVoid, bool isVA,
+                  bool isTail);
 };
 }  // end namespace llvm
 

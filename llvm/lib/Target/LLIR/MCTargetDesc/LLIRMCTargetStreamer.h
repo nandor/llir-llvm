@@ -14,6 +14,7 @@
 #include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/Support/MachineValueType.h"
+#include "LLIRMachineFunctionInfo.h"
 
 namespace llvm {
 class LLIRMCTargetStreamer : public MCTargetStreamer {
@@ -25,7 +26,7 @@ public:
   /// .vararg
   virtual void emitVarArg() = 0;
   /// .args
-  virtual void emitParams(ArrayRef<MVT> params) = 0;
+  virtual void emitParams(ArrayRef<LLIRMachineFunctionInfo::Parameter> params) = 0;
   /// .fast, .c, etc.
   virtual void emitCallingConv(CallingConv::ID CallConv) = 0;
   /// .ctor
@@ -45,7 +46,7 @@ public:
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
   virtual void emitVarArg() override;
-  virtual void emitParams(ArrayRef<MVT> params) override;
+  virtual void emitParams(ArrayRef<LLIRMachineFunctionInfo::Parameter> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitDtor(int Priority, const MCSymbol *Sym) override;
@@ -63,7 +64,7 @@ public:
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
   virtual void emitVarArg() override;
-  virtual void emitParams(ArrayRef<MVT> params) override;
+  virtual void emitParams(ArrayRef<LLIRMachineFunctionInfo::Parameter> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitDtor(int Priority, const MCSymbol *Sym) override;

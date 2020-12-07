@@ -17,16 +17,16 @@ multiclass CALL<LLIRRegClass vt, SDNode node, SDNode node_va>
 {
   def "" : CallInst
     < (outs vt:$dst)
-    , (ins i32imm:$conv, I64:$callee, variable_ops)
-    , [(set vt:$dst, (node I64:$callee, timm:$conv))]
+    , (ins i32imm:$conv, variable_ops)
+    , [(set vt:$dst, (node timm:$conv))]
     , ""
     , 0x50
     >;
 
   def _VA : CallInst
     < (outs vt:$dst)
-    , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
-    , [(set vt:$dst, (node_va I64:$callee, timm:$conv, timm:$fixed))]
+    , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+    , [(set vt:$dst, (node_va timm:$conv, timm:$fixed))]
     , ""
     , 0x51
     >;
@@ -44,16 +44,16 @@ defm CALL_F128 : CALL<F128, LLIRcall, LLIRcall_va>;
 
 def CALL_VOID : CallInst
   < (outs)
-  , (ins i32imm:$conv, I64:$callee, variable_ops)
-  , [(LLIRvoid I64:$callee, timm:$conv)]
+  , (ins i32imm:$conv, variable_ops)
+  , [(LLIRvoid timm:$conv)]
   , ""
   , 0x53
   >;
 
 def CALL_VOID_VA : CallInst
   < (outs)
-  , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
-  , [(LLIRvoid_va I64:$callee, timm:$conv, timm:$fixed)]
+  , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+  , [(LLIRvoid_va timm:$conv, timm:$fixed)]
   , ""
   , 0x53
   >;
@@ -64,8 +64,8 @@ multiclass TCALL<LLIRRegClass vt, SDNode node, SDNode node_va>
 {
   def "" : CallInst
     < (outs vt:$dst)
-    , (ins i32imm:$conv, I64:$callee, variable_ops)
-    , [(set vt:$dst, (node I64:$callee, timm:$conv))]
+    , (ins i32imm:$conv, variable_ops)
+    , [(set vt:$dst, (node timm:$conv))]
     , ""
     , 0x50
     >
@@ -75,8 +75,8 @@ multiclass TCALL<LLIRRegClass vt, SDNode node, SDNode node_va>
 
   def _VA : CallInst
     < (outs vt:$dst)
-    , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
-    , [(set vt:$dst, (node_va I64:$callee, timm:$conv, timm:$fixed))]
+    , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+    , [(set vt:$dst, (node_va timm:$conv, timm:$fixed))]
     , ""
     , 0x51
     >
@@ -97,8 +97,8 @@ defm TCALL_F128 : TCALL<F128, LLIRtcall, LLIRtcall_va>;
 
 def TCALL_VOID : CallInst
   < (outs)
-  , (ins i32imm:$conv, I64:$callee, variable_ops)
-  , [(LLIRtvoid I64:$callee, timm:$conv)]
+  , (ins i32imm:$conv, variable_ops)
+  , [(LLIRtvoid timm:$conv)]
   , ""
   , 0x54
   >
@@ -108,8 +108,8 @@ def TCALL_VOID : CallInst
 
 def TCALL_VOID_VA : CallInst
   < (outs)
-  , (ins i32imm:$fixed, i32imm:$conv, I64:$callee, variable_ops)
-  , [(LLIRtvoid_va I64:$callee, timm:$conv, timm:$fixed)]
+  , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+  , [(LLIRtvoid_va timm:$conv, timm:$fixed)]
   , ""
   , 0x54
   >

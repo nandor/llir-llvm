@@ -62,13 +62,31 @@ void LLIRMCTargetAsmStreamer::emitVarArg()
   OS << "\t.vararg\n";
 }
 
-void LLIRMCTargetAsmStreamer::emitParams(ArrayRef<MVT> params)
+void LLIRMCTargetAsmStreamer::emitParams(
+    ArrayRef<LLIRMachineFunctionInfo::Parameter> Params)
 {
   OS << "\t.args\t";
-  for (unsigned i = 0, n = params.size(); i < n; ++i) {
+  for (unsigned i = 0, n = Params.size(); i < n; ++i) {
+    auto &Param = Params[i];
     if (i != 0)
       OS << ", ";
-    OS << LLIRTypeName(params[i]);
+    OS << LLIRTypeName(Param.VT);
+    auto imm = Param.Flags;
+    switch (imm & 0xFF) {
+    case 0: break;
+    case 1: {
+      unsigned size = (imm >> 32) & 0xFFFF;
+      unsigned align = (imm >> 16) & 0xFFFF;
+      OS << ":byval:" << size << ":" << align;
+      break;
+    }
+    case 2:
+      OS << ":zext";
+      break;
+    case 3:
+      OS << ":sext";
+      break;
+    }
   }
   OS << "\n";
 }
@@ -118,7 +136,8 @@ void LLIRMCTargetLLIRStreamer::emitVarArg()
   llvm_unreachable("LLIRMCTargetLLIRStreamer::emitVarArg");
 }
 
-void LLIRMCTargetLLIRStreamer::emitParams(ArrayRef<MVT> params)
+void LLIRMCTargetLLIRStreamer::emitParams(
+    ArrayRef<LLIRMachineFunctionInfo::Parameter> params)
 {
   llvm_unreachable("LLIRMCTargetLLIRStreamer::emitParams");
 }

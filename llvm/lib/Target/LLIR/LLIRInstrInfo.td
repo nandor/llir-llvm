@@ -26,21 +26,19 @@ def IsPPC64le     : Predicate<"Subtarget->isPPC64le()">;
 //===----------------------------------------------------------------------===//
 
 def SDT_LLIRargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
-def SDT_LLIRreturn   : SDTypeProfile<0, -1, []>;
 def SDT_LLIRsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
 def SDT_LLIRswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
 def SDT_LLIRvastart  : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
 def SDT_LLIRvalue    : SDTypeProfile<1,  0, []>;
 
-def SDT_LLIRcall     : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
-def SDT_LLIRcall_va  : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
-def SDT_LLIRtcall    : SDTypeProfile<1, -2, [SDTCisPtrTy<1>, SDTCisVT<2, i32>]>;
-def SDT_LLIRtcall_va : SDTypeProfile<1, -3, [SDTCisPtrTy<1>, SDTCisVT<2, i32>, SDTCisVT<3, i32>]>;
-
-def SDT_LLIRvoid     : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
-def SDT_LLIRvoid_va  : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
-def SDT_LLIRtvoid    : SDTypeProfile<0, -1, [SDTCisPtrTy<0>, SDTCisVT<1, i32>]>;
-def SDT_LLIRtvoid_va : SDTypeProfile<0, -2, [SDTCisPtrTy<0>, SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_LLIRcall     : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
+def SDT_LLIRcall_va  : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_LLIRtcall    : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
+def SDT_LLIRtcall_va : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_LLIRvoid     : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
+def SDT_LLIRvoid_va  : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+def SDT_LLIRtvoid    : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
+def SDT_LLIRtvoid_va : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
 
 def SDT_LLIRover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
 
@@ -50,8 +48,8 @@ def SDT_LLIRalloca   : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
 // LLIR-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
 
+def LLIRreturn    : SDNode<"LLIRISD::RETURN",   SDTNone, [SDNPHasChain, SDNPVariadic]>;
 def LLIRargument  : SDNode<"LLIRISD::ARGUMENT", SDT_LLIRargument>;
-def LLIRreturn    : SDNode<"LLIRISD::RETURN",   SDT_LLIRreturn, [SDNPHasChain]>;
 def LLIRsymbol    : SDNode<"LLIRISD::SYMBOL",   SDT_LLIRsymbol>;
 def LLIRswitch    : SDNode<"LLIRISD::SWITCH",   SDT_LLIRswitch, [SDNPHasChain, SDNPVariadic]>;
 def LLIRvastart   : SDNode<"LLIRISD::VASTART",  SDT_LLIRvastart, [SDNPHasChain]>;
