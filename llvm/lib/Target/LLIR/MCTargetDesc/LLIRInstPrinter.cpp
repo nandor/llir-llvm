@@ -80,15 +80,17 @@ void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
   printCallingConv(OS, MI->getOperand(start++).getImm());
   OS << '\t';
 
+  // Return value.
   if (!isVoid && !isTail) {
     printOperand(MI, 0, STI, OS);
+    OS << ", ";
   }
-
-  for (unsigned i = start; i < MI->getNumOperands(); ++i) {
-    if ((!isVoid && !isTail) || i != start) {
-      OS << ", ";
-    }
-    printOperand(MI, i, STI, OS);
+  // Callee.
+  printOperand(MI, start++, STI, OS);
+  // Arguments.
+  for (unsigned i = start; i < MI->getNumOperands(); i += 2) {
+    OS << ", ";
+    printOperand(MI, i + 1, STI, OS);
   }
 }
 

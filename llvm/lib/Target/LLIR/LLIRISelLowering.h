@@ -26,9 +26,13 @@ enum NodeType : unsigned {
   ARGUMENT,
   // Calls.
   CALL,
+  CALL_VA,
   TCALL,
+  TCALL_VA,
   VOID,
+  VOID_VA,
   TVOID,
+  TVOID_VA,
   // Symbols.
   SYMBOL,
   // Control flow.

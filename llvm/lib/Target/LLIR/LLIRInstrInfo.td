@@ -57,13 +57,13 @@ def LLIRswitch    : SDNode<"LLIRISD::SWITCH",   SDT_LLIRswitch, [SDNPHasChain, S
 def LLIRvastart   : SDNode<"LLIRISD::VASTART",  SDT_LLIRvastart, [SDNPHasChain]>;
 
 def LLIRcall      : SDNode<"LLIRISD::CALL",     SDT_LLIRcall,     [SDNPHasChain, SDNPVariadic]>;
-def LLIRcall_va   : SDNode<"LLIRISD::CALL",     SDT_LLIRcall_va,  [SDNPHasChain, SDNPVariadic]>;
+def LLIRcall_va   : SDNode<"LLIRISD::CALL_VA",  SDT_LLIRcall_va,  [SDNPHasChain, SDNPVariadic]>;
 def LLIRtcall     : SDNode<"LLIRISD::TCALL",    SDT_LLIRtcall,    [SDNPHasChain, SDNPVariadic]>;
-def LLIRtcall_va  : SDNode<"LLIRISD::TCALL",    SDT_LLIRtcall_va, [SDNPHasChain, SDNPVariadic]>;
+def LLIRtcall_va  : SDNode<"LLIRISD::TCALL_VA", SDT_LLIRtcall_va, [SDNPHasChain, SDNPVariadic]>;
 def LLIRvoid      : SDNode<"LLIRISD::VOID",     SDT_LLIRvoid,     [SDNPHasChain, SDNPVariadic]>;
-def LLIRvoid_va   : SDNode<"LLIRISD::VOID",     SDT_LLIRvoid_va,  [SDNPHasChain, SDNPVariadic]>;
+def LLIRvoid_va   : SDNode<"LLIRISD::VOID_VA",  SDT_LLIRvoid_va,  [SDNPHasChain, SDNPVariadic]>;
 def LLIRtvoid     : SDNode<"LLIRISD::TVOID",    SDT_LLIRtvoid,    [SDNPHasChain, SDNPVariadic]>;
-def LLIRtvoid_va  : SDNode<"LLIRISD::TVOID",    SDT_LLIRtvoid_va, [SDNPHasChain, SDNPVariadic]>;
+def LLIRtvoid_va  : SDNode<"LLIRISD::TVOID_VA", SDT_LLIRtvoid_va, [SDNPHasChain, SDNPVariadic]>;
 
 def LLIRsaddo     : SDNode<"LLIRISD::SADDO",    SDT_LLIRover>;
 def LLIRuaddo     : SDNode<"LLIRISD::UADDO",    SDT_LLIRover>;

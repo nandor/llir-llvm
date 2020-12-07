@@ -2315,12 +2315,15 @@ class X86_64ABIInfo : public SwiftABIInfo {
   // Some ABIs (e.g. X32 ABI and Native Client OS) use 32 bit pointers on
   // 64-bit hardware.
   bool Has64BitPointers;
+  // Flag indicating whether the target is LLIR.
+  bool IsLLIR;
 
 public:
-  X86_64ABIInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel) :
-      SwiftABIInfo(CGT), AVXLevel(AVXLevel),
-      Has64BitPointers(CGT.getDataLayout().getPointerSize(0) == 8) {
-  }
+  X86_64ABIInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel,
+                bool IsLLIR)
+      : SwiftABIInfo(CGT), AVXLevel(AVXLevel),
+        Has64BitPointers(CGT.getDataLayout().getPointerSize(0) == 8),
+        IsLLIR(IsLLIR) {}
 
   bool isPassedUsingAVXType(QualType type) const {
     unsigned neededInt, neededSSE;
@@ -2358,9 +2361,11 @@ public:
 /// WinX86_64ABIInfo - The Windows X86_64 ABI information.
 class WinX86_64ABIInfo : public SwiftABIInfo {
 public:
-  WinX86_64ABIInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel)
+  WinX86_64ABIInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel,
+                   bool IsLLIR)
       : SwiftABIInfo(CGT), AVXLevel(AVXLevel),
-        IsMingw64(getTarget().getTriple().isWindowsGNUEnvironment()) {}
+        IsMingw64(getTarget().getTriple().isWindowsGNUEnvironment()),
+        IsLLIR(IsLLIR) {}
 
   void computeInfo(CGFunctionInfo &FI) const override;
 
@@ -2398,12 +2403,15 @@ private:
   X86AVXABILevel AVXLevel;
 
   bool IsMingw64;
+
+  bool IsLLIR;
 };
 
 class X86_64TargetCodeGenInfo : public TargetCodeGenInfo {
 public:
-  X86_64TargetCodeGenInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel)
-      : TargetCodeGenInfo(std::make_unique<X86_64ABIInfo>(CGT, AVXLevel)) {}
+  X86_64TargetCodeGenInfo(CodeGen::CodeGenTypes &CGT, X86AVXABILevel AVXLevel,
+                          bool IsLLIR)
+      : TargetCodeGenInfo(std::make_unique<X86_64ABIInfo>(CGT, AVXLevel, IsLLIR)) {}
 
   const X86_64ABIInfo &getABIInfo() const {
     return static_cast<const X86_64ABIInfo&>(TargetCodeGenInfo::getABIInfo());
@@ -2646,8 +2654,9 @@ void WinX86_32TargetCodeGenInfo::setTargetAttributes(
 class WinX86_64TargetCodeGenInfo : public TargetCodeGenInfo {
 public:
   WinX86_64TargetCodeGenInfo(CodeGen::CodeGenTypes &CGT,
-                             X86AVXABILevel AVXLevel)
-      : TargetCodeGenInfo(std::make_unique<WinX86_64ABIInfo>(CGT, AVXLevel)) {}
+                             X86AVXABILevel AVXLevel,
+                             bool IsLLIR)
+      : TargetCodeGenInfo(std::make_unique<WinX86_64ABIInfo>(CGT, AVXLevel, IsLLIR)) {}
 
   void setTargetAttributes(const Decl *D, llvm::GlobalValue *GV,
                            CodeGen::CodeGenModule &CGM) const override;
@@ -3849,7 +3858,7 @@ void X86_64ABIInfo::computeInfo(CGFunctionInfo &FI) const {
   // using __attribute__((ms_abi)). In such case to correctly emit Win64
   // compatible code delegate this call to WinX86_64ABIInfo::computeInfo.
   if (CallingConv == llvm::CallingConv::Win64) {
-    WinX86_64ABIInfo Win64ABIInfo(CGT, AVXLevel);
+    WinX86_64ABIInfo Win64ABIInfo(CGT, AVXLevel, IsLLIR);
     Win64ABIInfo.computeInfo(FI);
     return;
   }
@@ -3857,8 +3866,8 @@ void X86_64ABIInfo::computeInfo(CGFunctionInfo &FI) const {
   bool IsRegCall = CallingConv == llvm::CallingConv::X86_RegCall;
 
   // Keep track of the number of assigned registers.
-  unsigned FreeIntRegs = IsRegCall ? 11 : 6;
-  unsigned FreeSSERegs = IsRegCall ? 16 : 8;
+  unsigned FreeIntRegs = IsLLIR ? UINT_MAX : (IsRegCall ? 11 : 6);
+  unsigned FreeSSERegs = IsLLIR ? UINT_MAX : (IsRegCall ? 16 : 8);
   unsigned NeededInt, NeededSSE;
 
   if (!::classifyReturnType(getCXXABI(), FI, *this)) {
@@ -4321,7 +4330,7 @@ void WinX86_64ABIInfo::computeInfo(CGFunctionInfo &FI) const {
   // If __attribute__((sysv_abi)) is in use, use the SysV argument
   // classification rules.
   if (CC == llvm::CallingConv::X86_64_SysV) {
-    X86_64ABIInfo SysVABIInfo(CGT, AVXLevel);
+    X86_64ABIInfo SysVABIInfo(CGT, AVXLevel, IsLLIR);
     SysVABIInfo.computeInfo(FI);
     return;
   }
@@ -11055,12 +11064,13 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
         (ABI == "avx512"
              ? X86AVXABILevel::AVX512
              : ABI == "avx" ? X86AVXABILevel::AVX : X86AVXABILevel::None);
+    bool IsLLIR = Triple.isLLIR();
 
     switch (Triple.getOS()) {
     case llvm::Triple::Win32:
-      return SetCGInfo(new WinX86_64TargetCodeGenInfo(Types, AVXLevel));
+      return SetCGInfo(new WinX86_64TargetCodeGenInfo(Types, AVXLevel, IsLLIR));
     default:
-      return SetCGInfo(new X86_64TargetCodeGenInfo(Types, AVXLevel));
+      return SetCGInfo(new X86_64TargetCodeGenInfo(Types, AVXLevel, IsLLIR));
     }
   }
   case llvm::Triple::hexagon:

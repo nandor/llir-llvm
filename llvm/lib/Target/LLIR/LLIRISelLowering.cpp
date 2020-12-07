@@ -668,6 +668,14 @@ const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const {
       return "LLIRISD::VOID";
     case LLIRISD::TVOID:
       return "LLIRISD::TVOID";
+    case LLIRISD::CALL_VA:
+      return "LLIRISD::CALL_VA";
+    case LLIRISD::TCALL_VA:
+      return "LLIRISD::TCALL_VA";
+    case LLIRISD::VOID_VA:
+      return "LLIRISD::VOID_VA";
+    case LLIRISD::TVOID_VA:
+      return "LLIRISD::TVOID";
     case LLIRISD::SYMBOL:
       return "LLIRISD::SYMBOL";
     case LLIRISD::SWITCH:
@@ -792,7 +800,6 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SDValue Callee = CLI.Callee;
   CallingConv::ID CallConv = CLI.CallConv;
 
-
   if (const auto *GA = ::dyn_cast_or_null<GlobalAddressSDNode>(CLI.Callee)) {
     if (auto *GV = GA->getGlobal()) {
       StringRef name = GV->getName( );
@@ -824,8 +831,7 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   // Collect all fixed arguments.
   unsigned NumFixedArgs = 0;
   for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
-    const ISD::OutputArg &Out = CLI.Outs[i];
-    NumFixedArgs += Out.IsFixed;
+    NumFixedArgs += CLI.Outs[i].IsFixed;
   }
 
   // Add all arguments to the call.
@@ -836,7 +842,14 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   if (CLI.IsVarArg) {
     Ops.push_back(DAG.getTargetConstant(NumFixedArgs, DL, MVT::i32));
   }
-  Ops.append(CLI.OutVals.begin(), CLI.OutVals.end());
+
+  for (unsigned i = 0; i < CLI.Outs.size(); ++i) {
+    const SDValue &Arg = CLI.OutVals[i];
+    const ISD::OutputArg &Out = CLI.Outs[i];
+    uint64_t flag = 0;
+    Ops.push_back(DAG.getTargetConstant(flag, DL, MVT::i64));
+    Ops.push_back(Arg);
+  }
 
   // Collect the types of return values.
   SmallVector<EVT, 8> InTys;
@@ -848,16 +861,20 @@ SDValue LLIRTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   // Construct the call node.
   if (CLI.Ins.empty()) {
-    return DAG.getNode(CLI.IsTailCall ? LLIRISD::TVOID : LLIRISD::VOID, DL,
-                       DAG.getVTList(InTys), Ops);
+    unsigned Op;
+    if (CLI.IsVarArg) {
+      Op = CLI.IsTailCall ? LLIRISD::TVOID_VA : LLIRISD::VOID_VA;
+    } else {
+      Op = CLI.IsTailCall ? LLIRISD::TVOID : LLIRISD::VOID;
+    }
+    return DAG.getNode(Op, DL, DAG.getVTList(InTys), Ops);
   } else {
     if (CLI.IsTailCall) {
-      return DAG.getNode(LLIRISD::TCALL, DL, DAG.getVTList(InTys), Ops)
-          .getValue(1);
+      unsigned Op = CLI.IsVarArg ? LLIRISD::TCALL_VA : LLIRISD::TCALL;
+      return DAG.getNode(Op, DL, DAG.getVTList(InTys), Ops).getValue(1);
     } else {
-      SDValue Call =
-          DAG.getNode(CLI.IsTailCall ? LLIRISD::TCALL : LLIRISD::CALL, DL,
-                      DAG.getVTList(InTys), Ops);
+      unsigned Op = CLI.IsVarArg ? LLIRISD::CALL_VA : LLIRISD::CALL;
+      SDValue Call = DAG.getNode(Op, DL, DAG.getVTList(InTys), Ops);
       InVals.push_back(Call);
       return Call.getValue(1);
     }
