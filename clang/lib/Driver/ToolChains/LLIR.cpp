@@ -40,9 +40,13 @@ void tools::llir::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
                                           const InputInfoList &Inputs,
                                           const llvm::opt::ArgList &Args,
                                           const char *LinkingOutput) const {
-  auto &ToolChain = static_cast<const toolchains::LLIR &>(getToolChain());
-  const llvm::Triple &Triple = ToolChain.getTriple();
+  auto &TC = static_cast<const toolchains::LLIR &>(getToolChain());
+  const llvm::Triple &Triple = TC.getTriple();
   ArgStringList CmdArgs;
+
+  // Ignore a bunch of arguments.
+  claimNoWarnArgs(Args);
+  ParsePICArgs(TC, Args);
 
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
@@ -56,7 +60,7 @@ void tools::llir::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
   }
 
   const std::string as = Triple.str() + "-as";
-  const char *Exec = Args.MakeArgString(ToolChain.GetProgramPath(as.c_str()));
+  const char *Exec = Args.MakeArgString(TC.GetProgramPath(as.c_str()));
   C.addCommand(std::make_unique<Command>(
       JA, *this, ResponseFileSupport::AtFileCurCP(), Exec, CmdArgs, Inputs));
 }
