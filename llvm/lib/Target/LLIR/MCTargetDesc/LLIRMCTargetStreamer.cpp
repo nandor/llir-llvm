@@ -62,6 +62,14 @@ void LLIRMCTargetAsmStreamer::emitVarArg()
   OS << "\t.vararg\n";
 }
 
+void LLIRMCTargetAsmStreamer::emitFeatures(
+    StringRef cpu,
+    StringRef tuneCPU,
+    StringRef fs)
+{
+  OS << "\t.features \"" << cpu << "\", \"" << tuneCPU << "\", \"" << fs << "\"\n";
+}
+
 void LLIRMCTargetAsmStreamer::emitParams(
     ArrayRef<LLIRMachineFunctionInfo::Parameter> Params)
 {
@@ -134,6 +142,14 @@ void LLIRMCTargetLLIRStreamer::emitStackObject(int Offset, int Size, int Align)
 void LLIRMCTargetLLIRStreamer::emitVarArg()
 {
   llvm_unreachable("LLIRMCTargetLLIRStreamer::emitVarArg");
+}
+
+void LLIRMCTargetLLIRStreamer::emitFeatures(
+    StringRef cpu,
+    StringRef tuneCPU,
+    StringRef fs)
+{
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitFeatures");
 }
 
 void LLIRMCTargetLLIRStreamer::emitParams(

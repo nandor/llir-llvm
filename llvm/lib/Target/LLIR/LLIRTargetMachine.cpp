@@ -230,27 +230,31 @@ const LLIRSubtarget *
 LLIRTargetMachine::getSubtargetImpl(const Function &F) const
 {
   Attribute CPUAttr = F.getFnAttribute("target-cpu");
+  Attribute TuneAttr = F.getFnAttribute("tune-cpu");
   Attribute FSAttr = F.getFnAttribute("target-features");
 
-  std::string CPU = !CPUAttr.hasAttribute(Attribute::None)
-      ? CPUAttr.getValueAsString().str()
-      : TargetCPU;
-  std::string FS = !FSAttr.hasAttribute(Attribute::None)
-      ? FSAttr.getValueAsString().str()
-      : TargetFS;
+  StringRef CPU =
+      CPUAttr.isValid() ? CPUAttr.getValueAsString() : (StringRef)TargetCPU;
+  StringRef TuneCPU =
+      TuneAttr.isValid() ? TuneAttr.getValueAsString() : (StringRef)CPU;
+  StringRef FS =
+      FSAttr.isValid() ? FSAttr.getValueAsString() : (StringRef)TargetFS;
 
-  auto &I = SubtargetMap[CPU + FS];
+  SmallString<512> Key;
+  Key += "fs=";
+  Key += CPU;
+  Key += "tune=";
+  Key += TuneCPU;
+  Key += "fs=";
+  Key += FS;
+
+  auto &I = SubtargetMap[Key];
   if (!I) {
     // This needs to be done before we create a new subtarget since any
     // creation will depend on the TM and the code generation flags on the
     // function that reside in TargetOptions.
     resetTargetOptions(F);
-    I = std::make_unique<LLIRSubtarget>(
-        TargetTriple,
-        CPU,
-        FS,
-      *this
-    );
+    I = std::make_unique<LLIRSubtarget>(TargetTriple, CPU, TuneCPU, FS, *this);
   }
   return I.get();
 }

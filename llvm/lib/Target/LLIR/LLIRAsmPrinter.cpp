@@ -67,6 +67,9 @@ void LLIRAsmPrinter::emitFunctionBodyStart() {
     }
   }
 
+  auto &STI = MF->getSubtarget<LLIRSubtarget>();
+  Streamer.emitFeatures(STI.getCPU(), STI.getTuneCPU(), STI.getFS());
+
   if (F.hasFnAttribute(Attribute::NoInline)) {
     Streamer.emitNoInline();
   }

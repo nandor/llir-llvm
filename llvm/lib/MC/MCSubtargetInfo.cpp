@@ -228,9 +228,9 @@ MCSubtargetInfo::MCSubtargetInfo(const Triple &TT, StringRef C, StringRef TC,
                                  const InstrStage *IS, const unsigned *OC,
                                  const unsigned *FP)
     : TargetTriple(TT), CPU(std::string(C)), TuneCPU(std::string(TC)),
-      ProcFeatures(PF), ProcDesc(PD), WriteProcResTable(WPR),
-      WriteLatencyTable(WL), ReadAdvanceTable(RA), Stages(IS),
-      OperandCycles(OC), ForwardingPaths(FP) {
+      FS(std::string(FS)), ProcFeatures(PF), ProcDesc(PD),
+      WriteProcResTable(WPR), WriteLatencyTable(WL), ReadAdvanceTable(RA),
+      Stages(IS), OperandCycles(OC), ForwardingPaths(FP) {
   InitMCProcessorInfo(CPU, TuneCPU, FS);
 }
 

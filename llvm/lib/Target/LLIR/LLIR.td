@@ -27,6 +27,7 @@ include "LLIRInstrInfo.td"
 
 def LLIRInstrInfo : InstrInfo;
 
+def : Processor<"generic",  NoItineraries, []>;
 def : Processor<"penryn",  NoItineraries, []>;
 def : Processor<"skylake", NoItineraries, []>;
 def : Processor<"x86-64",  NoItineraries, []>;

@@ -76,6 +76,7 @@ class MCSubtargetInfo {
   Triple TargetTriple;
   std::string CPU; // CPU being targeted.
   std::string TuneCPU; // CPU being tuned for.
+  std::string FS; // Feature string.
   ArrayRef<SubtargetFeatureKV> ProcFeatures;  // Processor feature list
   ArrayRef<SubtargetSubTypeKV> ProcDesc;  // Processor descriptions
 
@@ -106,6 +107,7 @@ public:
   const Triple &getTargetTriple() const { return TargetTriple; }
   StringRef getCPU() const { return CPU; }
   StringRef getTuneCPU() const { return TuneCPU; }
+  StringRef getFS() const { return FS; }
 
   const FeatureBitset& getFeatureBits() const { return FeatureBits; }
   void setFeatureBits(const FeatureBitset &FeatureBits_) {

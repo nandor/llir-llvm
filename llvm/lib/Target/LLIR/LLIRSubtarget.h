@@ -31,11 +31,11 @@ namespace llvm {
 
 class LLIRSubtarget : public LLIRGenSubtargetInfo {
  public:
-  LLIRSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
-                const TargetMachine &TM);
+   LLIRSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU,
+                 StringRef FS, const TargetMachine &TM);
 
-  const LLIRRegisterInfo *getRegisterInfo() const override {
-    return &RegisterInfo;
+   const LLIRRegisterInfo *getRegisterInfo() const override {
+     return &RegisterInfo;
   }
 
   const LLIRInstrInfo *getInstrInfo() const override { return &InstrInfo; }

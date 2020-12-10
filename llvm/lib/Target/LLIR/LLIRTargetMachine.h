@@ -23,9 +23,9 @@ namespace llvm {
 class LLIRTargetMachine : public LLVMTargetMachine {
 public:
   LLIRTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                     StringRef FS, const TargetOptions &Options,
-                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                     CodeGenOpt::Level OL, bool JIT);
+                    StringRef FS, const TargetOptions &Options,
+                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                    CodeGenOpt::Level OL, bool JIT);
   ~LLIRTargetMachine() override;
 
   const LLIRSubtarget *getSubtargetImpl(const Function &) const override;

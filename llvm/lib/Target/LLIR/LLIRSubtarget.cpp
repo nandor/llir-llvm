@@ -24,22 +24,11 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_CTOR
 #include "LLIRGenSubtargetInfo.inc"
 
-
-LLIRSubtarget::LLIRSubtarget(
-    const Triple &TT,
-    const std::string &CPU,
-    const std::string &FS,
-    const TargetMachine &TM)
-  : LLIRGenSubtargetInfo(TT, CPU, /*TrueCPU*/CPU, FS)
-  , TargetTriple(TT)
-  , InstrInfo(*this)
-  , TargetLowering(TM, *this)
-  , FrameLowering(*this)
-{
-  ParseSubtargetFeatures(CPU, /*TrueCPU*/CPU, FS);
+LLIRSubtarget::LLIRSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU,
+                             StringRef FS, const TargetMachine &TM)
+    : LLIRGenSubtargetInfo(TT, CPU, TuneCPU, FS), TargetTriple(TT),
+      InstrInfo(*this), TargetLowering(TM, *this), FrameLowering(*this) {
+  ParseSubtargetFeatures(CPU, TuneCPU, FS);
 }
 
-bool LLIRSubtarget::enableMachineScheduler() const
-{
-  return false;
-}
+bool LLIRSubtarget::enableMachineScheduler() const { return false; }

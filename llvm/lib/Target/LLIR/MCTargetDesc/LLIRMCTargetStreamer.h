@@ -21,6 +21,8 @@ class LLIRMCTargetStreamer : public MCTargetStreamer {
 public:
   LLIRMCTargetStreamer(MCStreamer &S);
 
+  /// .features
+  virtual void emitFeatures(StringRef cpu, StringRef tuneCPU, StringRef fs) = 0;
   /// .stack_obj
   virtual void emitStackObject(int Offset, int Size, int Align) = 0;
   /// .vararg
@@ -46,6 +48,7 @@ public:
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
   virtual void emitVarArg() override;
+  virtual void emitFeatures(StringRef cpu, StringRef tuneCPU, StringRef fs) override;
   virtual void emitParams(ArrayRef<LLIRMachineFunctionInfo::Parameter> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
@@ -64,6 +67,7 @@ public:
 
   virtual void emitStackObject(int Offset, int Size, int Align) override;
   virtual void emitVarArg() override;
+  virtual void emitFeatures(StringRef cpu, StringRef tuneCPU, StringRef fs) override;
   virtual void emitParams(ArrayRef<LLIRMachineFunctionInfo::Parameter> params) override;
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
