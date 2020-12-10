@@ -246,3 +246,15 @@ std::string LLIR::computeSysRoot() const {
   }
   return std::string();
 }
+
+ToolChain::RuntimeLibType LLIR::GetRuntimeLibType(
+    const ArgList &Args) const {
+  if (Arg *A = Args.getLastArg(clang::driver::options::OPT_rtlib_EQ)) {
+    StringRef Value = A->getValue();
+    if (Value != "compiler-rt")
+      getDriver().Diag(clang::diag::err_drv_invalid_rtlib_name)
+          << A->getAsString(Args);
+  }
+
+  return ToolChain::RLT_CompilerRT;
+}
