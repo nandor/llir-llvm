@@ -2360,7 +2360,7 @@ MCSection *TargetLoweringObjectFileLLIR::getSectionForConstant(
     const DataLayout &DL, SectionKind Kind, const Constant *C,
     Align &Alignment) const {
   if (Kind.isReadOnlyWithRel())
-    return DataSection;
+    return DataRelROSection;
   if (Kind.isReadOnly())
     return ReadOnlySection;
   llvm_unreachable("invalid section kind");
@@ -2383,7 +2383,7 @@ MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
     if (GVar->isConstant()) {
       const Constant *C = GVar->getInitializer();
       if (C->needsRelocation()) {
-        return DataSection;
+        return DataRelROSection;
       } else {
         return ReadOnlySection;
       }
