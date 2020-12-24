@@ -120,6 +120,10 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(Args.MakeArgString(FS));
   }
 
+  // Forward flags.
+  if (Args.hasArg(options::OPT_rdynamic))
+    CmdArgs.push_back("-E");
+
   // Forward the optimisation level.
   if (Arg *A = Args.getLastArg(options::OPT_O_Group)) {
     if (A->getOption().matches(options::OPT_O0)) {
