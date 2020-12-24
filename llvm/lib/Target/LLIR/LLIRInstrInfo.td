@@ -304,7 +304,7 @@ let hasSideEffects = 1 in
     < (outs I64:$dst)
     , (ins R64:$src)
     , []
-    , "mov.i64\t$dst, $src"
+    , "get.i64\t$dst, $src"
     , 0x0A
     >;
 
