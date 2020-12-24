@@ -198,7 +198,7 @@ class FMov
     < (outs oc:$dst)
     , (ins ic:$src)
     , [(set oc:$dst, (bitconvert ic:$src))]
-    , !strconcat("mov.", !strconcat(type, "\t$dst, $src"))
+    , !strconcat("bit_cast.", !strconcat(type, "\t$dst, $src"))
     , op
     >
 {
