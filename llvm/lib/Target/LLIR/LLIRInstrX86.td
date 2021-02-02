@@ -77,11 +77,13 @@ def X86_ATOMIC_CMPXCHG_64 : I
   , 0xE1
   >;
 
+// 32-bit loads.
 def : Pat<
   (acquiring_load<atomic_load_32>  I64:$ptr),
   (LD_4_I32 I64:$ptr)
 >;
 
+// 32-bit stores.
 def : Pat<
   (releasing_store<atomic_store_32> I64:$ptr, I32:$val),
   (ST_4_I32 I64:$ptr, I32:$val)
@@ -90,6 +92,16 @@ def : Pat<
 def : Pat<
   (monotonic_store<atomic_store_32> I64:$ptr, I32:$val),
   (ST_4_I32 I64:$ptr, I32:$val)
+>;
+
+// 64-bit stores.
+def : Pat<
+  (monotonic_store<atomic_store_64> I64:$ptr, I64:$val),
+  (ST_8_I64 I64:$ptr, I64:$val)
+>;
+def : Pat<
+  (seq_cst_store<atomic_store_64> I64:$ptr, I64:$val),
+  (ST_8_I64 I64:$ptr, I64:$val)
 >;
 
 def X86_RDTSC_I64 : I

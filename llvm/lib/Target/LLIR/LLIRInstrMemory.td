@@ -41,9 +41,6 @@ def ST_16_I128 : LLIRSt<I128, store, 0x30>;
 def ST_10_F80  : LLIRSt<F80,  store, 0x30>;
 def ST_16_F128 : LLIRSt<F128, store, 0x30>;
 
-def ST_4_I32_ATOMIC : LLIRSt<I32, atomic_store_32, 0x4D>;
-def ST_8_I64_ATOMIC : LLIRSt<I64, atomic_store_64, 0x4E>;
-
 def : Pat<(truncstorei8  I16:$r,  I64:$addr), (ST_1_I8  I64:$addr, (TRUNC_I16_I8   I16:$r))>;
 def : Pat<(truncstorei8  I32:$r,  I64:$addr), (ST_1_I8  I64:$addr, (TRUNC_I32_I8   I32:$r))>;
 def : Pat<(truncstorei8  I64:$r,  I64:$addr), (ST_1_I8  I64:$addr, (TRUNC_I64_I8   I64:$r))>;
