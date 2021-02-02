@@ -87,6 +87,11 @@ def : Pat<
   (ST_4_I32 I64:$ptr, I32:$val)
 >;
 
+def : Pat<
+  (monotonic_store<atomic_store_32> I64:$ptr, I32:$val),
+  (ST_4_I32 I64:$ptr, I32:$val)
+>;
+
 def X86_RDTSC_I64 : I
   < (outs I64:$res)
   , (ins)

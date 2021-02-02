@@ -328,6 +328,12 @@ class releasing_store<PatFrag base>
   let IsAtomicOrderingReleaseOrStronger = 1;
 }
 
+class monotonic_store<PatFrag base>
+  : PatFrag<(ops node:$ptr, node:$val), (base node:$ptr, node:$val)> {
+  let IsAtomic = 1;
+  let IsAtomicOrderingMonotonic = 1;
+}
+
 class acquiring_load<PatFrag base>
   : PatFrag<(ops node:$ptr), (base node:$ptr)> {
   let IsAtomic = 1;
