@@ -8,7 +8,7 @@
 
 #include "assembly.h"
 
-    .text
+TEXT_SECTION_DIRECTIVE
 
 #if !defined(__USING_SJLJ_EXCEPTIONS__)
 
@@ -54,6 +54,13 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
   ret
 
 #elif defined(__x86_64__)
+
+#ifdef __llir__
+DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
+  trap
+  .end
+
+#else
 
 #
 # extern int __unw_getcontext(unw_context_t* thread_state)
@@ -114,6 +121,8 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 #endif
   xorl  %eax, %eax    # return UNW_ESUCCESS
   ret
+
+#endif
 
 #elif defined(__mips__) && defined(_ABIO32) && _MIPS_SIM == _ABIO32
 
@@ -761,7 +770,7 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 @
 @ On entry:
 @  thread_state pointer is in r0
-@ 
+@
 @ Per EHABI #4.7 this only saves the core integer registers.
 @ EHABI #7.4.5 notes that in general all VRS registers should be restored
 @ however this is very hard to do for VFP registers because it is unknown

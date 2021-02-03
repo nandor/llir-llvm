@@ -8,7 +8,7 @@
 
 #include "assembly.h"
 
-  .text
+TEXT_SECTION_DIRECTIVE
 
 #if !defined(__USING_SJLJ_EXCEPTIONS__)
 
@@ -54,6 +54,14 @@ DEFINE_LIBUNWIND_FUNCTION(__libunwind_Registers_x86_jumpto)
   # skip gs
 
 #elif defined(__x86_64__)
+
+#if defined (__llir__)
+
+DEFINE_LIBUNWIND_FUNCTION(__libunwind_Registers_x86_64_jumpto)
+  trap
+  .end
+
+#else
 
 DEFINE_LIBUNWIND_FUNCTION(__libunwind_Registers_x86_64_jumpto)
 #
@@ -121,6 +129,7 @@ DEFINE_LIBUNWIND_FUNCTION(__libunwind_Registers_x86_64_jumpto)
   pop    %rdi      # rdi was saved here earlier
   ret            # rip was saved here
 
+#endif
 
 #elif defined(__powerpc64__)
 
@@ -474,7 +483,7 @@ DEFINE_LIBUNWIND_FUNCTION(_ZN9libunwind13Registers_ppc6jumptoEv)
   rlwinm  %r4, %r4, 0, 0, 27  // mask low 4-bits
   // r4 is now a 16-byte aligned pointer into the red zone
   // the _vectorRegisters may not be 16-byte aligned so copy via red zone temp buffer
- 
+
 
 #define LOAD_VECTOR_UNALIGNEDl(_index) \
   andis.  %r0, %r5, (1<<(15-_index))  SEPARATOR \

@@ -85,16 +85,23 @@
 
 #elif defined(__ELF__)
 
+#ifndef __llir__
 #if defined(__arm__)
 #define SYMBOL_IS_FUNC(name) .type name,%function
 #else
 #define SYMBOL_IS_FUNC(name) .type name,@function
 #endif
+#else
+#define SYMBOL_IS_FUNC(name)
+#endif
 #define EXPORT_SYMBOL(name)
 #define HIDDEN_SYMBOL(name) .hidden name
 #define WEAK_SYMBOL(name) .weak name
 
-#if defined(__hexagon__)
+#if defined(__llir__)
+#define WEAK_ALIAS(name, aliasname) \
+  .equ SYMBOL_NAME(aliasname), SYMBOL_NAME(name)
+#elif defined(__hexagon__)
 #define WEAK_ALIAS(name, aliasname) \
   WEAK_SYMBOL(aliasname) SEPARATOR                                             \
   .equiv SYMBOL_NAME(aliasname), SYMBOL_NAME(name)
@@ -106,9 +113,18 @@
 
 #if defined(__GNU__) || defined(__FreeBSD__) || defined(__Fuchsia__) || \
     defined(__linux__)
+#ifndef __llir__
 #define NO_EXEC_STACK_DIRECTIVE .section .note.GNU-stack,"",%progbits
+#endif
+#define NO_EXEC_STACK_DIRECTIVE
 #else
 #define NO_EXEC_STACK_DIRECTIVE
+#endif
+
+#ifdef __llir__
+#define TEXT_SECTION_DIRECTIVE .section .text
+#else
+#define TEXT_SECTION_DIRECTIVE .text
 #endif
 
 #elif defined(_WIN32)
