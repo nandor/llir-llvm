@@ -44,6 +44,8 @@ def SDT_LLIRover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
 
 def SDT_LLIRalloca   : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
 
+def SDT_LLIRbarrier  : SDTypeProfile<0, 0, []>;
+
 //===----------------------------------------------------------------------===//
 // LLIR-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
@@ -73,6 +75,10 @@ def LLIRumulo     : SDNode<"LLIRISD::UMULO",    SDT_LLIRover>;
 def LLIRrdtsc     : SDNode<"LLIRISD::RDTSC",    SDT_LLIRvalue, [SDNPHasChain]>;
 
 def LLIRalloca    : SDNode<"LLIRISD::ALLOCA",   SDT_LLIRalloca, [SDNPHasChain]>;
+
+def LLIRBarrier   : SDNode<"LLIRISD::BARRIER",  SDT_LLIRbarrier, [SDNPHasChain, SDNPSideEffect]>;
+def LLIRMFence    : SDNode<"LLIRISD::MFENCE",   SDT_LLIRbarrier, [SDNPHasChain]>;
+
 
 //===----------------------------------------------------------------------===//
 // WebAssembly-specific Operands.
@@ -275,6 +281,11 @@ def : Pat
 
 def : Pat
   < (LLIRsymbol tconstpool:$addr)
+  , (ADDR_I64 i64addr_op:$addr)
+  >;
+
+def : Pat
+  < (LLIRsymbol tglobaltlsaddr:$addr)
   , (ADDR_I64 i64addr_op:$addr)
   >;
 

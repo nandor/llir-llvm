@@ -119,6 +119,11 @@ void LLIRMCTargetAsmStreamer::emitDtor(int Priority, const MCSymbol *Sym)
   OS << ".dtor " << Priority << ", " << Sym->getName() << "\n";
 }
 
+void LLIRMCTargetAsmStreamer::emitThreadLocal()
+{
+  OS << ".thread_local\n";
+}
+
 void LLIRMCTargetAsmStreamer::emitEnd()
 {
   OS << "\t.end\n";
@@ -171,6 +176,11 @@ void LLIRMCTargetLLIRStreamer::emitCtor(int Priority, const MCSymbol *Sym)
 void LLIRMCTargetLLIRStreamer::emitDtor(int Priority, const MCSymbol *Sym)
 {
   llvm_unreachable("not implemented");
+}
+
+void LLIRMCTargetLLIRStreamer::emitThreadLocal()
+{
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitThreadLocal");
 }
 
 void LLIRMCTargetLLIRStreamer::emitEnd()

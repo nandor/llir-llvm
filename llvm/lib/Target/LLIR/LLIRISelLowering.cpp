@@ -77,6 +77,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::FRAMEADDR, MVTPtr, Custom);
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
   setOperationAction(ISD::GlobalAddress, MVTPtr, Custom);
+  setOperationAction(ISD::GlobalTLSAddress, MVTPtr, Custom);
   setOperationAction(ISD::ExternalSymbol, MVTPtr, Custom);
   setOperationAction(ISD::JumpTable, MVTPtr, Custom);
   setOperationAction(ISD::BlockAddress, MVTPtr, Custom);
@@ -165,14 +166,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
   // Disable some integer operations.
   for (auto T : {MVT::i8, MVT::i16, MVT::i32, MVT::i64, MVT::i128}) {
-    // Custom lowering for some actions.
-    setOperationAction(ISD::SADDO, T, Custom);
-    setOperationAction(ISD::UADDO, T, Custom);
-    setOperationAction(ISD::SSUBO, T, Custom);
-    setOperationAction(ISD::USUBO, T, Custom);
-    setOperationAction(ISD::SMULO, T, Custom);
-    setOperationAction(ISD::UMULO, T, Custom);
-
     // Expand unavailable integer operations.
     setOperationAction(ISD::BSWAP, T, Legal);
     setOperationAction(ISD::SMUL_LOHI, T, Expand);
@@ -216,6 +209,29 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FP_TO_SINT, T, Op);
       setOperationAction(ISD::STRICT_FP_TO_SINT, T, Op);
       setOperationAction(ISD::STRICT_FP_TO_UINT, T, Op);
+    }
+
+    // Custom lowering for some actions.
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_64()) {
+        Op = Expand;
+      } else if (Subtarget->isAArch64()) {
+        Op = Custom;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Custom;
+      } else if (Subtarget->isRISCV()) {
+        Op = Custom;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
+
+      setOperationAction(ISD::SADDO, T, Op);
+      setOperationAction(ISD::UADDO, T, Op);
+      setOperationAction(ISD::SSUBO, T, Op);
+      setOperationAction(ISD::USUBO, T, Op);
+      setOperationAction(ISD::SMULO, T, Op);
+      setOperationAction(ISD::UMULO, T, Op);
     }
 
     {
@@ -281,6 +297,9 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   // Custom lowering for some buildings.
   setOperationAction(ISD::READCYCLECOUNTER, MVT::i64, Custom);
 
+  // Custom lowering for fences.
+  setOperationAction(ISD::ATOMIC_FENCE  , MVT::Other, Custom);
+
   // Expansion of memset/memcpy/memmove
   if (Subtarget->isX86_64()) {
     MaxStoresPerMemset = 16;
@@ -312,11 +331,14 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
                                            SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
+    case ISD::ATOMIC_FENCE:
+      return LowerATOMIC_FENCE(Op, DAG);
     case ISD::FRAMEADDR:
       return LowerFRAMEADDR(Op, DAG);
     case ISD::FrameIndex:
       return LowerFrameIndex(Op, DAG);
     case ISD::GlobalAddress:
+    case ISD::GlobalTLSAddress:
       return LowerGlobalAddress(Op, DAG);
     case ISD::ExternalSymbol:
       return LowerExternalSymbol(Op, DAG);
@@ -393,6 +415,29 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return SDValue();
     }
   }
+}
+
+SDValue LLIRTargetLowering::LowerATOMIC_FENCE(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  if (Subtarget->isX86_64()) {
+    SDLoc dl(Op);
+    AtomicOrdering FenceOrdering =
+        static_cast<AtomicOrdering>(Op.getConstantOperandVal(1));
+    SyncScope::ID FenceSSID =
+        static_cast<SyncScope::ID>(Op.getConstantOperandVal(2));
+
+    // The only fence that needs an instruction is a sequentially-consistent
+    // cross-thread fence.
+    if (FenceOrdering == AtomicOrdering::SequentiallyConsistent &&
+        FenceSSID == SyncScope::System) {
+      return DAG.getNode(LLIRISD::MFENCE, dl, MVT::Other, Op.getOperand(0));
+    }
+
+    // MEMBARRIER is a compiler barrier; it codegens to a no-op.
+    return DAG.getNode(LLIRISD::BARRIER, dl, MVT::Other, Op.getOperand(0));
+  }
+  llvm_unreachable("not implemented");
+
 }
 
 SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op,
@@ -702,6 +747,10 @@ const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const {
       return "LLIRISD::LL";
     case LLIRISD::SC:
       return "LLIRISD::SC";
+    case LLIRISD::BARRIER:
+      return "LLIRISD::BARRIER";
+    case LLIRISD::MFENCE:
+      return "LLIRISD::MFENCE";
   }
   llvm_unreachable("invalid opcode");
 }
@@ -901,6 +950,9 @@ void LLIRTargetLowering::ReplaceNodeResults(SDNode *N,
   SDLoc dl(N);
   switch (N->getOpcode()) {
   default:
+#ifndef NDEBUG
+    N->dump(&DAG);
+#endif
     llvm_unreachable("Do not know how to custom type legalize this operation!");
   }
 }

@@ -54,6 +54,10 @@ enum NodeType : unsigned {
   // Atomics.
   LL,
   SC,
+  // Memory fence.
+  MFENCE,
+  // No-op barrier.
+  BARRIER,
 };
 } // end namespace LLIRISD
 
@@ -64,6 +68,7 @@ public:
   LLIRTargetLowering(const TargetMachine &TM, const LLIRSubtarget &STI);
 
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
+  SDValue LowerATOMIC_FENCE(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFRAMEADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFrameIndex(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;

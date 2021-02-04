@@ -83,14 +83,45 @@ def : Pat<
   (LD_4_I32 I64:$ptr)
 >;
 
+// 8-bit stores.
+def : Pat<
+  (releasing_store<atomic_store_8> I64:$ptr, I8:$val),
+  (ST_1_I8 I64:$ptr, I8:$val)
+>;
+def : Pat<
+  (monotonic_store<atomic_store_8> I64:$ptr, I8:$val),
+  (ST_1_I8 I64:$ptr, I8:$val)
+>;
+def : Pat<
+  (atomic_store_8 I64:$ptr, I8:$val),
+  (ST_1_I8 I64:$ptr, I8:$val)
+>;
+
+// 16-bit stores.
+def : Pat<
+  (releasing_store<atomic_store_8> I64:$ptr, I16:$val),
+  (ST_2_I16 I64:$ptr, I16:$val)
+>;
+def : Pat<
+  (monotonic_store<atomic_store_16> I64:$ptr, I16:$val),
+  (ST_2_I16 I64:$ptr, I16:$val)
+>;
+def : Pat<
+  (atomic_store_16 I64:$ptr, I16:$val),
+  (ST_2_I16 I64:$ptr, I16:$val)
+>;
+
 // 32-bit stores.
 def : Pat<
   (releasing_store<atomic_store_32> I64:$ptr, I32:$val),
   (ST_4_I32 I64:$ptr, I32:$val)
 >;
-
 def : Pat<
   (monotonic_store<atomic_store_32> I64:$ptr, I32:$val),
+  (ST_4_I32 I64:$ptr, I32:$val)
+>;
+def : Pat<
+  (atomic_store_32 I64:$ptr, I32:$val),
   (ST_4_I32 I64:$ptr, I32:$val)
 >;
 
@@ -103,6 +134,11 @@ def : Pat<
   (seq_cst_store<atomic_store_64> I64:$ptr, I64:$val),
   (ST_8_I64 I64:$ptr, I64:$val)
 >;
+def : Pat<
+  (atomic_store_64 I64:$ptr, I64:$val),
+  (ST_8_I64 I64:$ptr, I64:$val)
+>;
+
 
 def X86_RDTSC_I64 : I
   < (outs I64:$res)
@@ -111,5 +147,9 @@ def X86_RDTSC_I64 : I
   , "x86_rdtsc.i64\t$res"
   , 0x15
   >;
+
+// Barriers.
+def X86_MFENCE : I <(outs), (ins), [(LLIRMFence)], "x86_mfence", 0xE1>;
+def X86_BARRIER : I <(outs), (ins), [(LLIRBarrier)], "x86_barrier", 0xE1>;
 
 }

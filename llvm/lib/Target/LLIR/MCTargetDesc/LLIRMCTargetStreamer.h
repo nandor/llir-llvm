@@ -35,6 +35,8 @@ public:
   virtual void emitCtor(int Priority, const MCSymbol *Sym) = 0;
   /// .dtor
   virtual void emitDtor(int Priority, const MCSymbol *Sym) = 0;
+  /// .thread_local
+  virtual void emitThreadLocal() = 0;
   /// .end
   virtual void emitEnd() = 0;
   /// .noinline
@@ -53,6 +55,7 @@ public:
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitDtor(int Priority, const MCSymbol *Sym) override;
+  virtual void emitThreadLocal() override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
 
@@ -72,6 +75,7 @@ public:
   virtual void emitCallingConv(CallingConv::ID CallConv) override;
   virtual void emitCtor(int Priority, const MCSymbol *Sym) override;
   virtual void emitDtor(int Priority, const MCSymbol *Sym) override;
+  virtual void emitThreadLocal() override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
 };

@@ -50,6 +50,9 @@ void LLIRAsmPrinter::emitInstruction(const MachineInstr *MI) {
 }
 
 void LLIRAsmPrinter::emitGlobalVariable(const GlobalVariable *GV) {
+  if (GV->isThreadLocal()) {
+    getTargetStreamer().emitThreadLocal();
+  }
   AsmPrinter::emitGlobalVariable(GV);
   getTargetStreamer().emitEnd();
 }
