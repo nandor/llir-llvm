@@ -3214,6 +3214,8 @@ def MFENCE : I<0xAE, MRM6X, (outs), (ins), "mfence", [(int_x86_sse2_mfence)]>,
 } // SchedRW
 
 def : Pat<(X86MFence), (MFENCE)>;
+def : Pat<(X86LFence), (LFENCE)>;
+def : Pat<(X86SFence), (SFENCE)>;
 
 //===----------------------------------------------------------------------===//
 // SSE 1 & 2 - Load/Store XCSR register

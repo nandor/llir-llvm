@@ -65,6 +65,18 @@ void tools::llir::Assembler::ConstructJob(Compilation &C, const JobAction &JA,
       JA, *this, ResponseFileSupport::AtFileCurCP(), Exec, CmdArgs, Inputs));
 }
 
+static bool getPIE(const ArgList &Args, const ToolChain &TC) {
+  if (Args.hasArg(options::OPT_shared) || Args.hasArg(options::OPT_static) ||
+      Args.hasArg(options::OPT_r) || Args.hasArg(options::OPT_static_pie))
+    return false;
+
+  Arg *A = Args.getLastArg(options::OPT_pie, options::OPT_no_pie,
+                           options::OPT_nopie);
+  if (!A)
+    return TC.isPIEDefault();
+  return A->getOption().matches(options::OPT_pie);
+}
+
 void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                        const InputInfo &Output,
                                        const InputInfoList &Inputs,
@@ -73,6 +85,10 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   auto &TC = static_cast<const toolchains::LLIR &>(getToolChain());
   const llvm::Triple &Triple = TC.getTriple();
   ArgStringList CmdArgs;
+
+  // TODO: forward the pie flag.
+  bool pie = getPIE(Args, TC);
+  (void) pie;
 
   // Forward architecture flags.
   std::vector<StringRef> Features;

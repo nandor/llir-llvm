@@ -134,8 +134,9 @@ def SDT_X86AESENCDECKL : SDTypeProfile<2, 2, [SDTCisVT<0, v2i64>,
 
 def X86MemBarrier : SDNode<"X86ISD::MEMBARRIER", SDT_X86MEMBARRIER,
                             [SDNPHasChain,SDNPSideEffect]>;
-def X86MFence : SDNode<"X86ISD::MFENCE", SDT_X86MEMBARRIER,
-                        [SDNPHasChain]>;
+def X86MFence : SDNode<"X86ISD::MFENCE", SDT_X86MEMBARRIER, [SDNPHasChain]>;
+def X86LFence : SDNode<"X86ISD::LFENCE", SDT_X86MEMBARRIER, [SDNPHasChain]>;
+def X86SFence : SDNode<"X86ISD::SFENCE", SDT_X86MEMBARRIER, [SDNPHasChain]>;
 
 
 def X86bsf     : SDNode<"X86ISD::BSF",      SDTUnaryArithWithFlags>;

@@ -644,6 +644,8 @@ namespace llvm {
     // Memory barriers.
     MEMBARRIER,
     MFENCE,
+    LFENCE,
+    SFENCE,
 
     // Get a random integer and indicate whether it is valid in CF.
     RDRAND,
