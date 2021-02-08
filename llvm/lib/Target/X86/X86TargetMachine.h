@@ -38,6 +38,9 @@ public:
                    CodeGenOpt::Level OL, bool JIT);
   ~X86TargetMachine() override;
 
+  const X86Subtarget *getSubtarget(llvm::StringRef CPU, llvm::StringRef TuneCPU,
+                                   llvm::StringRef FS);
+
   const X86Subtarget *getSubtargetImpl(const Function &F) const override;
   // DO NOT IMPLEMENT: There is no such thing as a valid default subtarget,
   // subtargets are per-function entities based on the target-specific

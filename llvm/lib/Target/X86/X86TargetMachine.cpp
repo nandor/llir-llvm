@@ -230,6 +230,31 @@ X86TargetMachine::X86TargetMachine(const Target &T, const Triple &TT,
 
 X86TargetMachine::~X86TargetMachine() = default;
 
+const X86Subtarget *X86TargetMachine::getSubtarget(llvm::StringRef CPU,
+                                                   llvm::StringRef TuneCPU,
+                                                   llvm::StringRef FS) {
+  SmallString<512> Key;
+
+  Key += CPU;
+  Key += "tune=";
+  Key += TuneCPU;
+  unsigned FSStart = Key.size();
+  Key += FS;
+  FS = Key.substr(FSStart);
+
+  auto &I = SubtargetMap[Key];
+  if (!I) {
+    Options.UnsafeFPMath = false;
+    Options.NoInfsFPMath = false;
+    Options.NoNaNsFPMath = false;
+    Options.NoSignedZerosFPMath = false;
+    I = std::make_unique<X86Subtarget>(
+        TargetTriple, CPU, TuneCPU, FS, *this,
+        MaybeAlign(Options.StackAlignmentOverride), 0, UINT32_MAX);
+  }
+  return I.get();
+}
+
 const X86Subtarget *
 X86TargetMachine::getSubtargetImpl(const Function &F) const {
   Attribute CPUAttr = F.getFnAttribute("target-cpu");
