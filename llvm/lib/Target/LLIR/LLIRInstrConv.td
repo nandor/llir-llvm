@@ -145,6 +145,14 @@ def I16_S_U_F128 : StrictConv<I16, F128,  strict_fp_to_uint, "sext", "i16", 0xF0
 def I32_S_U_F128 : StrictConv<I32, F128,  strict_fp_to_uint, "sext", "i32", 0xF0>;
 def I64_S_U_F128 : StrictConv<I64, F128,  strict_fp_to_uint, "sext", "i64", 0xF0>;
 
+def F32_R_S_I8   : Conv<F32,  I8,  sint_to_fp, "sext", "f32",  0xE4>;
+def F64_R_S_I8   : Conv<F64,  I8,  sint_to_fp, "sext", "f64",  0xE6>;
+def F80_R_S_I8   : Conv<F80,  I8,  sint_to_fp, "sext", "f80",  0xE6>;
+def F128_R_S_I8  : Conv<F128, I8,  sint_to_fp, "sext", "f128", 0xE6>;
+def F32_R_S_I16  : Conv<F32,  I16, sint_to_fp, "sext", "f32",  0xE4>;
+def F64_R_S_I16  : Conv<F64,  I16, sint_to_fp, "sext", "f64",  0xE6>;
+def F80_R_S_I16  : Conv<F80,  I16, sint_to_fp, "sext", "f80",  0xE6>;
+def F128_R_S_I16 : Conv<F128, I16, sint_to_fp, "sext", "f128", 0xE6>;
 def F32_R_S_I32  : Conv<F32,  I32, sint_to_fp, "sext", "f32",  0xE4>;
 def F64_R_S_I32  : Conv<F64,  I32, sint_to_fp, "sext", "f64",  0xE6>;
 def F80_R_S_I32  : Conv<F80,  I32, sint_to_fp, "sext", "f80",  0xE6>;
@@ -153,6 +161,7 @@ def F32_R_S_I64  : Conv<F32,  I64, sint_to_fp, "sext", "f32",  0xE8>;
 def F64_R_S_I64  : Conv<F64,  I64, sint_to_fp, "sext", "f64",  0xEA>;
 def F80_R_S_I64  : Conv<F80,  I64, sint_to_fp, "sext", "f80",  0xEA>;
 def F128_R_S_I64 : Conv<F128, I64, sint_to_fp, "sext", "f128", 0xEA>;
+
 def F32_R_U_I8   : Conv<F32,  I8,  uint_to_fp, "zext", "f32",  0xE5>;
 def F64_R_U_I8   : Conv<F64,  I8,  uint_to_fp, "zext", "f64",  0xE7>;
 def F80_R_U_I8   : Conv<F80,  I8,  uint_to_fp, "zext", "f80",  0xE7>;
@@ -170,6 +179,14 @@ def F64_R_U_I64  : Conv<F64,  I64, uint_to_fp, "zext", "f64",  0xEB>;
 def F80_R_U_I64  : Conv<F80,  I64, uint_to_fp, "zext", "f80",  0xEB>;
 def F128_R_U_I64 : Conv<F128, I64, uint_to_fp, "zext", "f128", 0xEB>;
 
+def F32_S_S_I8   : StrictConv<F32,  I8,  strict_sint_to_fp, "sext", "f32",  0xE4>;
+def F64_S_S_I8   : StrictConv<F64,  I8,  strict_sint_to_fp, "sext", "f64",  0xE6>;
+def F80_S_S_I8   : StrictConv<F80,  I8,  strict_sint_to_fp, "sext", "f80",  0xE6>;
+def F128_S_S_I8  : StrictConv<F128, I8,  strict_sint_to_fp, "sext", "f128", 0xE6>;
+def F32_S_S_I16  : StrictConv<F32,  I16, strict_sint_to_fp, "sext", "f32",  0xE4>;
+def F64_S_S_I16  : StrictConv<F64,  I16, strict_sint_to_fp, "sext", "f64",  0xE6>;
+def F80_S_S_I16  : StrictConv<F80,  I16, strict_sint_to_fp, "sext", "f80",  0xE6>;
+def F128_S_S_I16 : StrictConv<F128, I16, strict_sint_to_fp, "sext", "f128", 0xE6>;
 def F32_S_S_I32  : StrictConv<F32,  I32, strict_sint_to_fp, "sext", "f32",  0xE4>;
 def F64_S_S_I32  : StrictConv<F64,  I32, strict_sint_to_fp, "sext", "f64",  0xE6>;
 def F80_S_S_I32  : StrictConv<F80,  I32, strict_sint_to_fp, "sext", "f80",  0xE6>;
@@ -178,6 +195,7 @@ def F32_S_S_I64  : StrictConv<F32,  I64, strict_sint_to_fp, "sext", "f32",  0xE8
 def F64_S_S_I64  : StrictConv<F64,  I64, strict_sint_to_fp, "sext", "f64",  0xEA>;
 def F80_S_S_I64  : StrictConv<F80,  I64, strict_sint_to_fp, "sext", "f80",  0xEA>;
 def F128_S_S_I64 : StrictConv<F128, I64, strict_sint_to_fp, "sext", "f128", 0xEA>;
+
 def F32_S_U_I8   : StrictConv<F32,   I8, strict_uint_to_fp, "zext", "f32",  0xE5>;
 def F64_S_U_I8   : StrictConv<F64,   I8, strict_uint_to_fp, "zext", "f64",  0xE7>;
 def F80_S_U_I8   : StrictConv<F80,   I8, strict_uint_to_fp, "zext", "f80",  0xE7>;
