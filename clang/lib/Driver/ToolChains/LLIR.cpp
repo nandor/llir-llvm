@@ -124,6 +124,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   }
   }
 
+  // Forward all feature flags.
   if (!Features.empty()) {
     std::string FS;
     for (StringRef Feature : Features) {
@@ -136,7 +137,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(Args.MakeArgString(FS));
   }
 
-  // Forward flags.
+  // Forward the rdynamic flag.
   if (Args.hasArg(options::OPT_rdynamic))
     CmdArgs.push_back("-E");
 
@@ -151,30 +152,50 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     }
   }
 
-  if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
-    if (!Args.hasArg(options::OPT_shared))
-      CmdArgs.push_back(Args.MakeArgString(TC.GetFilePath("crt1.o")));
+  // Set up the CRT, based on the environment.
+  switch (Triple.getEnvironment()) {
+  default: break;
+  case llvm::Triple::Musl:
+  case llvm::Triple::MuslEABI:
+  case llvm::Triple::MuslEABIHF: {
+    if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
+      if (!Args.hasArg(options::OPT_shared))
+        CmdArgs.push_back(Args.MakeArgString(TC.GetFilePath("crt1.o")));
+    }
+    break;
+  }
   }
 
+  // Forward linker flags.
   Args.AddAllArgs(CmdArgs, options::OPT_L);
   Args.AddAllArgs(CmdArgs, options::OPT_u);
   TC.AddFilePathLibArgs(Args, CmdArgs);
 
   AddLinkerInputs(TC, Inputs, Args, CmdArgs, JA);
 
-  if (!Args.hasArg(options::OPT_nostdlib)) {
-    if (!Args.hasArg(options::OPT_nodefaultlibs)) {
-      bool WantPthread = Args.hasArg(options::OPT_pthread) ||
-                         Args.hasArg(options::OPT_pthreads);
+  // Add the implicit C library.
+  switch (Triple.getEnvironment()) {
+  default: break;
+  case llvm::Triple::Musl:
+  case llvm::Triple::MuslEABI:
+  case llvm::Triple::MuslEABIHF: {
+    if (!Args.hasArg(options::OPT_nostdlib)) {
+      if (!Args.hasArg(options::OPT_nodefaultlibs)) {
+        bool WantPthread = Args.hasArg(options::OPT_pthread) ||
+                           Args.hasArg(options::OPT_pthreads);
 
-      if (WantPthread)
-        CmdArgs.push_back("-lpthread");
+        if (WantPthread)
+          CmdArgs.push_back("-lpthread");
 
-      if (!Args.hasArg(options::OPT_nolibc))
-        CmdArgs.push_back("-lc");
+        if (!Args.hasArg(options::OPT_nolibc))
+          CmdArgs.push_back("-lc");
+      }
     }
+    break;
+  }
   }
 
+  // Prepare flags for shared/static libs.
   if (Args.hasArg(options::OPT_static)) {
     CmdArgs.push_back("-static");
   } else if (Args.hasArg(options::OPT_shared)) {
@@ -206,6 +227,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     }
   }
 
+  // Add compiler-rt.
   auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
   if (TC.getVFS().exists(RT)) {
     CmdArgs.push_back(Args.MakeArgString(RT));

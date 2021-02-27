@@ -21,6 +21,14 @@ def RISCV_ATOMIC_XCHG_32 : I
   , 0xE1
   >;
 
+def RISCV_ATOMIC_CMPXCHG_32 : I
+  < (outs I32:$dst)
+  , (ins I64:$addr, I32:$val, I32:$ref)
+  , [(set I32:$dst, (atomic_cmp_swap_32 I64:$addr, I32:$ref, I32:$val))]
+  , "riscv_cmpxchg.i32\t$dst, $addr, $val, $ref"
+  , 0xE1
+  >;
+
 def RISCV_ATOMIC_XCHG_64 : I
   < (outs I64:$dst)
   , (ins I64:$addr, I64:$src)

@@ -1011,9 +1011,7 @@ LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
     return AtomicExpansionKind::LLSC;
   }
   if (Subtarget->isRISCV()) {
-    if (AI->isFloatingPointOperation())
-      return AtomicExpansionKind::CmpXChg;
-    return AtomicExpansionKind::None;
+    return AtomicExpansionKind::CmpXChg;
   }
   if (Subtarget->isPPC64le()) {
     return AtomicExpansionKind::LLSC;
