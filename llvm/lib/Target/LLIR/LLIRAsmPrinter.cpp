@@ -118,10 +118,18 @@ void LLIRAsmPrinter::emitXXStructorList(const DataLayout &DL,
 bool LLIRAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
                                      const char *ExtraCode, raw_ostream &O) {
   const MachineOperand &MO = MI->getOperand(OpNo);
-  assert(MO.getType() == MachineOperand::MO_Register && "register expected");
-  auto &MFI = *MI->getParent()->getParent()->getInfo<LLIRMachineFunctionInfo>();
-  O << "$" << MFI.getGMReg(MO.getReg());
-  return false;
+  switch (MO.getType()) {
+    default: llvm_unreachable("invalid operand");
+    case MachineOperand::MO_Register: {
+      auto &MFI = *MI->getParent()->getParent()->getInfo<LLIRMachineFunctionInfo>();
+      O << "$" << MFI.getGMReg(MO.getReg());
+      return false;
+    }
+    case MachineOperand::MO_Immediate: {
+      O << MO.getImm();
+      return false;
+    }
+  }
 }
 
 bool LLIRAsmPrinter::PrintAsmMemoryOperand(const MachineInstr *MI,
