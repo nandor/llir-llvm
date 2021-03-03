@@ -528,7 +528,8 @@ SDValue LLIRTargetLowering::LowerJumpTable(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerDynamicStackalloc(SDValue Op,
                                                    SelectionDAG &DAG) const {
-  SDVTList VTs = DAG.getVTList(MVT::i64, MVT::Other);
+  MVT PtrVT = getPointerTy(DAG.getDataLayout());
+  SDVTList VTs = DAG.getVTList(PtrVT, MVT::Other);
   return DAG.getNode(LLIRISD::ALLOCA, SDLoc(Op), VTs, Op.getOperand(0),
                      Op.getOperand(1), Op.getOperand(2));
 }
@@ -984,7 +985,7 @@ SDValue LLIRTargetLowering::LowerReturn(
 
 LLIRTargetLowering::AtomicExpansionKind
 LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
-  if (Subtarget->isX86_64()) {
+  if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
     AtomicRMWInst::BinOp Op = AI->getOperation();
     switch (Op) {
     default:

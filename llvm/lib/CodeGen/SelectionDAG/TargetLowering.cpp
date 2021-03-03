@@ -884,6 +884,10 @@ bool TargetLowering::SimplifyDemandedBits(
     const APInt &OriginalDemandedElts, KnownBits &Known, TargetLoweringOpt &TLO,
     unsigned Depth, bool AssumeSingleUse) const {
   unsigned BitWidth = OriginalDemandedBits.getBitWidth();
+  if (Op.getScalarValueSizeInBits() != BitWidth) {
+    TLO.DAG.dump();
+    Op.dump();
+  }
   assert(Op.getScalarValueSizeInBits() == BitWidth &&
          "Mask size mismatches value type size!");
 

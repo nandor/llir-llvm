@@ -30,6 +30,10 @@ def RETURN : TerminatorInst<(ins variable_ops), [(LLIRreturn)], "", 0x70>
   let isBarrier = 1;
 }
 
+//===----------------------------------------------------------------------===//
+// Conditional jumps and aliases
+//===----------------------------------------------------------------------===//
+
 def JT : BranchInst<(ins I8:$cond, bb_op:$dst), [], "jt \t$cond, $dst", 0x72>;
 def JF : BranchInst<(ins I8:$cond, bb_op:$dst), [], "jf \t$cond, $dst", 0x73>;
 def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>
@@ -52,7 +56,26 @@ def : Pat
   , (JF I8:$cond, bb_op:$dst)
   >;
 
+//===----------------------------------------------------------------------===//
+// Unreachable instruction
+//===----------------------------------------------------------------------===//
+
 def TRAP: TerminatorInst<(ins), [(trap)], "trap", 0x75>;
+
+//===----------------------------------------------------------------------===//
+// Switch with various arguments
+//===----------------------------------------------------------------------===//
+
+def SWITCH_I32 : TerminatorInst
+  < (ins I32:$index, variable_ops)
+  , [(LLIRswitch I32:$index)]
+  , "switch\t$index"
+  , 0x72
+  >
+{
+  let hasCtrlDep = 1;
+  let isBarrier = 1;
+}
 
 def SWITCH_I64 : TerminatorInst
   < (ins I64:$index, variable_ops)

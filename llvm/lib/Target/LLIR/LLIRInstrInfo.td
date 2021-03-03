@@ -15,6 +15,7 @@
 // LLIR subtarget predicates.
 //===----------------------------------------------------------------------===//
 
+def IsX86         : Predicate<"Subtarget->isX86()">;
 def IsX86_32      : Predicate<"Subtarget->isX86_32()">;
 def IsX86_64      : Predicate<"Subtarget->isX86_64()">;
 def IsAArch64     : Predicate<"Subtarget->isAArch64()">;

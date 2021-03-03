@@ -62,6 +62,8 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
     return TargetTriple.getArch() == llvm::Triple::llir_x86_64;
   }
 
+  bool isX86() const { return isX86_32() || isX86_64(); }
+
   bool isAArch64() const {
     return TargetTriple.getArch() == llvm::Triple::llir_aarch64;
   }
