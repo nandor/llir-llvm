@@ -26,11 +26,11 @@ class LLIRRegClass<list<ValueType> regTypes, int alignment, dag regList>
 // Special registers.
 //===----------------------------------------------------------------------===//
 
-def RSP : LLIRReg<"%sp">;
+def SP : LLIRReg<"%sp">;
 def FRAME_ADDR : LLIRReg<"%frame_addr">;
 
-def R64 : LLIRRegClass<[i64], 64, (add RSP, FRAME_ADDR)>;
-def ARGUMENTS : LLIRReg<"ARGUMENTS">;
+def R32 : LLIRRegClass<[i32], 32, (add SP, FRAME_ADDR)>;
+def R64 : LLIRRegClass<[i64], 64, (add SP, FRAME_ADDR)>;
 
 //===----------------------------------------------------------------------===//
 // Virtual register types.
@@ -46,18 +46,19 @@ def F64_0  : LLIRReg<"%f64.0">;
 def F80_0  : LLIRReg<"%f80.0">;
 def F128_0 : LLIRReg<"%f128.0">;
 
-def I8   : LLIRRegClass<[i8], 8, (add I8_0)>;
-def I16  : LLIRRegClass<[i16], 16, (add I16_0)>;
-def I32  : LLIRRegClass<[i32], 32, (add I32_0)>;
-def I64  : LLIRRegClass<[i64], 64, (add I64_0)>;
+def I8   : LLIRRegClass<  [i8],   8, (add   I8_0)>;
+def I16  : LLIRRegClass< [i16],  16, (add  I16_0)>;
+def I32  : LLIRRegClass< [i32],  32, (add  I32_0)>;
+def I64  : LLIRRegClass< [i64],  64, (add  I64_0)>;
 def I128 : LLIRRegClass<[i128], 128, (add I128_0)>;
-def F32  : LLIRRegClass<[f32], 32, (add F32_0)>;
-def F64  : LLIRRegClass<[f64], 64, (add F64_0)>;
-def F80  : LLIRRegClass<[f80], 80, (add F80_0)>;
+def F32  : LLIRRegClass< [f32],  32, (add  F32_0)>;
+def F64  : LLIRRegClass< [f64],  64, (add  F64_0)>;
+def F80  : LLIRRegClass< [f80],  80, (add  F80_0)>;
 def F128 : LLIRRegClass<[f128], 128, (add F128_0)>;
 
 //===----------------------------------------------------------------------===//
 // Composite register classes.
 //===----------------------------------------------------------------------===//
 
-def GI64 : LLIRRegClass<[i64], 64, (add I64_0, RSP, FRAME_ADDR)>;
+def GI32 : LLIRRegClass<[i32], 32, (add I32_0, SP, FRAME_ADDR)>;
+def GI64 : LLIRRegClass<[i64], 64, (add I64_0, SP, FRAME_ADDR)>;

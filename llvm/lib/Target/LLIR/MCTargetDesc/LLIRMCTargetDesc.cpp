@@ -40,10 +40,10 @@ static MCAsmInfo *createLLIRMCAsmInfo(const MCRegisterInfo &MRI,
 }
 
 static MCInstPrinter *createMCInstPrinter(const Triple &T,
-                                              unsigned SyntaxVariant,
-                                              const MCAsmInfo &MAI,
-                                              const MCInstrInfo &MII,
-                                              const MCRegisterInfo &MRI) {
+                                          unsigned SyntaxVariant,
+                                          const MCAsmInfo &MAI,
+                                          const MCInstrInfo &MII,
+                                          const MCRegisterInfo &MRI) {
   return new LLIRInstPrinter(MAI, MII, MRI);
 }
 
@@ -66,8 +66,9 @@ static MCSubtargetInfo *createMCSubtargetInfo(const Triple &TT, StringRef CPU,
 
 extern "C" void LLVMInitializeLLIRTargetMC() {
   // Register stuff for all targets and subtargets.
-  for (Target *T : {&getTheLLIR_X86_64Target(), &getTheLLIR_AArch64Target(),
-                    &getTheLLIR_PPC64LETarget(), &getTheLLIR_RISCV64Target()}) {
+  for (Target *T : {&getTheLLIR_X86_32Target(), &getTheLLIR_X86_64Target(),
+                    &getTheLLIR_AArch64Target(), &getTheLLIR_PPC64LETarget(),
+                    &getTheLLIR_RISCV64Target()}) {
     // Register the MC asm info.
     RegisterMCAsmInfoFn X(*T, createLLIRMCAsmInfo);
 

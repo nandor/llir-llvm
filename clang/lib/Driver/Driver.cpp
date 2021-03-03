@@ -5151,6 +5151,7 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
       case llvm::Triple::ve:
         TC = std::make_unique<toolchains::VEToolChain>(*this, Target, Args);
         break;
+      case llvm::Triple::llir_x86:
       case llvm::Triple::llir_x86_64:
       case llvm::Triple::llir_aarch64:
       case llvm::Triple::llir_ppc64le:

@@ -28,16 +28,38 @@
 namespace clang {
 namespace targets {
 
+// llir x86 generic target
+class LLVM_LIBRARY_VISIBILITY LLIR_X86_32TargetInfo : public X86_32TargetInfo {
+ public:
+  LLIR_X86_32TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
+      : X86_32TargetInfo(Triple, Opts) {}
+
+  const char *getClobbers() const override { return ""; }
+
+  bool handleTargetFeatures(std::vector<std::string> &Features,
+                            DiagnosticsEngine &Diags) override {
+    if (X86_32TargetInfo::handleTargetFeatures(Features, Diags)) {
+      HasFMA = false;
+      SSELevel = std::min(SSE1, SSELevel);
+      XOPLevel = std::min(NoXOP, XOPLevel);
+      return true;
+    }
+    return false;
+  }
+
+  void getTargetDefines(const LangOptions &Opts,
+                        MacroBuilder &Builder) const override {
+    X86_32TargetInfo::getTargetDefines(Opts, Builder);
+    Builder.defineMacro("__llir__");
+    Builder.defineMacro("__llir_x86__");
+  }
+};
+
 // llir x86-64 generic target
 class LLVM_LIBRARY_VISIBILITY LLIR_X86_64TargetInfo : public X86_64TargetInfo {
  public:
   LLIR_X86_64TargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts)
-      : X86_64TargetInfo(Triple, Opts) {
-    // Pointers are 32-bit in x32.
-    resetDataLayout(
-        "e-m:e-p270:32:32-p271:32:32-p272:64:"
-        "64-i64:64-f80:128-n8:16:32:64-S128");
-  }
+      : X86_64TargetInfo(Triple, Opts) {}
 
   const char *getClobbers() const override { return ""; }
 

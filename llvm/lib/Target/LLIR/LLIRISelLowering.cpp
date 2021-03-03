@@ -49,7 +49,8 @@ static void Fail(const SDLoc &DL, SelectionDAG &DAG, const char *msg) {
 LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
                                        const LLIRSubtarget &STI)
     : TargetLowering(TM), Subtarget(&STI) {
-  auto MVTPtr = MVT::i64;
+
+  auto MVTPtr = STI.is32Bit() ? MVT::i32 : MVT::i64;
 
   setBooleanContents(ZeroOrOneBooleanContent);
   setSchedulingPreference(Sched::RegPressure);
@@ -90,7 +91,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
   setOperationAction(ISD::STACKRESTORE, MVT::Other, Expand);
   setOperationAction(ISD::DYNAMIC_STACKALLOC, MVTPtr, Custom);
-  setStackPointerRegisterToSaveRestore(LLIR::RSP);
+  setStackPointerRegisterToSaveRestore(LLIR::SP);
 
   // Handle variable arguments.
   setOperationAction(ISD::VASTART, MVT::Other, Custom);
@@ -115,7 +116,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Decide what to do with funky float operations based on target.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64()) {
+      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = T != MVT::f128 ? Legal : Custom;
@@ -147,7 +148,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Disable some operations on some platforms.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64()) {
+      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = T != MVT::f128 ? Legal : Custom;
@@ -188,7 +189,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64()) {
+      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = Custom;
@@ -214,7 +215,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Custom lowering for some actions.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64()) {
+      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
         Op = Expand;
       } else if (Subtarget->isAArch64()) {
         Op = Custom;
@@ -301,7 +302,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::ATOMIC_FENCE  , MVT::Other, Custom);
 
   // Expansion of memset/memcpy/memmove
-  if (Subtarget->isX86_64()) {
+  if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
     MaxStoresPerMemset = 16;
     MaxStoresPerMemsetOptSize = 8;
     MaxStoresPerMemcpy = 8;
@@ -837,8 +838,6 @@ SDValue LLIRTargetLowering::LowerFormalArguments(
     SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
   MachineFunction &MF = DAG.getMachineFunction();
   auto *MFI = MF.getInfo<LLIRMachineFunctionInfo>();
-
-  MF.getRegInfo().addLiveIn(LLIR::ARGUMENTS);
 
   if (!isCallingConvSupported(CallConv)) {
     Fail(DL, DAG, "unsupported calling convention");

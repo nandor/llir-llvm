@@ -12,6 +12,11 @@
 #include "llvm/Support/TargetRegistry.h"
 using namespace llvm;
 
+Target &llvm::getTheLLIR_X86_32Target() {
+  static Target TheLLIR_X86_32_Target;
+  return TheLLIR_X86_32_Target;
+}
+
 Target &llvm::getTheLLIR_X86_64Target() {
   static Target TheLLIR_X86_64_Target;
   return TheLLIR_X86_64_Target;
@@ -33,12 +38,14 @@ Target &llvm::getTheLLIR_RISCV64Target() {
 }
 
 extern "C" void LLVMInitializeLLIRTargetInfo() {
-  RegisterTarget<Triple::llir_x86_64, false> A(
+  RegisterTarget<Triple::llir_x86, false> A(
+      getTheLLIR_X86_32Target(), "llir-x86-32", "LLIR over x86-32", "LLIR");
+  RegisterTarget<Triple::llir_x86_64, false> B(
       getTheLLIR_X86_64Target(), "llir-x86-64", "LLIR over x86-64", "LLIR");
-  RegisterTarget<Triple::llir_aarch64, false> B(
+  RegisterTarget<Triple::llir_aarch64, false> C(
       getTheLLIR_AArch64Target(), "llir-aarch64", "LLIR over aarch64", "LLIR");
-  RegisterTarget<Triple::llir_ppc64le, false> C(
+  RegisterTarget<Triple::llir_ppc64le, false> D(
       getTheLLIR_PPC64LETarget(), "llir-ppc64le", "LLIR over ppc64le", "LLIR");
-  RegisterTarget<Triple::llir_riscv64, false> D(
+  RegisterTarget<Triple::llir_riscv64, false> E(
       getTheLLIR_RISCV64Target(), "llir-riscv64", "LLIR over riscv64", "LLIR");
 }

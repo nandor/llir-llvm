@@ -45,7 +45,7 @@ LLIRRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const
 BitVector LLIRRegisterInfo::getReservedRegs(const MachineFunction &MF) const
 {
   BitVector Reserved(getNumRegs());
-  Reserved.set(LLIR::RSP);
+  Reserved.set(LLIR::SP);
   Reserved.set(LLIR::FRAME_ADDR);
   return Reserved;
 }

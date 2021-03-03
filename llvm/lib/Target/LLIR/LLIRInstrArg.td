@@ -21,7 +21,6 @@ class LLIRArg
     >
 {
   let hasSideEffects = 1;
-  let Uses = [ARGUMENTS];
 }
 
 def ARG_I8   : LLIRArg<I8,   "i8",   0x1>;

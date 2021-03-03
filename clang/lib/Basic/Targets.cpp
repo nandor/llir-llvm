@@ -625,6 +625,14 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
   case llvm::Triple::ve:
     return new LinuxTargetInfo<VETargetInfo>(Triple, Opts);
 
+  case llvm::Triple::llir_x86:
+    switch (os) {
+    case llvm::Triple::Linux:
+      return new LinuxTargetInfo<LLIR_X86_32TargetInfo>(Triple, Opts);
+    default:
+      return new LLIR_X86_32TargetInfo(Triple, Opts);
+    }
+
   case llvm::Triple::llir_x86_64:
     switch (os) {
     case llvm::Triple::Linux:

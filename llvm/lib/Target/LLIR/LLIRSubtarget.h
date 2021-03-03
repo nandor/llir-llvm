@@ -54,6 +54,10 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
 
   bool enableMachineScheduler() const override;
 
+  bool isX86_32() const {
+    return TargetTriple.getArch() == llvm::Triple::llir_x86;
+  }
+
   bool isX86_64() const {
     return TargetTriple.getArch() == llvm::Triple::llir_x86_64;
   }
@@ -79,6 +83,9 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
   }
 
   bool isTargetILP32() const { return TargetTriple.isArch32Bit(); }
+
+  bool is32Bit() const { return TargetTriple.isArch32Bit(); }
+  bool is64Bit() const { return TargetTriple.isArch64Bit(); }
 
   bool isCallingConvWin64(CallingConv::ID CC) const {
     if (isX86_64()) {

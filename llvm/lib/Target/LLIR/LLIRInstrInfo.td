@@ -15,10 +15,13 @@
 // LLIR subtarget predicates.
 //===----------------------------------------------------------------------===//
 
+def IsX86_32      : Predicate<"Subtarget->isX86_32()">;
 def IsX86_64      : Predicate<"Subtarget->isX86_64()">;
 def IsAArch64     : Predicate<"Subtarget->isAArch64()">;
 def IsRISCV       : Predicate<"Subtarget->isRISCV()">;
 def IsPPC64le     : Predicate<"Subtarget->isPPC64le()">;
+def Is32Bit       : Predicate<"Subtarget->is32Bit()">;
+def Is64Bit       : Predicate<"Subtarget->is64Bit()">;
 
 
 //===----------------------------------------------------------------------===//
@@ -92,13 +95,19 @@ class LLIROperand<ValueType ty, string type> : Operand<ty>
 
 
 def bb_op      : LLIROperand<OtherVT, "OPERAND_BASIC_BLOCK">;
+
 def i8imm_op   : LLIROperand<i8,   "OPERAND_I8IMM">;
 def i16imm_op  : LLIROperand<i16,  "OPERAND_I16IMM">;
 def i32imm_op  : LLIROperand<i32,  "OPERAND_I32IMM">;
 def i64imm_op  : LLIROperand<i64,  "OPERAND_I64IMM">;
 def i128imm_op : LLIROperand<i128, "OPERAND_I128IMM">;
+
 def i32off_op  : LLIROperand<i32,  "OPERAND_I32OFF">;
-def i64addr_op : LLIROperand<i64,  "OPERAND_I64FUNC">;
+def i64off_op  : LLIROperand<i64,  "OPERAND_I64OFF">;
+
+def i32addr_op : LLIROperand<i32,  "OPERAND_I32ADDR">;
+def i64addr_op : LLIROperand<i64,  "OPERAND_I64ADDR">;
+
 def f32imm_op  : LLIROperand<f32,  "OPERAND_F32IMM">;
 def f64imm_op  : LLIROperand<f64,  "OPERAND_F64IMM">;
 def f80imm_op  : LLIROperand<f80,  "OPERAND_F80IMM">;
@@ -109,225 +118,6 @@ def f128imm_op : LLIROperand<f128, "OPERAND_F128IMM">;
 //===----------------------------------------------------------------------===//
 
 include "LLIRInstrFormats.td"
-
-//===----------------------------------------------------------------------===//
-// Additional instructions.
-//===----------------------------------------------------------------------===//
-
-let isAsCheapAsAMove = 1, isReMaterializable = 1 in
-{
-  def MOV_I8 : I
-    < (outs I8:$dst)
-    , (ins I8:$src)
-    , []
-    , "mov.i8\t$dst, $src"
-    , 0x09
-    >;
-
-  def MOV_I16 : I
-    < (outs I16:$dst)
-    , (ins I16:$src)
-    , []
-    , "mov.i16\t$dst, $src"
-    , 0x09
-    >;
-
-  def MOV_I32 : I
-    < (outs I32:$dst)
-    , (ins I32:$src)
-    , []
-    , "mov.i32\t$dst, $src"
-    , 0x09
-    >;
-
-  def MOV_I64 : I
-    < (outs I64:$dst)
-    , (ins GI64:$src)
-    , []
-    , "mov.i64\t$dst, $src"
-    , 0x0A
-    >;
-
-  def MOV_I128 : I
-    < (outs I128:$dst)
-    , (ins I128:$src)
-    , []
-    , "mov.i128\t$dst, $src"
-    , 0x09
-    >;
-
-  def MOV_F32 : I
-    < (outs F32:$dst)
-    , (ins F32:$src)
-    , []
-    , "mov.f32\t$dst, $src"
-    , 0x0B
-    >;
-
-  def MOV_F64 : I
-    < (outs F64:$dst)
-    , (ins F64:$src)
-    , []
-    , "mov.f64\t$dst, $src"
-    , 0x0C
-    >;
-
-  def MOV_F80 : I
-    < (outs F80:$dst)
-    , (ins F80:$src)
-    , []
-    , "mov.f80\t$dst, $src"
-    , 0x0C
-    >;
-
-  def MOV_F128 : I
-    < (outs F128:$dst)
-    , (ins F128:$src)
-    , []
-    , "mov.f128\t$dst, $src"
-    , 0x0C
-    >;
-
-  def ADDR_I64 : I
-    < (outs I64:$dst)
-    , (ins i64addr_op:$addr)
-    , []
-    , "mov.i64\t$dst, $addr"
-    , 0x0D
-    >;
-
-  def FRAME_I64 : I
-    < (outs I64:$res)
-    , (ins i32imm:$index, i64imm:$offset)
-    , []
-    , "frame.i64\t$res, $index, $offset"
-    , 0x0E
-    >;
-
-  def UNDEF_I8 : I
-      < (outs I8:$res)
-      , (ins)
-      , [(set I8:$res, undef)]
-      , "undef.i8\t$res"
-      , 0x11
-      >;
-
-  def UNDEF_I16 : I
-      < (outs I16:$res)
-      , (ins)
-      , [(set I16:$res, undef)]
-      , "undef.i16\t$res"
-      , 0x11
-      >;
-
-  def UNDEF_I32 : I
-      < (outs I32:$res)
-      , (ins)
-      , [(set I32:$res, undef)]
-      , "undef.i32\t$res"
-      , 0x11
-      >;
-
-  def UNDEF_I64 : I
-      < (outs I64:$res)
-      , (ins)
-      , [(set I64:$res, undef)]
-      , "undef.i64\t$res"
-      , 0x12
-      >;
-
-  def UNDEF_F32 : I
-      < (outs F32:$res)
-      , (ins)
-      , [(set F32:$res, undef)]
-      , "undef.f32\t$res"
-      , 0x13
-      >;
-
-  def UNDEF_F64 : I
-      < (outs F64:$res)
-      , (ins)
-      , [(set F64:$res, undef)]
-      , "undef.f64\t$res"
-      , 0x14
-      >;
-
-  def UNDEF_F80 : I
-      < (outs F80:$res)
-      , (ins)
-      , [(set F80:$res, undef)]
-      , "undef.f80\t$res"
-      , 0x14
-      >;
-
-  def UNDEF_F128 : I
-      < (outs F128:$res)
-      , (ins)
-      , [(set F128:$res, undef)]
-      , "undef.f128\t$res"
-      , 0x14
-      >;
-}
-
-def : Pat
-  < (LLIRsymbol tglobaladdr:$addr)
-  , (ADDR_I64 i64addr_op:$addr)
-  >;
-
-def : Pat
-  < (LLIRsymbol texternalsym:$addr)
-  , (ADDR_I64 i64addr_op:$addr)
-  >;
-
-def : Pat
-  < (LLIRsymbol tconstpool:$addr)
-  , (ADDR_I64 i64addr_op:$addr)
-  >;
-
-def : Pat
-  < (LLIRsymbol tglobaltlsaddr:$addr)
-  , (ADDR_I64 i64addr_op:$addr)
-  >;
-
-//===----------------------------------------------------------------------===//
-// Special instructions with side effects.
-//===----------------------------------------------------------------------===//
-
-let hasSideEffects = 1 in
-{
-  def VASTART : I
-    < (outs)
-    , (ins I64:$frame)
-    , [(LLIRvastart I64:$frame)]
-    , "vastart\t$frame"
-    , 0x00
-    >;
-
-  def ALLOCA_I64 : I
-    < (outs I64:$res)
-    , (ins I64:$size, i64imm:$align)
-    , [(set I64:$res, (LLIRalloca I64:$size, imm:$align))]
-    , "alloca.i64\t$res, $size, $align"
-    , 0x0F
-    >;
-
-  def GET_I64 : I
-    < (outs I64:$dst)
-    , (ins R64:$src)
-    , []
-    , "get.i64\t$dst, $src"
-    , 0x0A
-    >;
-
-  def SET_I64 : I
-    < (outs)
-    , (ins R64:$dst, I64:$src)
-    , []
-    , "set\t$dst, $src"
-    , 0x0A
-    >;
-
-}
 
 //===----------------------------------------------------------------------===//
 // Atomic Helpers
@@ -362,6 +152,9 @@ class seq_cst_store<PatFrag base>
 //===----------------------------------------------------------------------===//
 
 include "LLIRInstrArg.td"
+include "LLIRInstrMov.td"
+include "LLIRInstrUndef.td"
+include "LLIRInstrAddr.td"
 include "LLIRInstrCall.td"
 include "LLIRInstrConst.td"
 include "LLIRInstrConv.td"

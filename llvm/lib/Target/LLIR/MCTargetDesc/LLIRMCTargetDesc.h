@@ -30,6 +30,7 @@ class MCSubtargetInfo;
 class MCTargetOptions;
 class Target;
 
+Target &getTheLLIR_X86_32Target();
 Target &getTheLLIR_X86_64Target();
 Target &getTheLLIR_AArch64Target();
 Target &getTheLLIR_PPC64LETarget();
@@ -65,8 +66,12 @@ enum OperandType {
   OPERAND_F128IMM,
   // 32-bit integer offset.
   OPERAND_I32OFF,
-  // 32-bit function identifier.
-  OPERAND_I64FUNC,
+  // 64-bit integer offset.
+  OPERAND_I64OFF,
+  // 32-bit symbol identifier.
+  OPERAND_I32ADDR,
+  // 64-bit symbol identifier.
+  OPERAND_I64ADDR,
 };
 }
 

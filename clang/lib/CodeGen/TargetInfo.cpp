@@ -2072,7 +2072,8 @@ Address X86_32ABIInfo::EmitVAArg(CodeGenFunction &CGF,
 
 bool X86_32TargetCodeGenInfo::isStructReturnInRegABI(
     const llvm::Triple &Triple, const CodeGenOptions &Opts) {
-  assert(Triple.getArch() == llvm::Triple::x86);
+  assert(Triple.getArch() == llvm::Triple::x86 ||
+         Triple.getArch() == llvm::Triple::llir_x86);
 
   switch (Opts.getStructReturnConvention()) {
   case CodeGenOptions::SRCK_Default:
@@ -11030,7 +11031,8 @@ const TargetCodeGenInfo &CodeGenModule::getTargetCodeGenInfo() {
   case llvm::Triple::tcele:
     return SetCGInfo(new TCETargetCodeGenInfo(Types));
 
-  case llvm::Triple::x86: {
+  case llvm::Triple::x86:
+  case llvm::Triple::llir_x86: {
     bool IsDarwinVectorABI = Triple.isOSDarwin();
     bool RetSmallStructInRegABI =
         X86_32TargetCodeGenInfo::isStructReturnInRegABI(Triple, CodeGenOpts);

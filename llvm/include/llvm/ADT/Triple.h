@@ -99,6 +99,7 @@ public:
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
     ve,             // NEC SX-Aurora Vector Engine
+    llir_x86,       // LLIR for x86
     llir_x86_64,    // LLIR for X86-64
     llir_aarch64,   // LLIR for aarch64
     llir_ppc64le,   // LLIR for ppc64le
@@ -766,7 +767,7 @@ public:
   /// Tests whether the target is x86 (32- or 64-bit).
   bool isX86() const {
     return getArch() == Triple::x86 || getArch() == Triple::x86_64 ||
-           getArch() == Triple::llir_x86_64;
+           getArch() == Triple::llir_x86 || getArch() == Triple::llir_x86_64;
   }
 
   /// Tests whether the target is VE

@@ -95,6 +95,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   switch (Triple.getArch()) {
   default:
     llvm_unreachable("invalid LLIR architecture");
+  case llvm::Triple::llir_x86:
   case llvm::Triple::llir_x86_64:
     break;
   case llvm::Triple::llir_aarch64:

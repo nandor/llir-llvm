@@ -353,6 +353,7 @@ static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
     break;
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86:
   case llvm::Triple::llir_x86_64:
     x86::getX86TargetFeatures(D, Triple, Args, Features);
     break;
@@ -565,6 +566,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
     case llvm::Triple::systemz:
     case llvm::Triple::x86:
     case llvm::Triple::x86_64:
+    case llvm::Triple::llir_x86:
     case llvm::Triple::llir_x86_64:
       return !areOptimizationsEnabled(Args);
     default:
@@ -575,6 +577,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
   if (Triple.isOSWindows()) {
     switch (Triple.getArch()) {
     case llvm::Triple::x86:
+    case llvm::Triple::llir_x86:
       return !areOptimizationsEnabled(Args);
     case llvm::Triple::x86_64:
     case llvm::Triple::llir_x86_64:
@@ -1643,6 +1646,7 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
 
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86:
   case llvm::Triple::llir_x86_64:
     AddX86TargetArgs(Args, CmdArgs);
     break;
@@ -7136,6 +7140,7 @@ void ClangAs::ConstructJob(Compilation &C, const JobAction &JA,
 
   case llvm::Triple::x86:
   case llvm::Triple::x86_64:
+  case llvm::Triple::llir_x86:
   case llvm::Triple::llir_x86_64:
     AddX86TargetArgs(Args, CmdArgs);
     break;

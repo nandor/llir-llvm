@@ -81,17 +81,18 @@ public:
 extern "C" void LLVMInitializeLLIRTarget()
 {
   // Register the target.
-  RegisterTargetMachine<LLIRTargetMachine> A(getTheLLIR_X86_64Target());
-  RegisterTargetMachine<LLIRTargetMachine> B(getTheLLIR_AArch64Target());
-  RegisterTargetMachine<LLIRTargetMachine> C(getTheLLIR_PPC64LETarget());
-  RegisterTargetMachine<LLIRTargetMachine> D(getTheLLIR_RISCV64Target());
+  RegisterTargetMachine<LLIRTargetMachine> A(getTheLLIR_X86_32Target());
+  RegisterTargetMachine<LLIRTargetMachine> B(getTheLLIR_X86_64Target());
+  RegisterTargetMachine<LLIRTargetMachine> C(getTheLLIR_AArch64Target());
+  RegisterTargetMachine<LLIRTargetMachine> D(getTheLLIR_PPC64LETarget());
+  RegisterTargetMachine<LLIRTargetMachine> E(getTheLLIR_RISCV64Target());
 
   // Register backend passes.
   auto &PR = *PassRegistry::getPassRegistry();
   initializeLLIRRegisterNumberingPass(PR);
 }
 
-static std::string computeDataLayoutX86_64(const Triple &TT) {
+static std::string computeDataLayoutX86(const Triple &TT) {
   // X86 is little endian
   std::string Ret = "e";
 
@@ -176,8 +177,9 @@ static std::string computeDataLayoutRISCV64(const Triple &TT) {
 static std::string computeDataLayout(const Triple &TT, StringRef CPU,
                                      StringRef FS) {
   switch (TT.getArch()) {
+  case Triple::llir_x86:
   case Triple::llir_x86_64:
-    return computeDataLayoutX86_64(TT);
+    return computeDataLayoutX86(TT);
   case Triple::llir_aarch64:
     return computeDataLayoutAArch64(TT);
   case Triple::llir_ppc64le:
