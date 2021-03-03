@@ -1417,6 +1417,73 @@ bool Triple::isLLIR() const {
   llvm_unreachable("Invalid architecture value");
 }
 
+Triple Triple::getNativeVariant() const {
+  Triple T(*this);
+  switch (getArch()) {
+  case Triple::UnknownArch:
+  case Triple::amdgcn:
+  case Triple::avr:
+  case Triple::bpfeb:
+  case Triple::bpfel:
+  case Triple::msp430:
+  case Triple::ppc64le:
+  case Triple::systemz:
+  case Triple::ve:
+  case Triple::aarch64_32:
+  case Triple::amdil:
+  case Triple::arc:
+  case Triple::arm:
+  case Triple::armeb:
+  case Triple::csky:
+  case Triple::hexagon:
+  case Triple::hsail:
+  case Triple::kalimba:
+  case Triple::lanai:
+  case Triple::le32:
+  case Triple::mips:
+  case Triple::mipsel:
+  case Triple::nvptx:
+  case Triple::ppc:
+  case Triple::r600:
+  case Triple::renderscript32:
+  case Triple::riscv32:
+  case Triple::shave:
+  case Triple::sparc:
+  case Triple::sparcel:
+  case Triple::spir:
+  case Triple::tce:
+  case Triple::tcele:
+  case Triple::thumb:
+  case Triple::thumbeb:
+  case Triple::wasm32:
+  case Triple::x86:
+  case Triple::xcore:
+  case Triple::aarch64:
+  case Triple::aarch64_be:
+  case Triple::amdil64:
+  case Triple::hsail64:
+  case Triple::le64:
+  case Triple::mips64:
+  case Triple::mips64el:
+  case Triple::nvptx64:
+  case Triple::ppc64:
+  case Triple::renderscript64:
+  case Triple::riscv64:
+  case Triple::sparcv9:
+  case Triple::spir64:
+  case Triple::wasm64:
+  case Triple::x86_64:
+    break;
+
+  case Triple::llir_aarch64:   T.setArch(Triple::aarch64);      break;
+  case Triple::llir_ppc64le:   T.setArch(Triple::ppc64le);      break;
+  case Triple::llir_riscv64:   T.setArch(Triple::riscv64);      break;
+  case Triple::llir_x86:       T.setArch(Triple::x86);          break;
+  case Triple::llir_x86_64:    T.setArch(Triple::x86_64);       break;
+  }
+  return T;
+}
+
 Triple Triple::get32BitArchVariant() const {
   Triple T(*this);
   switch (getArch()) {

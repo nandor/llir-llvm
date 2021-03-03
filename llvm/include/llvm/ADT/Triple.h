@@ -853,6 +853,9 @@ public:
   /// @name Helpers to build variants of a particular triple.
   /// @{
 
+  /// Form the base triple for an LLIR target.
+  llvm::Triple getNativeVariant() const;
+
   /// Form a triple with a 32-bit variant of the current architecture.
   ///
   /// This can be used to move across "families" of architectures where useful.
