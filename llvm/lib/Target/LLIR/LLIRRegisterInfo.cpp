@@ -62,11 +62,13 @@ void LLIRRegisterInfo::eliminateFrameIndex(
 
   const int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
   MachineRegisterInfo &MRI = MF.getRegInfo();
-  const LLIRInstrInfo *TII = MF.getSubtarget<LLIRSubtarget>().getInstrInfo();
+  const LLIRSubtarget &STI = MF.getSubtarget<LLIRSubtarget>();
+  const LLIRInstrInfo *TII = STI.getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
 
   unsigned TempReg = MRI.createVirtualRegister(&LLIR::I64RegClass);
-  BuildMI(MBB, II, DL, TII->get(LLIR::FRAME_I64), TempReg)
+  unsigned Op = STI.is32Bit() ? LLIR::FRAME_I32 : LLIR::FRAME_I64;
+  BuildMI(MBB, II, DL, TII->get(Op), TempReg)
       .addImm(FrameIndex)
       .addImm(0ull);
   MI.getOperand(FIOperandNum).ChangeToRegister(TempReg, false);

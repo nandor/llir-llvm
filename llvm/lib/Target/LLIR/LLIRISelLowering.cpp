@@ -443,8 +443,9 @@ SDValue LLIRTargetLowering::LowerATOMIC_FENCE(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op,
                                            SelectionDAG &DAG) const {
+  MVT PtrVT = getPointerTy(DAG.getDataLayout());
   return DAG.getCopyFromReg(Op.getOperand(0), SDLoc(Op), LLIR::FRAME_ADDR,
-                            MVT::i64);
+                            PtrVT);
 }
 
 SDValue LLIRTargetLowering::LowerFrameIndex(SDValue Op,
@@ -670,8 +671,9 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                    SelectionDAG &DAG) const {
   switch (cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue()) {
     case Intrinsic::x86_rdtsc: {
+      MVT PtrVT = getPointerTy(DAG.getDataLayout());
       return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
-                         DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
+                         DAG.getVTList(MVT::i32, MVT::Other), Op.getOperand(0));
     }
     case Intrinsic::llir_ldaxr:
     case Intrinsic::llir_stlxr:
@@ -690,8 +692,9 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerREADCYCLECOUNTER(SDValue Op,
                                                   SelectionDAG &DAG) const {
+  MVT PtrVT = getPointerTy(DAG.getDataLayout());
   return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
-                   DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
+                   DAG.getVTList(MVT::i32, MVT::Other), Op.getOperand(0));
 }
 
 MachineBasicBlock *LLIRTargetLowering::EmitInstrWithCustomInserter(
