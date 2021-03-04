@@ -268,6 +268,9 @@ namespace CallingConv {
     /// Calling convention for Xen Hypercall.
     LLIR_XEN = 108,
 
+    /// Calling convention for multiboot entry.
+    LLIR_MULTIBOOT = 109,
+
     /// The highest possible calling convention ID. Must be some 2^k - 1.
     MaxID = 1023
   };
