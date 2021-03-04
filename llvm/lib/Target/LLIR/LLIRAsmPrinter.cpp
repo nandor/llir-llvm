@@ -129,6 +129,10 @@ bool LLIRAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
       O << MO.getImm();
       return false;
     }
+    case MachineOperand::MO_GlobalAddress: {
+      O << MO.getGlobal()->getName();
+      return false;
+    }
   }
 }
 
