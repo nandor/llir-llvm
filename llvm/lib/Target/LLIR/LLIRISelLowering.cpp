@@ -62,7 +62,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::i64, &LLIR::I64RegClass);
   addRegisterClass(MVT::f32, &LLIR::F32RegClass);
   addRegisterClass(MVT::f64, &LLIR::F64RegClass);
-  if (Subtarget->isX86_64()) {
+  if (Subtarget->isX86()) {
     addRegisterClass(MVT::f80, &LLIR::F80RegClass);
   }
   if (Subtarget->isAArch64()) {
@@ -116,7 +116,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Decide what to do with funky float operations based on target.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+      if (Subtarget->isX86()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = T != MVT::f128 ? Legal : Custom;
@@ -148,7 +148,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Disable some operations on some platforms.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+      if (Subtarget->isX86()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = T != MVT::f128 ? Legal : Custom;
@@ -189,7 +189,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+      if (Subtarget->isX86()) {
         Op = Legal;
       } else if (Subtarget->isAArch64()) {
         Op = Custom;
@@ -215,7 +215,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     // Custom lowering for some actions.
     {
       LegalizeAction Op = Legal;
-      if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+      if (Subtarget->isX86()) {
         Op = Expand;
       } else if (Subtarget->isAArch64()) {
         Op = Custom;
@@ -276,8 +276,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::ConstantFP, MVT::f64, Legal);
   setOperationAction(ISD::ConstantFP, MVT::f80, Expand);
   setOperationAction(ISD::ConstantFP, MVT::f128, Expand);
-  setOperationAction(ISD::ConstantPool, MVT::f80, Custom);
-  setOperationAction(ISD::ConstantPool, MVT::f128, Custom);
   setOperationAction(ISD::Constant, MVT::i8, Legal);
   setOperationAction(ISD::Constant, MVT::i16, Legal);
   setOperationAction(ISD::Constant, MVT::i32, Legal);
@@ -285,7 +283,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::Constant, MVT::i128, Expand);
 
   // Lower constant pools.
-  setOperationAction(ISD::ConstantPool, MVT::i64, Custom);
+  setOperationAction(ISD::ConstantPool, MVTPtr, Custom);
 
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
@@ -302,7 +300,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::ATOMIC_FENCE  , MVT::Other, Custom);
 
   // Expansion of memset/memcpy/memmove
-  if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+  if (Subtarget->isX86()) {
     MaxStoresPerMemset = 16;
     MaxStoresPerMemsetOptSize = 8;
     MaxStoresPerMemcpy = 8;
@@ -420,7 +418,7 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerATOMIC_FENCE(SDValue Op,
                                               SelectionDAG &DAG) const {
-  if (Subtarget->isX86_64()) {
+  if (Subtarget->isX86()) {
     SDLoc dl(Op);
     AtomicOrdering FenceOrdering =
         static_cast<AtomicOrdering>(Op.getConstantOperandVal(1));
@@ -553,7 +551,7 @@ SDValue LLIRTargetLowering::LowerVACOPY(SDValue Op, SelectionDAG &DAG) const {
   const Value *DstSV = cast<SrcValueSDNode>(Op.getOperand(3))->getValue();
   const Value *SrcSV = cast<SrcValueSDNode>(Op.getOperand(4))->getValue();
 
-  if (Subtarget->isX86_64()) {
+  if (Subtarget->isX86()) {
     // X86-64 va_list is a struct { i32, i32, i8*, i8* }, except on Windows,
     // where a va_list is still an i8*.
     if (Subtarget->isCallingConvWin64(
@@ -671,7 +669,6 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                    SelectionDAG &DAG) const {
   switch (cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue()) {
     case Intrinsic::x86_rdtsc: {
-      MVT PtrVT = getPointerTy(DAG.getDataLayout());
       return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
                          DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
     }
@@ -692,7 +689,6 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_VOID(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerREADCYCLECOUNTER(SDValue Op,
                                                   SelectionDAG &DAG) const {
-  MVT PtrVT = getPointerTy(DAG.getDataLayout());
   return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
                    DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
 }
@@ -988,7 +984,7 @@ SDValue LLIRTargetLowering::LowerReturn(
 
 LLIRTargetLowering::AtomicExpansionKind
 LLIRTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
-  if (Subtarget->isX86_64() || Subtarget->isX86_32()) {
+  if (Subtarget->isX86()) {
     AtomicRMWInst::BinOp Op = AI->getOperation();
     switch (Op) {
     default:
