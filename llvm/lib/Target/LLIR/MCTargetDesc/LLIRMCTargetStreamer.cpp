@@ -67,7 +67,9 @@ void LLIRMCTargetAsmStreamer::emitFeatures(
     StringRef tuneCPU,
     StringRef fs)
 {
-  OS << "\t.features \"" << cpu << "\", \"" << tuneCPU << "\", \"" << fs << "\"\n";
+  if (!cpu.empty() || !tuneCPU.empty() || !fs.empty()) {
+    OS << "\t.features \"" << cpu << "\", \"" << tuneCPU << "\", \"" << fs << "\"\n";
+  }
 }
 
 void LLIRMCTargetAsmStreamer::emitParams(

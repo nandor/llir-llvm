@@ -3,7 +3,7 @@
 ; Test that wasm select instruction is selected from LLVM select instruction.
 
 ; CHECK-LABEL: select_i32_bool:
-; CHECK-NEXT:  .args i8, i32, i32
+; CHECK-NEXT:  .args i8:zext, i32, i32
 ; CHECK-NEXT:  .call c
 define i32 @select_i32_bool(i1 zeroext %a, i32 %b, i32 %c) {
   %cond = select i1 %a, i32 %b, i32 %c
@@ -29,7 +29,7 @@ define i32 @select_i32_ne(i32 %a, i32 %b, i32 %c) {
 }
 
 ; CHECK-LABEL: select_i64_bool:
-; CHECK-NEXT:  .args i8, i64, i64
+; CHECK-NEXT:  .args i8:zext, i64, i64
 ; CHECK-NEXT:  .call c
 define i64 @select_i64_bool(i1 zeroext %a, i64 %b, i64 %c) {
   %cond = select i1 %a, i64 %b, i64 %c
