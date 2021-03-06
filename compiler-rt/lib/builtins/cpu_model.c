@@ -226,6 +226,14 @@ static bool getX86CpuIDAndInfoEx(unsigned value, unsigned subleaf,
                                  unsigned *rEAX, unsigned *rEBX, unsigned *rECX,
                                  unsigned *rEDX) {
 #if defined(__GNUC__) || defined(__clang__)
+#if defined(__llir__)
+  __asm__
+    ( "x86_cpuid.i32.i32.i32.i32 %0, %1, %2, %3, %4, %5"
+    : "=r"(*rEAX), "=r"(*rEBX), "=r"(*rECX), "=r"(*rEDX)
+    : "r"(value), "r"(subleaf)
+    );
+  return false;
+#else
 #if defined(__x86_64__)
   // gcc doesn't know cpuid would clobber ebx/rbx. Preserve it manually.
   // FIXME: should we save this for Clang?
@@ -244,6 +252,7 @@ static bool getX86CpuIDAndInfoEx(unsigned value, unsigned subleaf,
   return false;
 #else
   return true;
+#endif
 #endif
 #elif defined(_MSC_VER)
   int registers[4];
@@ -264,7 +273,7 @@ static bool getX86XCR0(unsigned *rEAX, unsigned *rEDX) {
   // Check xgetbv; this uses a .byte sequence instead of the instruction
   // directly because older assemblers do not include support for xgetbv and
   // there is no easy way to conditionally compile based on the assembler used.
-  __asm__(".byte 0x0f, 0x01, 0xd0" : "=a"(*rEAX), "=d"(*rEDX) : "c"(0));
+  __asm__("x86_get_xcr.i32.i32 %0, %1, %2" : "=r"(*rEAX), "=r"(rEDX): "r"(0));
   return false;
 #elif defined(_MSC_FULL_VER) && defined(_XCR_XFEATURE_ENABLED_MASK)
   unsigned long long Result = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
