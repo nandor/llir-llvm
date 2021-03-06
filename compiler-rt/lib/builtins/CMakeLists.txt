@@ -251,7 +251,7 @@ set(x86_ARCH_SOURCES
   cpu_model.c
   )
 set(llir_x86_ARCH_SOURCES
-  llir/x86_64/cpu_model.c
+  cpu_model.c
   )
 
 if (NOT MSVC)
@@ -364,6 +364,23 @@ if (NOT MSVC)
     i386/udivdi3.S
     i386/umoddi3.S
   )
+  set(llir_i386_SOURCES
+    ${GENERIC_SOURCES}
+    ${x86_ARCH_SOURCES}
+    llir/i386/ashldi3.S
+    llir/i386/ashrdi3.S
+    llir/i386/divdi3.S
+    llir/i386/floatdidf.S
+    llir/i386/floatdisf.S
+    llir/i386/floatundidf.S
+    llir/i386/floatundisf.S
+    llir/i386/lshrdi3.S
+    llir/i386/moddi3.S
+    llir/i386/muldi3.S
+    llir/i386/udivdi3.S
+    llir/i386/umoddi3.S
+  )
+
 
   if (NOT ANDROID)
     set(i386_SOURCES
@@ -372,6 +389,12 @@ if (NOT MSVC)
       i386/floatdixf.S
       i386/floatundixf.S
     )
+    set(i386_SOURCES
+      ${llir_i386_SOURCES}
+      ${llir_x86_80_BIT_SOURCES}
+      llir/i386/floatdixf.S
+      llir/i386/floatundixf.S
+    )
   endif()
 
   if (WIN32)
@@ -379,6 +402,11 @@ if (NOT MSVC)
       ${i386_SOURCES}
       i386/chkstk.S
       i386/chkstk2.S
+    )
+    set(llir_i386_SOURCES
+      ${llir_i386_SOURCES}
+      llir/i386/chkstk.S
+      llir/i386/chkstk2.S
     )
   endif()
 else () # MSVC
@@ -398,6 +426,7 @@ else () # MSVC
     llir/x86_64/floatdisf.c
   )
   set(i386_SOURCES ${GENERIC_SOURCES} ${x86_ARCH_SOURCES})
+  set(llir_i386_SOURCES ${GENERIC_SOURCES} ${llir_x86_ARCH_SOURCES})
 endif () # if (NOT MSVC)
 
 set(arm_SOURCES

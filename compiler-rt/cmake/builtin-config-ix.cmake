@@ -39,7 +39,7 @@ set(SPARCV9 sparcv9)
 set(WASM32 wasm32)
 set(WASM64 wasm64)
 set(VE ve)
-set(LLIR_X864 llir_i386)
+set(LLIR_X86 llir_i386)
 set(LLIR_X86_64 llir_x86_64)
 set(LLIR_AARCH64 llir_aarch64)
 set(LLIR_RISCV llir_riscv64)
@@ -56,7 +56,10 @@ set(ALL_BUILTIN_SUPPORTED_ARCH
   ${HEXAGON} ${MIPS32} ${MIPS64} ${PPC32} ${PPC64}
   ${RISCV32} ${RISCV64} ${SPARC} ${SPARCV9}
   ${WASM32} ${WASM64} ${VE}
-  ${LLIR_X86_64} ${LLIR_AARCH64} ${LLIR_RISCV} ${LLIR_PPC64})
+  ${LLIR_X86} ${LLIR_X86_64}
+  ${LLIR_AARCH64}
+  ${LLIR_RISCV}
+  ${LLIR_PPC64})
 
 include(CompilerRTUtils)
 include(CompilerRTDarwinUtils)

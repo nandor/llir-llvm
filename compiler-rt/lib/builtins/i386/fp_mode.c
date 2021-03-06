@@ -17,7 +17,11 @@
 FE_ROUND_MODE __fe_getround() {
   // Assume that the rounding mode state for the fpu agrees with the SSE unit.
   unsigned short cw;
+  #ifdef __llir__
+  __asm__ __volatile__ ("x86_fnstcw %0" : : "r" (&cw));
+  #else
   __asm__ __volatile__ ("fnstcw %0" : "=m" (cw));
+  #endif
 
   switch (cw & X87_RMODE_MASK) {
     case X87_TONEAREST:
@@ -33,7 +37,11 @@ FE_ROUND_MODE __fe_getround() {
 }
 
 int __fe_raise_inexact() {
+  #ifdef __llir__
+  __builtin_trap();
+  #else
   float f = 1.0f, g = 3.0f;
   __asm__ __volatile__ ("fdivs %1" : "+t" (f) : "m" (g));
+  #endif
   return 0;
 }

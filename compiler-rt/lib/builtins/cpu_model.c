@@ -140,6 +140,9 @@ enum ProcessorFeatures {
 static bool isCpuIdSupported() {
 #if defined(__GNUC__) || defined(__clang__)
 #if defined(__i386__)
+#if defined(__llir__)
+  __builtin_trap();
+#else
   int __cpuid_supported;
   __asm__("  pushfl\n"
           "  popl   %%eax\n"
@@ -160,6 +163,7 @@ static bool isCpuIdSupported() {
   if (!__cpuid_supported)
     return false;
 #endif
+#endif
   return true;
 #endif
   return true;
@@ -173,6 +177,14 @@ static bool isCpuIdSupported() {
 static bool getX86CpuIDAndInfo(unsigned value, unsigned *rEAX, unsigned *rEBX,
                                unsigned *rECX, unsigned *rEDX) {
 #if defined(__GNUC__) || defined(__clang__)
+#if defined (__llir__)
+  __asm__
+    ( "x86_cpuid.i32.i32.i32.i32 %0, %1, %2, %3, %4"
+    : "=r"(*rEAX), "=r"(*rEBX), "=r"(*rECX), "=r"(*rEDX)
+    : "r"(value)
+    );
+  return false;
+#else
 #if defined(__x86_64__)
   // gcc doesn't know cpuid would clobber ebx/rbx. Preserve it manually.
   // FIXME: should we save this for Clang?
@@ -191,6 +203,7 @@ static bool getX86CpuIDAndInfo(unsigned value, unsigned *rEAX, unsigned *rEBX,
   return false;
 #else
   return true;
+#endif
 #endif
 #elif defined(_MSC_VER)
   // The MSVC intrinsic is portable across x86 and x64.
