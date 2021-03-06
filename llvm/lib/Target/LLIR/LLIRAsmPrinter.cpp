@@ -105,7 +105,7 @@ void LLIRAsmPrinter::emitXXStructorList(const DataLayout &DL,
   if (Structors.empty())
     return;
   for (const Structor &S : Structors) {
-    auto *GV = dyn_cast<GlobalValue>(S.Func);
+    auto *GV = dyn_cast<GlobalValue>(S.Func->stripPointerCasts());
     assert(GV && "not a global value");
     if (IsCtor) {
       Streamer.emitCtor(S.Priority, getSymbol(GV));

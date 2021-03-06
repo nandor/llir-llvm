@@ -236,7 +236,12 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     }
 
     {
-      LegalizeAction Op = T == MVT::i128 ? Expand : Legal;
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_32()) {
+        Op = T == MVT::i64 || T == MVT::i128 ? Expand : Legal;
+      } else {
+        Op = T == MVT::i128 ? Expand : Legal;
+      }
       setOperationAction(ISD::SDIV, T, Op);
       setOperationAction(ISD::UDIV, T, Op);
       setOperationAction(ISD::SREM, T, Op);
