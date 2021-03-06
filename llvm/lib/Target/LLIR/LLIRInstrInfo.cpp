@@ -31,7 +31,7 @@ using namespace llvm;
 #include "LLIRGenInstrInfo.inc"
 
 LLIRInstrInfo::LLIRInstrInfo(LLIRSubtarget &ST)
-    : LLIRGenInstrInfo(-1, -1, -1, -1) {}
+    : LLIRGenInstrInfo(-1, -1, -1, -1), Subtarget(ST) {}
 
 bool LLIRInstrInfo::analyzeBranch(MachineBasicBlock &MBB,
                                   MachineBasicBlock *&TBB,
@@ -166,12 +166,12 @@ void LLIRInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
       }
     } else {
       // virt -> phys
-      Op = LLIR::SET_I64;
+      Op = Subtarget.is64Bit() ? LLIR::SET_I64 : LLIR::SET_I32;
     }
   } else {
     if (Register::isVirtualRegister(DstReg)) {
       // phys -> virt
-      Op = LLIR::GET_I64;
+      Op = Subtarget.is64Bit() ? LLIR::GET_I64 : LLIR::GET_I32;
     } else {
       // phys -> phys
       llvm_unreachable("phys-phys copy not supported");

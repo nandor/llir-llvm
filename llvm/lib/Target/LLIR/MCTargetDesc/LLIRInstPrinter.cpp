@@ -258,6 +258,7 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
       printCall("tcall", OS, MI, STI, 1, 1, 1);
       break;
 
+    case LLIR::SWITCH_I32:
     case LLIR::SWITCH_I64: {
       OS << "\tswitch\t";
       printOperand(MI, 0, STI, OS);

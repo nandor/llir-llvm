@@ -25,6 +25,8 @@ namespace llvm {
 class LLIRSubtarget;
 
 class LLIRInstrInfo : public LLIRGenInstrInfo {
+  LLIRSubtarget &Subtarget;
+
  public:
   explicit LLIRInstrInfo(LLIRSubtarget &ST);
 
