@@ -389,7 +389,7 @@ if (NOT MSVC)
       i386/floatdixf.S
       i386/floatundixf.S
     )
-    set(i386_SOURCES
+    set(llir_i386_SOURCES
       ${llir_i386_SOURCES}
       ${llir_x86_80_BIT_SOURCES}
       llir/i386/floatdixf.S
