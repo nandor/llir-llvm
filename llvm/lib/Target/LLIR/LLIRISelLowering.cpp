@@ -231,6 +231,25 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::UADDO, T, Op);
       setOperationAction(ISD::SSUBO, T, Op);
       setOperationAction(ISD::USUBO, T, Op);
+    }
+
+    // Custom lowering for some actions.
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_32()) {
+        Op = T == MVT::i64 ? Custom : Expand;
+      } else if (Subtarget->isX86_64()) {
+        Op = Expand;
+      } else if (Subtarget->isAArch64()) {
+        Op = Custom;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Custom;
+      } else if (Subtarget->isRISCV()) {
+        Op = Custom;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
+
       setOperationAction(ISD::SMULO, T, Op);
       setOperationAction(ISD::UMULO, T, Op);
     }
