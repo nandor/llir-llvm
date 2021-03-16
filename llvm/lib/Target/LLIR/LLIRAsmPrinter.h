@@ -30,7 +30,7 @@ public:
 
   StringRef getPassName() const override { return "LLIR Assembly Printer"; }
 
-  void emitGlobalVariable(const GlobalVariable *GV) override;
+  void emitLinkage(const GlobalValue *GV, MCSymbol *GVSym) const override;
   void emitFunctionBodyStart() override;
   void emitFunctionBodyEnd() override;
   void emitInstruction(const MachineInstr *MI) override;
@@ -53,7 +53,7 @@ public:
   ) override;
 
 private:
-  LLIRMCTargetStreamer &getTargetStreamer();
+  LLIRMCTargetStreamer &getTargetStreamer() const;
 };
 
 

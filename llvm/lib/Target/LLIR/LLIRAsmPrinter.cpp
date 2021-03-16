@@ -49,12 +49,11 @@ void LLIRAsmPrinter::emitInstruction(const MachineInstr *MI) {
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
-void LLIRAsmPrinter::emitGlobalVariable(const GlobalVariable *GV) {
+void LLIRAsmPrinter::emitLinkage(const GlobalValue *GV, MCSymbol *sym) const {
   if (GV->isThreadLocal()) {
     getTargetStreamer().emitThreadLocal();
   }
-  AsmPrinter::emitGlobalVariable(GV);
-  getTargetStreamer().emitEnd();
+  AsmPrinter::emitLinkage(GV, sym);
 }
 
 void LLIRAsmPrinter::emitFunctionBodyStart() {
@@ -142,7 +141,7 @@ bool LLIRAsmPrinter::PrintAsmMemoryOperand(const MachineInstr *MI,
   return PrintAsmOperand(MI, OpNo, ExtraCode, O);
 }
 
-LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer() {
+LLIRMCTargetStreamer &LLIRAsmPrinter::getTargetStreamer() const {
   return static_cast<LLIRMCTargetStreamer &>(*OutStreamer->getTargetStreamer());
 }
 
