@@ -31,6 +31,7 @@ public:
   StringRef getPassName() const override { return "LLIR Assembly Printer"; }
 
   void emitLinkage(const GlobalValue *GV, MCSymbol *GVSym) const override;
+  void emitGlobalVariable(const GlobalVariable *GV);
   void emitFunctionBodyStart() override;
   void emitFunctionBodyEnd() override;
   void emitInstruction(const MachineInstr *MI) override;

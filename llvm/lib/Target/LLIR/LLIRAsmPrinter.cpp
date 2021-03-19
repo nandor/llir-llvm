@@ -56,6 +56,12 @@ void LLIRAsmPrinter::emitLinkage(const GlobalValue *GV, MCSymbol *sym) const {
   AsmPrinter::emitLinkage(GV, sym);
 }
 
+void LLIRAsmPrinter::emitGlobalVariable(const GlobalVariable *GV)
+{
+  AsmPrinter::emitGlobalVariable(GV);
+  getTargetStreamer().emitEnd();
+}
+
 void LLIRAsmPrinter::emitFunctionBodyStart() {
   MachineFrameInfo &MFI = MF->getFrameInfo();
   auto *FuncInfo = MF->getInfo<LLIRMachineFunctionInfo>();
