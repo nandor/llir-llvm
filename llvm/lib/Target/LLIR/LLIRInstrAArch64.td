@@ -13,6 +13,22 @@
 
 let Predicates = [IsAArch64] in {
 
+def AARCH64_ATOMIC_STLXR_8 : I
+  < (outs I32:$dst)
+  , (ins I8:$val, I64:$addr)
+  , [(set I32:$dst, (int_llir_stlxr I8:$val, I64:$addr))]
+  , "aarch64_sc.i32\t$dst, $addr, $val"
+  , 0xE1
+  >;
+
+def AARCH64_ATOMIC_STLXR_16 : I
+  < (outs I32:$dst)
+  , (ins I16:$val, I64:$addr)
+  , [(set I32:$dst, (int_llir_stlxr I16:$val, I64:$addr))]
+  , "aarch64_sc.i32\t$dst, $addr, $val"
+  , 0xE1
+  >;
+
 def AARCH64_ATOMIC_STLXR_32 : I
   < (outs I32:$dst)
   , (ins I32:$val, I64:$addr)
@@ -26,6 +42,22 @@ def AARCH64_ATOMIC_STLXR_64 : I
   , (ins I64:$val, I64:$addr)
   , [(set I32:$dst, (int_llir_stlxr I64:$val, I64:$addr))]
   , "aarch64_sc.i32\t$dst, $addr, $val"
+  , 0xE1
+  >;
+
+def AARCH64_ATOMIC_LDAXR_8 : I
+  < (outs I8:$dst)
+  , (ins I64:$addr)
+  , [(set I8:$dst, (int_llir_ldaxr I64:$addr))]
+  , "aarch64_ll.i8\t$dst, $addr"
+  , 0xE1
+  >;
+
+def AARCH64_ATOMIC_LDAXR_16 : I
+  < (outs I16:$dst)
+  , (ins I64:$addr)
+  , [(set I16:$dst, (int_llir_ldaxr I64:$addr))]
+  , "aarch64_ll.i16\t$dst, $addr"
   , 0xE1
   >;
 
