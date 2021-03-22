@@ -30,7 +30,7 @@ FE_ROUND_MODE __fe_getround() {
 #ifdef __ARM_FP
   uint64_t fpcr;
 #ifdef __llir__
-  __asm__ __volatile__("mov.i64  %0, $aarch64_fpcr" : "=r" (fpcr));
+  __asm__ __volatile__("get.i64  %0, $aarch64_fpcr" : "=r" (fpcr));
 #else
   __asm__ __volatile__("mrs  %0, fpcr" : "=r" (fpcr));
 #endif
@@ -55,7 +55,7 @@ int __fe_raise_inexact() {
 #ifdef __ARM_FP
   uint64_t fpsr;
 #ifdef __llir__
-  __asm__ __volatile__("mov.i64 %0, $aarch64_fpsr" : "=r" (fpsr));
+  __asm__ __volatile__("get.i64 %0, $aarch64_fpsr" : "=r" (fpsr));
   __asm__ __volatile__("set     $aarch64_fpsr, %0" : : "ri" (fpsr | AARCH64_INEXACT));
 #else
   __asm__ __volatile__("mrs  %0, fpsr" : "=r" (fpsr));
