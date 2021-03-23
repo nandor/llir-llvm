@@ -1196,13 +1196,21 @@ SDValue LLIRTargetLowering::LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue LLIRTargetLowering::LowerINT_TO_FP(SDValue Op,
-                                            SelectionDAG &DAG) const {
+                                           SelectionDAG &DAG) const {
+  SDLoc dl(Op);
+  bool IsSigned = Op.getOpcode() == ISD::SINT_TO_FP ||
+                  Op.getOpcode() == ISD::STRICT_SINT_TO_FP;
   bool IsStrict = Op->isStrictFPOpcode();
   SDValue SrcVal = Op.getOperand(IsStrict ? 1 : 0);
+  auto SrcTy = SrcVal.getValueType();
 
   // i128 conversions are libcalls.
-  if (SrcVal.getValueType() == MVT::i128)
+  if (SrcTy == MVT::i128)
     return SDValue();
+
+  // Convert i8/i16 to i32.
+  if (Subtarget->isAArch64() && (SrcTy == MVT::i8 || SrcTy == MVT::i16))
+    SrcTy = MVT::i32;
 
   // Other conversions are legal, unless it's to the completely software-based
   // fp128.
@@ -1210,13 +1218,23 @@ SDValue LLIRTargetLowering::LowerINT_TO_FP(SDValue Op,
     return Op;
 
   RTLIB::Libcall LC;
-  if (Op.getOpcode() == ISD::SINT_TO_FP ||
-      Op.getOpcode() == ISD::STRICT_SINT_TO_FP)
-    LC = RTLIB::getSINTTOFP(SrcVal.getValueType(), Op.getValueType());
-  else
-    LC = RTLIB::getUINTTOFP(SrcVal.getValueType(), Op.getValueType());
+  if (IsSigned) {
+    LC = RTLIB::getSINTTOFP(SrcTy, Op.getValueType());
+    if (SrcVal.getValueType() != SrcTy)
+      SrcVal = DAG.getSExtOrTrunc(SrcVal, dl, SrcTy);
+  } else {
+    LC = RTLIB::getUINTTOFP(SrcTy, Op.getValueType());
+    if (SrcVal.getValueType() != SrcTy)
+      SrcVal = DAG.getZExtOrTrunc(SrcVal, dl, SrcTy);
+  }
 
-  return LowerF128Call(Op, DAG, LC);
+  SDValue Chain = IsStrict ? Op.getOperand(0) : SDValue();
+  SmallVector<SDValue, 2> Ops{ SrcVal };
+  MakeLibCallOptions CallOptions;
+  SDValue Result;
+  std::tie(Result, Chain) =
+      makeLibCall(DAG, LC, Op.getValueType(), Ops, CallOptions, dl, Chain);
+  return IsStrict ? DAG.getMergeValues({Result, Chain}, dl) : Result;
 }
 
 SDValue LLIRTargetLowering::LowerFP_TO_INT(SDValue Op,
