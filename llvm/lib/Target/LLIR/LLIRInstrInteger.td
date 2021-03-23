@@ -54,7 +54,7 @@ multiclass UnaryInt
     < (outs I128:$dst)
     , (ins I128:$arg)
     , [(set I128:$dst, (node I128:$arg))]
-    , !strconcat(name, ".i64\t$dst, $arg")
+    , !strconcat(name, ".i128\t$dst, $arg")
     , b
     >;
 }
