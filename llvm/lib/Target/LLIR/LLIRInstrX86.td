@@ -175,6 +175,6 @@ let Predicates = [IsX86] in
     >;
 
   // Barriers.
-  def X86_MFENCE : I <(outs), (ins), [(LLIRMFence)], "x86_mfence", 0xE1>;
+  def X86_MFENCE : I <(outs), (ins), [(LLIRMFence)], "x86_m_fence", 0xE1>;
   def X86_BARRIER : I <(outs), (ins), [(LLIRBarrier)], "x86_barrier", 0xE1>;
 }
