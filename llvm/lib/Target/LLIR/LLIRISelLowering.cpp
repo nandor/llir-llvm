@@ -145,6 +145,33 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::STRICT_FSETCCS, T, Op);
     }
 
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86()) {
+        Op = T == MVT::f80 ? Expand : Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = Legal;
+      } else if (Subtarget->isPPC64le()) {
+        Op = Legal;
+      } else if (Subtarget->isRISCV()) {
+        Op = Legal;
+      } else {
+        llvm_unreachable("invalid subtarget");
+      }
+      setOperationAction(ISD::FCEIL, T, Op);
+      setOperationAction(ISD::FLOG, T, Op);
+      setOperationAction(ISD::FLOG2, T, Op);
+      setOperationAction(ISD::FLOG10, T, Op);
+      setOperationAction(ISD::STRICT_FCEIL, T, Op);
+      setOperationAction(ISD::STRICT_FLOG, T, Op);
+      setOperationAction(ISD::STRICT_FLOG2, T, Op);
+      setOperationAction(ISD::STRICT_FLOG10, T, Op);
+      setOperationAction(ISD::STRICT_FMAXNUM, T, Op);
+      setOperationAction(ISD::STRICT_FMINNUM, T, Op);
+      setOperationAction(ISD::FMAXNUM, T, Expand);
+      setOperationAction(ISD::FMINNUM, T, Expand);
+    }
+
     // Disable some operations on some platforms.
     {
       LegalizeAction Op = Legal;

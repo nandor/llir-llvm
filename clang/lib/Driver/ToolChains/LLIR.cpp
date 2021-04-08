@@ -232,6 +232,11 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   auto RT = TC.getCompilerRT(Args, "builtins", ToolChain::FT_Static);
   if (TC.getVFS().exists(RT)) {
     CmdArgs.push_back(Args.MakeArgString(RT));
+    if (!Args.hasArg(options::OPT_nostdlib)) {
+      if (!Args.hasArg(options::OPT_nolibc)) {
+        CmdArgs.push_back(Args.MakeArgString("-lc"));
+      }
+    }
   }
 
   CmdArgs.push_back("-o");
