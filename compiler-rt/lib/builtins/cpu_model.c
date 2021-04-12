@@ -273,7 +273,11 @@ static bool getX86XCR0(unsigned *rEAX, unsigned *rEDX) {
   // Check xgetbv; this uses a .byte sequence instead of the instruction
   // directly because older assemblers do not include support for xgetbv and
   // there is no easy way to conditionally compile based on the assembler used.
+  #ifdef __llir__
   __asm__("x86_get_xcr.i32.i32 %0, %1, %2" : "=r"(*rEAX), "=r"(rEDX): "r"(0));
+  #else
+  __asm__(".byte 0x0f, 0x01, 0xd0" : "=a"(*rEAX), "=d"(*rEDX) : "c"(0));
+  #endif
   return false;
 #elif defined(_MSC_FULL_VER) && defined(_XCR_XFEATURE_ENABLED_MASK)
   unsigned long long Result = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
