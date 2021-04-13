@@ -340,6 +340,8 @@ defm XOR : CommBinaryInt<xor, "xor", 0x90>;
 defm OR  : CommBinaryInt<or,  "or",  0x90>;
 defm AND : CommBinaryInt<and, "and", 0x90>;
 defm MUL : CommBinaryInt<mul, "mul", 0x90>;
+defm MULHS : CommBinaryInt<mulhs, "mul_h_s", 0x90>;
+defm MULHU : CommBinaryInt<mulhu, "mul_h_u", 0x90>;
 
 defm SUB  : BinaryInt<sub,  "sub",  0xA0>;
 defm SDIV : BinaryInt<sdiv, "sdiv", 0xA1>;

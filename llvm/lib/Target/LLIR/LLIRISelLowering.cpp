@@ -198,8 +198,6 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::BSWAP, T, Legal);
     setOperationAction(ISD::SMUL_LOHI, T, Expand);
     setOperationAction(ISD::UMUL_LOHI, T, Expand);
-    setOperationAction(ISD::MULHS, T, Expand);
-    setOperationAction(ISD::MULHU, T, Expand);
     setOperationAction(ISD::SDIVREM, T, Expand);
     setOperationAction(ISD::UDIVREM, T, Expand);
     setOperationAction(ISD::SHL_PARTS, T, Expand);
@@ -293,6 +291,8 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SREM, T, Op);
       setOperationAction(ISD::UREM, T, Op);
       setOperationAction(ISD::MUL, T, Op);
+      setOperationAction(ISD::MULHS, T, Op);
+      setOperationAction(ISD::MULHU, T, Op);
     }
   }
 
