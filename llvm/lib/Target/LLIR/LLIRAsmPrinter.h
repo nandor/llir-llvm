@@ -28,6 +28,8 @@ public:
   {
   }
 
+  MCSymbol *GetCPISymbol(unsigned CPID) const override;
+
   StringRef getPassName() const override { return "LLIR Assembly Printer"; }
 
   void emitLinkage(const GlobalValue *GV, MCSymbol *GVSym) const override;

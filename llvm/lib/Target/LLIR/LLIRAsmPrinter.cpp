@@ -49,6 +49,15 @@ void LLIRAsmPrinter::emitInstruction(const MachineInstr *MI) {
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
+MCSymbol *LLIRAsmPrinter::GetCPISymbol(unsigned CPID) const {
+  // The AsmPrinter::GetCPISymbol superclass method tries to use CPID as
+  // indexes in MachineConstantPool, which isn't in sync with indexes used here.
+  const DataLayout &DL = getDataLayout();
+  return OutContext.getOrCreateSymbol(Twine(DL.getPrivateGlobalPrefix()) +
+                                      "LLIRCPI" + Twine(getFunctionNumber())
+                                      + "_" + Twine(CPID));
+}
+
 void LLIRAsmPrinter::emitLinkage(const GlobalValue *GV, MCSymbol *sym) const {
   if (GV->isThreadLocal()) {
     getTargetStreamer().emitThreadLocal();
