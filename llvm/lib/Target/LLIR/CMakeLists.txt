@@ -23,6 +23,7 @@ add_llvm_target(LLIRCodeGen
   LLIRSubtarget.cpp
   LLIRTargetMachine.cpp
   LLIRTargetObjectFile.cpp
+  LLIRTargetTransformInfo.cpp
 )
 
 add_subdirectory(MCTargetDesc)

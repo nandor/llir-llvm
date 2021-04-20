@@ -1283,3 +1283,225 @@ SDValue LLIRTargetLowering::LowerFP_TO_INT(SDValue Op,
 
   return LowerF128Call(Op, DAG, LC);
 }
+
+static bool isOffsetSuitableForCodeModel(int64_t Offset, CodeModel::Model M,
+                                       bool hasSymbolicDisplacement) {
+  // Offset should fit into 32 bit immediate field.
+  if (!isInt<32>(Offset))
+    return false;
+
+  // If we don't have a symbolic displacement - we don't have any extra
+  // restrictions.
+  if (!hasSymbolicDisplacement)
+    return true;
+
+  // FIXME: Some tweaks might be needed for medium code model.
+  if (M != CodeModel::Small && M != CodeModel::Kernel)
+    return false;
+
+  // For small code model we assume that latest object is 16MB before end of 31
+  // bits boundary. We may also accept pretty large negative constants knowing
+  // that all objects are in the positive half of address space.
+  if (M == CodeModel::Small && Offset < 16*1024*1024)
+    return true;
+
+  // For kernel code model we know that all object resist in the negative half
+  // of 32bits address space. We may not accept negative offsets, since they may
+  // be just off and we may accept pretty large positive ones.
+  if (M == CodeModel::Kernel && Offset >= 0)
+    return true;
+
+  return false;
+}
+
+bool LLIRTargetLowering::isLegalAddressingMode(const DataLayout &DL,
+                                               const AddrMode &AM, Type *Ty,
+                                               unsigned AS,
+                                               Instruction *I) const {
+  if (Subtarget->isX86()) {
+    // X86 supports extremely general addressing modes.
+    CodeModel::Model M = getTargetMachine().getCodeModel();
+
+    // X86 allows a sign-extended 32-bit immediate field as a displacement.
+    if (!isOffsetSuitableForCodeModel(AM.BaseOffs, M,
+                                           AM.BaseGV != nullptr))
+      return false;
+
+    if (AM.BaseGV) {
+      // TODO
+      /*
+      unsigned GVFlags = Subtarget->classifyGlobalReference(AM.BaseGV);
+
+      // If a reference to this global requires an extra load, we can't fold it.
+      if (isGlobalStubReference(GVFlags))
+        return false;
+
+      // If BaseGV requires a register for the PIC base, we cannot also have a
+      // BaseReg specified.
+      if (AM.HasBaseReg && isGlobalRelativeToPICBase(GVFlags))
+        return false;
+
+      // If lower 4G is not available, then we must use rip-relative addressing.
+      if ((M != CodeModel::Small || isPositionIndependent()) &&
+          Subtarget->is64Bit() && (AM.BaseOffs || AM.Scale > 1))
+        return false;
+      */
+    }
+
+    switch (AM.Scale) {
+    case 0:
+    case 1:
+    case 2:
+    case 4:
+    case 8:
+      // These scales always work.
+      break;
+    case 3:
+    case 5:
+    case 9:
+      // These scales are formed with basereg+scalereg.  Only accept if there is
+      // no basereg yet.
+      if (AM.HasBaseReg)
+        return false;
+      break;
+    default: // Other stuff never works.
+      return false;
+    }
+
+    return true;
+  }
+  if (Subtarget->isAArch64()) {
+    // AArch64 has five basic addressing modes:
+    //  reg
+    //  reg + 9-bit signed offset
+    //  reg + SIZE_IN_BYTES * 12-bit unsigned offset
+    //  reg1 + reg2
+    //  reg + SIZE_IN_BYTES * reg
+
+    // No global is ever allowed as a base.
+    if (AM.BaseGV)
+      return false;
+
+    // No reg+reg+imm addressing.
+    if (AM.HasBaseReg && AM.BaseOffs && AM.Scale)
+      return false;
+
+    // FIXME: Update this method to support scalable addressing modes.
+    if (isa<ScalableVectorType>(Ty))
+      return AM.HasBaseReg && !AM.BaseOffs && !AM.Scale;
+
+    // check reg + imm case:
+    // i.e., reg + 0, reg + imm9, reg + SIZE_IN_BYTES * uimm12
+    uint64_t NumBytes = 0;
+    if (Ty->isSized()) {
+      uint64_t NumBits = DL.getTypeSizeInBits(Ty);
+      NumBytes = NumBits / 8;
+      if (!isPowerOf2_64(NumBits))
+        NumBytes = 0;
+    }
+
+    if (!AM.Scale) {
+      int64_t Offset = AM.BaseOffs;
+
+      // 9-bit signed offset
+      if (isInt<9>(Offset))
+        return true;
+
+      // 12-bit unsigned offset
+      unsigned shift = Log2_64(NumBytes);
+      if (NumBytes && Offset > 0 && (Offset / NumBytes) <= (1LL << 12) - 1 &&
+          // Must be a multiple of NumBytes (NumBytes is a power of 2)
+          (Offset >> shift) << shift == Offset)
+        return true;
+      return false;
+    }
+
+    // Check reg1 + SIZE_IN_BYTES * reg2 and reg1 + reg2
+
+    return AM.Scale == 1 || (AM.Scale > 0 && (uint64_t)AM.Scale == NumBytes);
+  }
+  if (Subtarget->isRISCV()) {
+    // No global is ever allowed as a base.
+    if (AM.BaseGV)
+      return false;
+
+    // Require a 12-bit signed offset.
+    if (!isInt<12>(AM.BaseOffs))
+      return false;
+
+    switch (AM.Scale) {
+    case 0: // "r+i" or just "i", depending on HasBaseReg.
+      break;
+    case 1:
+      if (!AM.HasBaseReg) // allow "r+i".
+        break;
+      return false; // disallow "r+r" or "r+r+i".
+    default:
+      return false;
+    }
+
+    return true;
+  }
+  if (Subtarget->isPPC64le()) {
+    // Vector type r+i form is supported since power9 as DQ form. We don't check
+    // the offset matching DQ form requirement(off % 16 == 0), because on
+    // PowerPC, imm form is preferred and the offset can be adjusted to use imm
+    // form later in pass PPCLoopInstrFormPrep. Also in LSR, for one LSRUse, it
+    // uses min and max offset to check legal addressing mode, we should be a
+    // little aggressive to contain other offsets for that LSRUse.
+    if (Ty->isVectorTy() && AM.BaseOffs != 0 && !Subtarget->hasP9Vector())
+      return false;
+
+    // PPC allows a sign-extended 16-bit immediate field.
+    if (AM.BaseOffs <= -(1LL << 16) || AM.BaseOffs >= (1LL << 16) - 1)
+      return false;
+
+    // No global is ever allowed as a base.
+    if (AM.BaseGV)
+      return false;
+
+    // PPC only support r+r,
+    switch (AM.Scale) {
+    case 0: // "r+i" or just "i", depending on HasBaseReg.
+      break;
+    case 1:
+      if (AM.HasBaseReg && AM.BaseOffs) // "r+r+i" is not allowed.
+        return false;
+      // Otherwise we have r+r or r+i.
+      break;
+    case 2:
+      if (AM.HasBaseReg || AM.BaseOffs) // 2*r+r  or  2*r+i is not allowed.
+        return false;
+      // Allow 2*r as r+r.
+      break;
+    default:
+      // No other scales are supported.
+      return false;
+    }
+
+    return true;
+  }
+  llvm_unreachable("unknown subtarget");
+}
+
+int LLIRTargetLowering::getScalingFactorCost(const DataLayout &DL,
+                                             const AddrMode &AM, Type *Ty,
+                                             unsigned AS) const {
+  if (Subtarget->isX86()) {
+    if (isLegalAddressingMode(DL, AM, Ty, AS))
+      return AM.Scale != 0;
+    return -1;
+  }
+  if (Subtarget->isAArch64()) {
+    if (isLegalAddressingMode(DL, AM, Ty, AS))
+      return AM.Scale != 0 && AM.Scale != 1;
+    return -1;
+  }
+  if (Subtarget->isRISCV()) {
+    return TargetLowering::getScalingFactorCost(DL, AM, Ty, AS);
+  }
+  if (Subtarget->isPPC64le()) {
+    return TargetLowering::getScalingFactorCost(DL, AM, Ty, AS);
+  }
+  llvm_unreachable("unknown subtarget");
+}

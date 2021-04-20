@@ -33,6 +33,8 @@ public:
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
   TargetLoweringObjectFile *getObjFileLowering() const override;
 
+  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+
   bool isMachineVerifierClean() const override;
 
   bool usesPhysRegsForValues() const override { return false; }

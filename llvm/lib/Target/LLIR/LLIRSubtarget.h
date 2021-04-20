@@ -129,6 +129,16 @@ class LLIRSubtarget : public LLIRGenSubtargetInfo {
     }
   }
 
+  bool hasMacroFusion() const {
+    return isX86_64();
+  }
+
+  bool hasBranchFusion() const {
+    return isX86_64();
+  }
+
+  bool hasP9Vector() const { return false; }
+
  private:
   void ParseSubtargetFeatures(StringRef CPU, StringRef TrueCPU, StringRef FS);
 

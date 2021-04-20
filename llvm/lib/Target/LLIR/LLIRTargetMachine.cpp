@@ -7,12 +7,14 @@
 //
 //===----------------------------------------------------------------------===//
 //
+// This file defines the LLIR specific subclass of TargetMachine.
 //
 //===----------------------------------------------------------------------===//
 
 #include "LLIRTargetMachine.h"
 #include "LLIR.h"
 #include "LLIRTargetObjectFile.h"
+#include "LLIRTargetTransformInfo.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/Support/TargetRegistry.h"
@@ -24,25 +26,20 @@ namespace {
 class LLIRPassConfig : public TargetPassConfig {
 public:
   LLIRPassConfig(LLIRTargetMachine &TM, PassManagerBase &PM)
-    : TargetPassConfig(TM, PM) {}
+      : TargetPassConfig(TM, PM) {}
 
-  LLIRTargetMachine &getLLIRTargetMachine() const
-  {
+  LLIRTargetMachine &getLLIRTargetMachine() const {
     return getTM<LLIRTargetMachine>();
   }
 
-  FunctionPass *createTargetRegisterAllocator(bool) override
-  {
-    return nullptr;
-  }
+  FunctionPass *createTargetRegisterAllocator(bool) override { return nullptr; }
 
   void addIRPasses() override {
     addPass(createAtomicExpandPass());
     TargetPassConfig::addIRPasses();
   }
 
-  bool addInstSelector() override
-  {
+  bool addInstSelector() override {
     TargetPassConfig::addInstSelector();
     addPass(createLLIRISelDag(getLLIRTargetMachine()));
     addPass(createLLIRArgumentMove());
@@ -78,8 +75,7 @@ public:
 
 } // namespace
 
-extern "C" void LLVMInitializeLLIRTarget()
-{
+extern "C" void LLVMInitializeLLIRTarget() {
   // Register the target.
   RegisterTargetMachine<LLIRTargetMachine> A(getTheLLIR_X86_32Target());
   RegisterTargetMachine<LLIRTargetMachine> B(getTheLLIR_X86_64Target());
@@ -196,41 +192,24 @@ static std::unique_ptr<TargetLoweringObjectFile> createTLOF(const Triple &TT) {
   return std::make_unique<LLIRELFTargetObjectFile>();
 }
 
-LLIRTargetMachine::LLIRTargetMachine(
-    const Target &T,
-    const Triple &TT,
-    StringRef CPU,
-    StringRef FS,
-    const TargetOptions &Options,
-    Optional<Reloc::Model> RM,
-    Optional<CodeModel::Model> CM,
-    CodeGenOpt::Level OL,
-    bool JIT)
-  : LLVMTargetMachine(
-        T,
-        computeDataLayout(TT, CPU, FS),
-        TT,
-        CPU,
-        FS,
-        Options,
-        Reloc::Static,
-        CodeModel::Large,
-        OL
-    ),
-    TLOF(createTLOF(TT))
-{
+LLIRTargetMachine::LLIRTargetMachine(const Target &T, const Triple &TT,
+                                     StringRef CPU, StringRef FS,
+                                     const TargetOptions &Options,
+                                     Optional<Reloc::Model> RM,
+                                     Optional<CodeModel::Model> CM,
+                                     CodeGenOpt::Level OL, bool JIT)
+    : LLVMTargetMachine(T, computeDataLayout(TT, CPU, FS), TT, CPU, FS, Options,
+                        Reloc::Static, CodeModel::Large, OL),
+      TLOF(createTLOF(TT)) {
   this->Options.TrapUnreachable = true;
   this->Options.NoTrapAfterNoreturn = false;
   initAsmInfo();
 }
 
-LLIRTargetMachine::~LLIRTargetMachine()
-{
-}
+LLIRTargetMachine::~LLIRTargetMachine() {}
 
 const LLIRSubtarget *
-LLIRTargetMachine::getSubtargetImpl(const Function &F) const
-{
+LLIRTargetMachine::getSubtargetImpl(const Function &F) const {
   Attribute CPUAttr = F.getFnAttribute("target-cpu");
   Attribute TuneAttr = F.getFnAttribute("tune-cpu");
   Attribute FSAttr = F.getFnAttribute("target-features");
@@ -261,17 +240,19 @@ LLIRTargetMachine::getSubtargetImpl(const Function &F) const
   return I.get();
 }
 
-TargetPassConfig *LLIRTargetMachine::createPassConfig(PassManagerBase &PM)
-{
+TargetPassConfig *LLIRTargetMachine::createPassConfig(PassManagerBase &PM) {
   return new LLIRPassConfig(*this, PM);
 }
 
-TargetLoweringObjectFile *LLIRTargetMachine::getObjFileLowering() const
-{
+TargetLoweringObjectFile *LLIRTargetMachine::getObjFileLowering() const {
   return TLOF.get();
 }
 
-bool LLIRTargetMachine::isMachineVerifierClean() const
-{
+TargetTransformInfo
+LLIRTargetMachine::getTargetTransformInfo(const Function &F) {
+  return TargetTransformInfo(LLIRTTIImpl(this, F));
+}
+
+bool LLIRTargetMachine::isMachineVerifierClean() const {
   llvm_unreachable("isMachineVerifierClean");
 }
