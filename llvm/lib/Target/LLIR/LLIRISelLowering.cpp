@@ -360,6 +360,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     MaxStoresPerMemmoveOptSize = 4;
     MaxLoadsPerMemcmp = 2;
     MaxLoadsPerMemcmpOptSize = 2;
+    setPrefFunctionAlignment(Align(16));
   } else if (Subtarget->isAArch64()) {
     MaxStoresPerMemsetOptSize = 8;
     MaxStoresPerMemset = MaxStoresPerMemsetOptSize;
@@ -369,10 +370,11 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
     MaxStoresPerMemmoveOptSize = MaxStoresPerMemmove = 4;
     MaxLoadsPerMemcmpOptSize = 4;
     MaxLoadsPerMemcmp =  MaxLoadsPerMemcmpOptSize;
+    setPrefFunctionAlignment(Align(8));
   } else if (Subtarget->isPPC64le()) {
-    // No specialisation.
+    setPrefFunctionAlignment(Align(16));
   } else if (Subtarget->isRISCV()) {
-    // No specialisation.
+    setPrefFunctionAlignment(Align(4));
   } else {
     llvm_unreachable("unknown architecture");
   }

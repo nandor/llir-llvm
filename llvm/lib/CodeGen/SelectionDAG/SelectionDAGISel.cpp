@@ -975,7 +975,7 @@ void SelectionDAGISel::CodeGenAndEmitDAG() {
 
   if (ViewSUnitDAGs && MatchFilterBB)
     Scheduler->viewGraph();
- 
+
   // Emit machine code to BB.  This can change 'BB' to the last block being
   // inserted into.
   MachineBasicBlock *FirstMBB = FuncInfo->MBB, *LastMBB;
