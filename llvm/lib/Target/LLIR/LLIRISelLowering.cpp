@@ -283,6 +283,8 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       LegalizeAction Op = Legal;
       if (Subtarget->isX86_32()) {
         Op = T == MVT::i64 || T == MVT::i128 ? Expand : Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = T == MVT::i128 ? Expand : Legal;
       } else {
         Op = T == MVT::i128 ? Expand : Legal;
       }
@@ -291,6 +293,17 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::SREM, T, Op);
       setOperationAction(ISD::UREM, T, Op);
       setOperationAction(ISD::MUL, T, Op);
+    }
+
+    {
+      LegalizeAction Op = Legal;
+      if (Subtarget->isX86_32()) {
+        Op = T == MVT::i64 || T == MVT::i128 ? Expand : Legal;
+      } else if (Subtarget->isAArch64()) {
+        Op = T == MVT::i64 ? Legal : Expand;
+      } else {
+        Op = T == MVT::i128 ? Expand : Legal;
+      }
       setOperationAction(ISD::MULHS, T, Op);
       setOperationAction(ISD::MULHU, T, Op);
     }
@@ -430,6 +443,8 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return LowerINTRINSIC_VOID(Op, DAG);
     case ISD::READCYCLECOUNTER:
       return LowerREADCYCLECOUNTER(Op, DAG);
+    case ISD::BRIND:
+      return LowerBRIND(Op, DAG);
     case ISD::FP_EXTEND:
       return LowerFP_EXTEND(Op, DAG);
     case ISD::FP_ROUND:
@@ -744,6 +759,10 @@ SDValue LLIRTargetLowering::LowerREADCYCLECOUNTER(SDValue Op,
                                                   SelectionDAG &DAG) const {
   return DAG.getNode(LLIRISD::RDTSC, SDLoc(Op),
                    DAG.getVTList(MVT::i64, MVT::Other), Op.getOperand(0));
+}
+
+SDValue LLIRTargetLowering::LowerBRIND(SDValue Op, SelectionDAG &DAG) const {
+  llvm_unreachable("not implemented");
 }
 
 MachineBasicBlock *LLIRTargetLowering::EmitInstrWithCustomInserter(

@@ -86,6 +86,7 @@ public:
   SDValue LowerINTRINSIC_W_CHAIN(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINTRINSIC_VOID(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerREADCYCLECOUNTER(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBRIND(SDValue Op, SelectionDAG &DAG) const;
 
   bool useSoftFloat() const override { return false; }
   bool canLowerUndef() const override { return true; }
