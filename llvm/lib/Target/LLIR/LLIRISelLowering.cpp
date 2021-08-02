@@ -486,25 +486,27 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
 
 SDValue LLIRTargetLowering::LowerATOMIC_FENCE(SDValue Op,
                                               SelectionDAG &DAG) const {
-  if (Subtarget->isX86()) {
-    SDLoc dl(Op);
-    AtomicOrdering FenceOrdering =
-        static_cast<AtomicOrdering>(Op.getConstantOperandVal(1));
-    SyncScope::ID FenceSSID =
-        static_cast<SyncScope::ID>(Op.getConstantOperandVal(2));
+  SDLoc dl(Op);
+  AtomicOrdering FenceOrdering =
+      static_cast<AtomicOrdering>(Op.getConstantOperandVal(1));
+  SyncScope::ID FenceSSID =
+      static_cast<SyncScope::ID>(Op.getConstantOperandVal(2));
 
+  if (Subtarget->isX86()) {
     // The only fence that needs an instruction is a sequentially-consistent
     // cross-thread fence.
     if (FenceOrdering == AtomicOrdering::SequentiallyConsistent &&
         FenceSSID == SyncScope::System) {
       return DAG.getNode(LLIRISD::MFENCE, dl, MVT::Other, Op.getOperand(0));
     }
-
     // MEMBARRIER is a compiler barrier; it codegens to a no-op.
     return DAG.getNode(LLIRISD::BARRIER, dl, MVT::Other, Op.getOperand(0));
   }
+  if (Subtarget->isAArch64()) {
+    // TODO: support all fences.
+    return DAG.getNode(LLIRISD::MFENCE, dl, MVT::Other, Op.getOperand(0));
+  }
   llvm_unreachable("not implemented");
-
 }
 
 SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op,
