@@ -301,6 +301,8 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
         Op = T == MVT::i64 || T == MVT::i128 ? Expand : Legal;
       } else if (Subtarget->isAArch64()) {
         Op = T == MVT::i64 ? Legal : Expand;
+      } else if (Subtarget->isRISCV()) {
+        Op = T == MVT::i128 || T == MVT::i8 || T == MVT::i16 ? Expand : Legal;
       } else {
         Op = T == MVT::i128 ? Expand : Legal;
       }
