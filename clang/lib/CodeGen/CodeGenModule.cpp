@@ -1024,7 +1024,7 @@ void CodeGenModule::setGVPropertiesAux(llvm::GlobalValue *GV,
   setGlobalVisibility(GV, D);
   setDSOLocal(GV);
   GV->setPartition(CodeGenOpts.SymbolPartition);
-  if (D->hasAttr<NoDeadStripAttr>()) {
+  if (D && D->hasAttr<NoDeadStripAttr>()) {
     GV->setNoDeadStrip(true);
   }
 }

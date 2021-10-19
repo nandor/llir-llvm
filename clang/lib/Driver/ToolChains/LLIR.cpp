@@ -86,6 +86,10 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   const llvm::Triple &Triple = TC.getTriple();
   ArgStringList CmdArgs;
 
+  SmallString<128> SysRoot(TC.computeSysRoot());
+  SmallString<128> LibDir(SysRoot);
+  llvm::sys::path::append(LibDir, "lib");
+
   // TODO: forward the pie flag.
   bool pie = getPIE(Args, TC);
   (void) pie;
@@ -206,11 +210,6 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     case llvm::Triple::Musl:
     case llvm::Triple::MuslEABI:
     case llvm::Triple::MuslEABIHF: {
-      SmallString<128> SysRoot(TC.computeSysRoot());
-
-      SmallString<128> LibDir(SysRoot);
-      llvm::sys::path::append(LibDir, "lib");
-
       SmallString<128> DynamicLinkerPath(LibDir);
       std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
       llvm::sys::path::append(DynamicLinkerPath, Linker);
@@ -225,6 +224,19 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     default: {
       break;
     }
+    }
+  }
+
+  // Add libunwind.
+  {
+    SmallString<128> Path(LibDir);
+    llvm::sys::path::append(Path, "libunwind");
+    auto LibPath = (Path + ".a").str();
+    auto SoPath = (Path + ".so").str();
+    if (Args.hasArg(options::OPT_static) || TC.getVFS().exists(LibPath)) {
+      CmdArgs.push_back(Args.MakeArgString(LibPath));
+    } else if (TC.getVFS().exists(SoPath)) {
+      CmdArgs.push_back(Args.MakeArgString(SoPath));
     }
   }
 
