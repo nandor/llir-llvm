@@ -18,7 +18,7 @@ extern void __register_frame_info(const void *, void *) __attribute__((weak));
 extern void *__deregister_frame_info(const void *) __attribute__((weak));
 #endif
 
-#ifndef CRT_HAS_INITFINI_ARRAY
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
 typedef void (*fp)(void);
 
 static fp __CTOR_LIST__[]
@@ -28,7 +28,12 @@ extern fp __CTOR_LIST_END__[];
 
 extern void __cxa_finalize(void *) __attribute__((weak));
 
-static void __attribute__((used)) __do_init() {
+static void
+__attribute__((used))
+#ifdef __llir__
+  __attribute__((constructor))
+#endif
+__do_init() {
   static _Bool __initialized;
   if (__builtin_expect(__initialized, 0))
     return;
@@ -39,13 +44,14 @@ static void __attribute__((used)) __do_init() {
   if (__register_frame_info)
     __register_frame_info(__EH_FRAME_LIST__, &__object);
 #endif
-#ifndef CRT_HAS_INITFINI_ARRAY
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
   const size_t n = __CTOR_LIST_END__ - __CTOR_LIST__ - 1;
   for (size_t i = n; i >= 1; i--) __CTOR_LIST__[i]();
 #endif
 }
 
-#if defined(CRT_HAS_INITFINI_ARRAY) || defined(__llir__)
+#ifndef __llir__
+#ifdef CRT_HAS_INITFINI_ARRAY
 __attribute__((section(".init_array"),
                used)) static void (*__init)(void) = __do_init;
 #elif defined(__i386__) || defined(__x86_64__)
@@ -68,14 +74,20 @@ __asm__(".pushsection .init,\"ax\",@progbits\n\t"
 #else
 #error "crtbegin without .init_fini array unimplemented for this architecture"
 #endif // CRT_HAS_INITFINI_ARRAY
+#endif // __llir__
 
-#ifndef CRT_HAS_INITFINI_ARRAY
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
 static fp __DTOR_LIST__[]
     __attribute__((section(".dtors"), aligned(sizeof(fp)))) = {(fp)-1};
 extern fp __DTOR_LIST_END__[];
 #endif
 
-static void __attribute__((used)) __do_fini() {
+static void
+__attribute__((used))
+#ifdef __llir__
+  __attribute__((destructor))
+#endif
+__do_fini() {
   static _Bool __finalized;
   if (__builtin_expect(__finalized, 0))
     return;
@@ -84,7 +96,7 @@ static void __attribute__((used)) __do_fini() {
   if (__cxa_finalize)
     __cxa_finalize(__dso_handle);
 
-#ifndef CRT_HAS_INITFINI_ARRAY
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
   const size_t n = __DTOR_LIST_END__ - __DTOR_LIST__ - 1;
   for (size_t i = 1; i <= n; i++) __DTOR_LIST__[i]();
 #endif
@@ -94,7 +106,8 @@ static void __attribute__((used)) __do_fini() {
 #endif
 }
 
-#if defined(CRT_HAS_INITFINI_ARRAY) || defined(__llir__)
+#ifndef __llir__
+#ifdef CRT_HAS_INITFINI_ARRAY
 __attribute__((section(".fini_array"),
                used)) static void (*__fini)(void) = __do_fini;
 #elif defined(__i386__) || defined(__x86_64__)
@@ -117,3 +130,4 @@ __asm__(".pushsection .fini,\"ax\",@progbits\n\t"
 #else
 #error "crtbegin without .init_fini array unimplemented for this architecture"
 #endif  // CRT_HAS_INIT_FINI_ARRAY
+#endif // __llir__

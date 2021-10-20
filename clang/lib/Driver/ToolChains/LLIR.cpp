@@ -83,6 +83,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
                                        const llvm::opt::ArgList &Args,
                                        const char *LinkingOutput) const {
   auto &TC = static_cast<const toolchains::LLIR &>(getToolChain());
+  const Driver &D = TC.getDriver();
   const llvm::Triple &Triple = TC.getTriple();
   ArgStringList CmdArgs;
 
@@ -166,6 +167,8 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
       if (!Args.hasArg(options::OPT_shared))
         CmdArgs.push_back(Args.MakeArgString(TC.GetFilePath("crt1.o")));
+    }
+    if (!Args.hasArg(options::OPT_nostartfiles) && D.CCCIsCXX()) {
       auto CrtBegin = TC.getCompilerRT(Args, "crtbegin", ToolChain::FT_Object);
       if (TC.getVFS().exists(CrtBegin)) {
         CmdArgs.push_back(Args.MakeArgString(CrtBegin));
@@ -261,7 +264,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   case llvm::Triple::Musl:
   case llvm::Triple::MuslEABI:
   case llvm::Triple::MuslEABIHF: {
-    if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
+    if (!Args.hasArg(options::OPT_nostartfiles) && D.CCCIsCXX()) {
       auto CrtEnd = TC.getCompilerRT(Args, "crtend", ToolChain::FT_Object);
       if (TC.getVFS().exists(CrtEnd)) {
         CmdArgs.push_back(Args.MakeArgString(CrtEnd));

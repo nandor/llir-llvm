@@ -13,7 +13,7 @@ const int32_t __EH_FRAME_LIST_END__[]
     __attribute__((section(".eh_frame"), aligned(sizeof(int32_t)),
                    visibility("hidden"), used)) = {0};
 
-#ifndef CRT_HAS_INITFINI_ARRAY
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
 typedef void (*fp)(void);
 fp __CTOR_LIST_END__[]
     __attribute__((section(".ctors"), visibility("hidden"), used)) = {0};
