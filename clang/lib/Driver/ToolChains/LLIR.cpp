@@ -193,6 +193,21 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   case llvm::Triple::MuslEABIHF: {
     if (!Args.hasArg(options::OPT_nostdlib)) {
       if (!Args.hasArg(options::OPT_nodefaultlibs)) {
+        if (D.CCCIsCXX()) {
+          if (TC.ShouldLinkCXXStdlib(Args)) {
+            bool OnlyLibstdcxxStatic = Args.hasArg(options::OPT_static_libstdcxx) &&
+                                       !Args.hasArg(options::OPT_static);
+            if (OnlyLibstdcxxStatic)
+              CmdArgs.push_back("-Bstatic");
+            TC.AddCXXStdlibLibArgs(Args, CmdArgs);
+            if (OnlyLibstdcxxStatic)
+              CmdArgs.push_back("-Bdynamic");
+          }
+          CmdArgs.push_back("-lm");
+        }
+        // Silence warnings when linking C code with a C++ '-stdlib' argument.
+        Args.ClaimAllArgs(options::OPT_stdlib_EQ);
+
         bool WantPthread = Args.hasArg(options::OPT_pthread) ||
                            Args.hasArg(options::OPT_pthreads);
 
