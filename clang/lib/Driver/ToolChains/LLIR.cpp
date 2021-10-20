@@ -166,6 +166,10 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
       if (!Args.hasArg(options::OPT_shared))
         CmdArgs.push_back(Args.MakeArgString(TC.GetFilePath("crt1.o")));
+      auto CrtBegin = TC.getCompilerRT(Args, "crtbegin", ToolChain::FT_Object);
+      if (TC.getVFS().exists(CrtBegin)) {
+        CmdArgs.push_back(Args.MakeArgString(CrtBegin));
+      }
     }
     break;
   }
@@ -249,6 +253,22 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
         CmdArgs.push_back(Args.MakeArgString("-lc"));
       }
     }
+  }
+
+  // CRT finalisation.
+  switch (Triple.getEnvironment()) {
+  default: break;
+  case llvm::Triple::Musl:
+  case llvm::Triple::MuslEABI:
+  case llvm::Triple::MuslEABIHF: {
+    if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles)) {
+      auto CrtEnd = TC.getCompilerRT(Args, "crtend", ToolChain::FT_Object);
+      if (TC.getVFS().exists(CrtEnd)) {
+        CmdArgs.push_back(Args.MakeArgString(CrtEnd));
+      }
+    }
+    break;
+  }
   }
 
   CmdArgs.push_back("-o");
