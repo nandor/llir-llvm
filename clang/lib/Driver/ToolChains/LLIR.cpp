@@ -318,8 +318,45 @@ void LLIR::AddClangSystemIncludeArgs(const ArgList &DriverArgs,
   }
 }
 
+static std::string DetectLibcxxIncludePath(llvm::vfs::FileSystem &vfs,
+                                           StringRef base) {
+  std::error_code EC;
+  int MaxVersion = 0;
+  std::string MaxVersionString;
+  for (llvm::vfs::directory_iterator LI = vfs.dir_begin(base, EC), LE;
+       !EC && LI != LE; LI = LI.increment(EC)) {
+    StringRef VersionText = llvm::sys::path::filename(LI->path());
+    int Version;
+    if (VersionText[0] == 'v' &&
+        !VersionText.slice(1, StringRef::npos).getAsInteger(10, Version)) {
+      if (Version > MaxVersion) {
+        MaxVersion = Version;
+        MaxVersionString = std::string(VersionText);
+      }
+    }
+  }
+  return MaxVersion ? (base + "/" + MaxVersionString).str() : "";
+}
+
 void LLIR::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
                                         ArgStringList &CC1Args) const {
+  if (DriverArgs.hasArg(options::OPT_nostdlibinc) ||
+      DriverArgs.hasArg(options::OPT_nostdincxx))
+    return;
+
+  switch (GetCXXStdlibType(DriverArgs)) {
+  case ToolChain::CST_Libcxx: {
+    std::string Path = computeSysRoot() + "/include/c++";
+    std::string IncludePath = DetectLibcxxIncludePath(getVFS(), Path);
+    if (IncludePath.empty() || !getVFS().exists(IncludePath))
+      return;
+    addSystemInclude(DriverArgs, CC1Args, IncludePath);
+    break;
+  }
+
+  case ToolChain::CST_Libstdcxx:
+    llvm_unreachable("not implemented");
+  }
 }
 
 std::string LLIR::computeSysRoot() const {
