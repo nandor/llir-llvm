@@ -45,7 +45,7 @@ static void __attribute__((used)) __do_init() {
 #endif
 }
 
-#ifdef CRT_HAS_INITFINI_ARRAY
+#if defined(CRT_HAS_INITFINI_ARRAY) || defined(__llir__)
 __attribute__((section(".init_array"),
                used)) static void (*__init)(void) = __do_init;
 #elif defined(__i386__) || defined(__x86_64__)
@@ -94,7 +94,7 @@ static void __attribute__((used)) __do_fini() {
 #endif
 }
 
-#ifdef CRT_HAS_INITFINI_ARRAY
+#if defined(CRT_HAS_INITFINI_ARRAY) || defined(__llir__)
 __attribute__((section(".fini_array"),
                used)) static void (*__fini)(void) = __do_fini;
 #elif defined(__i386__) || defined(__x86_64__)
