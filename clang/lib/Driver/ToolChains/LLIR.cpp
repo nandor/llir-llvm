@@ -374,6 +374,21 @@ void LLIR::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
   }
 }
 
+void LLIR::AddCXXStdlibLibArgs(const ArgList &Args,
+                               ArgStringList &CmdArgs) const {
+  CXXStdlibType Type = GetCXXStdlibType(Args);
+  switch (Type) {
+  case ToolChain::CST_Libcxx:
+    CmdArgs.push_back("-lc++");
+    CmdArgs.push_back("-lc++abi");
+    break;
+
+  case ToolChain::CST_Libstdcxx:
+    CmdArgs.push_back("-lstdc++");
+    break;
+  }
+}
+
 std::string LLIR::computeSysRoot() const {
   std::string SysRoot = getDriver().SysRoot;
   if (!SysRoot.empty()) {

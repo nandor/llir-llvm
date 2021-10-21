@@ -88,6 +88,7 @@ protected:
   Tool *buildAssembler() const override;
   Tool *buildLinker() const override;
 
+public:
   /// \name ToolChain Implementation Helper Functions
   /// @{
 
@@ -105,8 +106,11 @@ protected:
       const llvm::opt::ArgList &DriverArgs,
       llvm::opt::ArgStringList &CC1Args) const override;
 
-  RuntimeLibType
-  GetRuntimeLibType(const llvm::opt::ArgList &Args) const override;
+  void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
+                           llvm::opt::ArgStringList &CmdArgs) const override;
+
+  RuntimeLibType GetRuntimeLibType(
+      const llvm::opt::ArgList &Args) const override;
 
   /// @}
 };
