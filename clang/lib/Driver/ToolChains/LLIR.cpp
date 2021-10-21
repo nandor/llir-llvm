@@ -379,13 +379,16 @@ void LLIR::AddCXXStdlibLibArgs(const ArgList &Args,
   CXXStdlibType Type = GetCXXStdlibType(Args);
   switch (Type) {
   case ToolChain::CST_Libcxx:
-    CmdArgs.push_back("-lc++");
-    CmdArgs.push_back("-lc++abi");
+    if (getVFS().exists(computeSysRoot() + "/lib/libc++.so")) {
+      CmdArgs.push_back("-lc++");
+    }
+    if (getVFS().exists(computeSysRoot() + "/lib/libc++abi.so")) {
+      CmdArgs.push_back("-lc++abi");
+    }
     break;
 
   case ToolChain::CST_Libstdcxx:
-    CmdArgs.push_back("-lstdc++");
-    break;
+    llvm_unreachable("not implemented");
   }
 }
 
