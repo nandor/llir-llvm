@@ -28,6 +28,7 @@ class LLIRRegClass<list<ValueType> regTypes, int alignment, dag regList>
 
 def SP : LLIRReg<"%sp">;
 def FRAME_ADDR : LLIRReg<"%frame_addr">;
+def RETURN_ADDR : LLIRReg<"%frame_addr">;
 
 def R32 : LLIRRegClass<[i32], 32, (add SP, FRAME_ADDR)>;
 def R64 : LLIRRegClass<[i64], 64, (add SP, FRAME_ADDR)>;
@@ -60,5 +61,5 @@ def F128 : LLIRRegClass<[f128], 128, (add F128_0)>;
 // Composite register classes.
 //===----------------------------------------------------------------------===//
 
-def GI32 : LLIRRegClass<[i32], 32, (add I32_0, SP, FRAME_ADDR)>;
-def GI64 : LLIRRegClass<[i64], 64, (add I64_0, SP, FRAME_ADDR)>;
+def GI32 : LLIRRegClass<[i32], 32, (add I32_0, SP, FRAME_ADDR, RETURN_ADDR)>;
+def GI64 : LLIRRegClass<[i64], 64, (add I64_0, SP, FRAME_ADDR, RETURN_ADDR)>;

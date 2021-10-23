@@ -44,6 +44,10 @@ void LLIRInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const {
       OS << "$frame_addr";
       break;
     }
+    case LLIR::RETURN_ADDR: {
+      OS << "$ret_addr";
+      break;
+    }
     default: {
       assert(RegNo >= LLIR::NUM_TARGET_REGS);
       OS << "$" << (RegNo - LLIR::NUM_TARGET_REGS);

@@ -56,6 +56,7 @@ let isAsCheapAsAMove = 1, isReMaterializable = 1 in
 let Predicates = [Is32Bit] in
 {
   def : Pat<(LLIRsymbol tglobaladdr:$addr),    (ADDR_I32 i32addr_op:$addr)>;
+  def : Pat<(LLIRsymbol tblockaddress:$addr),  (ADDR_I32 i32addr_op:$addr)>;
   def : Pat<(LLIRsymbol texternalsym:$addr),   (ADDR_I32 i32addr_op:$addr)>;
   def : Pat<(LLIRsymbol tconstpool:$addr),     (ADDR_I32 i32addr_op:$addr)>;
   def : Pat<(LLIRsymbol tglobaltlsaddr:$addr), (ADDR_I32 i32addr_op:$addr)>;
@@ -64,6 +65,7 @@ let Predicates = [Is32Bit] in
 let Predicates = [Is64Bit] in
 {
   def : Pat<(LLIRsymbol tglobaladdr:$addr),    (ADDR_I64 i64addr_op:$addr)>;
+  def : Pat<(LLIRsymbol tblockaddress:$addr),  (ADDR_I64 i64addr_op:$addr)>;
   def : Pat<(LLIRsymbol texternalsym:$addr),   (ADDR_I64 i64addr_op:$addr)>;
   def : Pat<(LLIRsymbol tconstpool:$addr),     (ADDR_I64 i64addr_op:$addr)>;
   def : Pat<(LLIRsymbol tglobaltlsaddr:$addr), (ADDR_I64 i64addr_op:$addr)>;

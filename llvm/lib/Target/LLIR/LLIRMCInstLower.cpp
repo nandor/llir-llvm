@@ -117,6 +117,12 @@ void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const {
             MO.getGlobal()->getValueType()->isFunctionTy(), false);
         break;
       }
+      case MachineOperand::MO_BlockAddress: {
+        MCOp = LowerSymbolOperand(
+            Printer.GetBlockAddressSymbol(MO.getBlockAddress()),
+            MO.getOffset(), false, false);
+        break;
+      }
       case MachineOperand::MO_ExternalSymbol: {
         // TODO(nand): remove hardcoded symbols.
         MCOp = LowerSymbolOperand(GetSymbolFromOperand(MO), 0, true, true);

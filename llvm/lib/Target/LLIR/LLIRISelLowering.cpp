@@ -76,6 +76,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
   // Custom lowerings for most operations.
   setOperationAction(ISD::FRAMEADDR, MVTPtr, Custom);
+  setOperationAction(ISD::RETURNADDR, MVTPtr, Custom);
   setOperationAction(ISD::FrameIndex, MVTPtr, Custom);
   setOperationAction(ISD::GlobalAddress, MVTPtr, Custom);
   setOperationAction(ISD::GlobalTLSAddress, MVTPtr, Custom);
@@ -402,8 +403,12 @@ SDValue LLIRTargetLowering::LowerOperation(SDValue Op,
       return LowerATOMIC_FENCE(Op, DAG);
     case ISD::FRAMEADDR:
       return LowerFRAMEADDR(Op, DAG);
+    case ISD::RETURNADDR:
+      return LowerRETURNADDR(Op, DAG);
     case ISD::FrameIndex:
       return LowerFrameIndex(Op, DAG);
+    case ISD::BlockAddress:
+      return LowerBlockAddress(Op, DAG);
     case ISD::GlobalAddress:
     case ISD::GlobalTLSAddress:
       return LowerGlobalAddress(Op, DAG);
@@ -518,6 +523,13 @@ SDValue LLIRTargetLowering::LowerFRAMEADDR(SDValue Op,
                             PtrVT);
 }
 
+SDValue LLIRTargetLowering::LowerRETURNADDR(SDValue Op,
+                                           SelectionDAG &DAG) const {
+  MVT PtrVT = getPointerTy(DAG.getDataLayout());
+  return DAG.getCopyFromReg(Op.getOperand(0), SDLoc(Op), LLIR::RETURN_ADDR,
+                            PtrVT);
+}
+
 SDValue LLIRTargetLowering::LowerFrameIndex(SDValue Op,
                                             SelectionDAG &DAG) const {
   const auto *FI = cast<FrameIndexSDNode>(Op);
@@ -540,6 +552,18 @@ SDValue LLIRTargetLowering::LowerGlobalAddress(SDValue Op,
   return DAG.getNode(
       LLIRISD::SYMBOL, DL, VT,
       DAG.getTargetGlobalAddress(GA->getGlobal(), DL, VT, GA->getOffset()));
+}
+
+SDValue LLIRTargetLowering::LowerBlockAddress(SDValue Op,
+                                              SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+
+  const auto *BA = cast<BlockAddressSDNode>(Op);
+  auto PtrVT = getPointerTy(DAG.getDataLayout());
+  EVT VT = Op.getValueType();
+  return DAG.getNode(LLIRISD::SYMBOL, DL, VT,
+                     DAG.getTargetBlockAddress(BA->getBlockAddress(), PtrVT,
+                                               BA->getOffset(), 0));
 }
 
 SDValue LLIRTargetLowering::LowerConstantPool(SDValue Op,
