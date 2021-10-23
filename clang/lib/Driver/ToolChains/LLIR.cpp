@@ -239,6 +239,9 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
       CmdArgs.push_back("-rpath");
       CmdArgs.push_back(Args.MakeArgString(LibDir));
 
+      CmdArgs.push_back("-rpath-link");
+      CmdArgs.push_back(Args.MakeArgString(LibDir));
+
       CmdArgs.push_back("-dynamic-linker");
       CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
       break;
