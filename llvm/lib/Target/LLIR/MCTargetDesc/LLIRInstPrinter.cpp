@@ -41,7 +41,7 @@ void LLIRInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const {
       break;
     }
     case LLIR::FRAME_ADDR: {
-      OS << "$frame_address";
+      OS << "$frame_addr";
       break;
     }
     default: {
