@@ -258,8 +258,10 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     llvm::sys::path::append(Path, "libunwind");
     auto LibPath = (Path + ".a").str();
     auto SoPath = (Path + ".so").str();
-    if (Args.hasArg(options::OPT_static) || TC.getVFS().exists(LibPath)) {
-      CmdArgs.push_back(Args.MakeArgString(LibPath));
+    if (Args.hasArg(options::OPT_static)) {
+      if (TC.getVFS().exists(LibPath)) {
+        CmdArgs.push_back(Args.MakeArgString(LibPath));
+      }
     } else if (TC.getVFS().exists(SoPath)) {
       CmdArgs.push_back(Args.MakeArgString(SoPath));
     }
