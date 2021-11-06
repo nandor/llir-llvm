@@ -2379,6 +2379,11 @@ MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
   if (isa<Function>(GO))
     return TextSection;
 
+  if (Kind.isThreadBSS())
+    return TLSBSSSection;
+  if (Kind.isThreadData())
+    return TLSDataSection;
+
   if (const auto *GVar = dyn_cast_or_null<GlobalVariable>(GO)) {
     if (GVar->isConstant()) {
       const Constant *C = GVar->getInitializer();

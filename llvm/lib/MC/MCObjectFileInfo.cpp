@@ -900,8 +900,10 @@ void MCObjectFileInfo::initLLIRMCObjectFileInfo(const Triple &T) {
   // LLIR
   TextSection = Ctx->getLLIRSection(".text", SectionKind::getText());
   DataSection = Ctx->getLLIRSection(".data", SectionKind::getData());
-  DataRelROSection = Ctx->getLLIRSection(".data.rel.ro", SectionKind::getData());
   BSSSection = Ctx->getLLIRSection(".bss", SectionKind::getBSS());
+  TLSDataSection = Ctx->getLLIRSection(".tdata", SectionKind::getData());
+  TLSBSSSection = Ctx->getLLIRSection(".tbss", SectionKind::getBSS());
+  DataRelROSection = Ctx->getLLIRSection(".data.rel.ro", SectionKind::getData());
   ReadOnlySection = Ctx->getLLIRSection(".const", SectionKind::getReadOnly());
 }
 
