@@ -370,6 +370,7 @@ LLIRTargetLowering::LLIRTargetLowering(const TargetMachine &TM,
 
   // Preserve traps since they terminate basic blocks.
   setOperationAction(ISD::TRAP, MVT::Other, Legal);
+  setOperationAction(ISD::DEBUGTRAP, MVT::Other, Legal);
 
   // Custom lowering for intrinsics.
   setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::Other, Custom);

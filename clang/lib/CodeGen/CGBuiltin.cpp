@@ -4430,8 +4430,8 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
   // See if we have a target specific intrinsic.
   const char *Name = getContext().BuiltinInfo.getName(BuiltinID);
   Intrinsic::ID IntrinsicID = Intrinsic::not_intrinsic;
-  StringRef Prefix =
-      llvm::Triple::getArchTypePrefix(getTarget().getTriple().getArch());
+  StringRef Prefix = llvm::Triple::getArchTypePrefix(
+      getTarget().getTriple().getNativeVariant().getArch());
   if (!Prefix.empty()) {
     IntrinsicID = Intrinsic::getIntrinsicForGCCBuiltin(Prefix.data(), Name);
     // NOTE we don't need to perform a compatibility flag check here since the

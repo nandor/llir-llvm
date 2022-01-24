@@ -61,6 +61,7 @@ def : Pat
 //===----------------------------------------------------------------------===//
 
 def TRAP: TerminatorInst<(ins), [(trap)], "trap", 0x75>;
+def DEBUG_TRAP: TerminatorInst<(ins), [(debugtrap)], "debug_trap", 0x76>;
 
 //===----------------------------------------------------------------------===//
 // Switch with various arguments
