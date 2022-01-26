@@ -111,14 +111,14 @@
   SYMBOL_NAME(aliasname) = SYMBOL_NAME(name)
 #endif
 
-#if defined(__GNU__) || defined(__FreeBSD__) || defined(__Fuchsia__) || \
-    defined(__linux__)
-#ifndef __llir__
-#define NO_EXEC_STACK_DIRECTIVE .section .note.GNU-stack,"",%progbits
-#endif
-#define NO_EXEC_STACK_DIRECTIVE
+#if defined(__GNU__) || defined(__FreeBSD__) || defined(__Fuchsia__) || defined(__linux__)
+#  ifndef __llir__
+#    define NO_EXEC_STACK_DIRECTIVE .section .note.GNU-stack,"",%progbits
+#  else
+#    define NO_EXEC_STACK_DIRECTIVE
+#  endif
 #else
-#define NO_EXEC_STACK_DIRECTIVE
+#  define NO_EXEC_STACK_DIRECTIVE
 #endif
 
 #ifdef __llir__
