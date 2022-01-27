@@ -35,6 +35,7 @@
 #include "ToolChains/MinGW.h"
 #include "ToolChains/Minix.h"
 #include "ToolChains/MipsLinux.h"
+#include "ToolChains/Musl.h"
 #include "ToolChains/Myriad.h"
 #include "ToolChains/NaCl.h"
 #include "ToolChains/NetBSD.h"
@@ -5056,8 +5057,18 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
 
       else if (Target.isLLIR())
         TC = std::make_unique<toolchains::LLIR>(*this, Target, Args);
-      else
-        TC = std::make_unique<toolchains::Linux>(*this, Target, Args);
+      else {
+        switch (Target.getEnvironment()) {
+        default:
+          TC = std::make_unique<toolchains::Linux>(*this, Target, Args);
+          break;
+        case llvm::Triple::Musl:
+        case llvm::Triple::MuslEABI:
+        case llvm::Triple::MuslEABIHF:
+          TC = std::make_unique<toolchains::Musl>(*this, Target, Args);
+          break;
+        }
+      }
       break;
     case llvm::Triple::NaCl:
       TC = std::make_unique<toolchains::NaClToolChain>(*this, Target, Args);
