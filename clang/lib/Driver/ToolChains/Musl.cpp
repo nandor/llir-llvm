@@ -144,34 +144,25 @@ void tools::musl::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   }
   }
 
+  // Forward flags to locate libraries.
+  SmallString<128> DynamicLinkerPath(LibDir);
+  std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
+  llvm::sys::path::append(DynamicLinkerPath, Linker);
+
+  CmdArgs.push_back("-rpath");
+  CmdArgs.push_back(Args.MakeArgString(LibDir));
+
+  CmdArgs.push_back("-rpath-link");
+  CmdArgs.push_back(Args.MakeArgString(LibDir));
+
+  CmdArgs.push_back("-dynamic-linker");
+  CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+
   // Prepare flags for shared/static libs.
   if (Args.hasArg(options::OPT_static)) {
     CmdArgs.push_back("-static");
   } else if (Args.hasArg(options::OPT_shared)) {
     CmdArgs.push_back("-shared");
-  } else {
-    switch (Triple.getEnvironment()) {
-    case llvm::Triple::Musl:
-    case llvm::Triple::MuslEABI:
-    case llvm::Triple::MuslEABIHF: {
-      SmallString<128> DynamicLinkerPath(LibDir);
-      std::string Linker = "ld-musl-" + Triple.getArchName().str() + ".so.1";
-      llvm::sys::path::append(DynamicLinkerPath, Linker);
-
-      CmdArgs.push_back("-rpath");
-      CmdArgs.push_back(Args.MakeArgString(LibDir));
-
-      CmdArgs.push_back("-rpath-link");
-      CmdArgs.push_back(Args.MakeArgString(LibDir));
-
-      CmdArgs.push_back("-dynamic-linker");
-      CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
-      break;
-    }
-    default: {
-      break;
-    }
-    }
   }
 
   // Add libunwind.
