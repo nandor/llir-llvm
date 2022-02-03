@@ -83,10 +83,10 @@ multiclass AtomicLoad<SDNode node, string name, bits<32> Op>
     >;
 }
 
-defm AARCH64_ATOMIC_STLXR_8 : AtomicStore<int_llir_stlxr, "aarch64_sc", 0xE1>;
-defm AARCH64_ATOMIC_STXR_8  : AtomicStore<int_llir_stxr, "aarch64_sc", 0xE1>;
-defm AARCH64_ATOMIC_LDLXR_8 : AtomicLoad<int_llir_ldaxr, "aarch64_ll", 0xE1>;
-defm AARCH64_ATOMIC_LDXR_8  : AtomicLoad<int_llir_ldxr, "aarch64_ll", 0xE1>;
+defm AARCH64_ATOMIC_STLXR_8 : AtomicStore<int_llir_stlxr, "aarch64_store_cond", 0xE1>;
+defm AARCH64_ATOMIC_STXR_8  : AtomicStore<int_llir_stxr, "aarch64_store_cond", 0xE1>;
+defm AARCH64_ATOMIC_LDLXR_8 : AtomicLoad<int_llir_ldaxr, "aarch64_load_link", 0xE1>;
+defm AARCH64_ATOMIC_LDXR_8  : AtomicLoad<int_llir_ldxr, "aarch64_load_link", 0xE1>;
 
 // Very incorrect.
 def : Pat<(releasing_store<atomic_store_8>  I64:$ptr,  I8:$val), (ST_1_I8_I64  I64:$ptr,  I8:$val)>;

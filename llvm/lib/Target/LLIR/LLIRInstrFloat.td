@@ -219,8 +219,8 @@ defm FEXP2  : UnaryFloat<fexp2,  "exp2",   0xB2>;
 defm FLOG   : UnaryFloat<flog,   "log",    0xB2>;
 defm FLOG2  : UnaryFloat<flog2,  "log2",   0xB2>;
 defm FLOG10 : UnaryFloat<flog10, "log10",  0xB2>;
-defm FCEIL  : UnaryFloat<fceil,  "fceil",  0xB2>;
-defm FFLOOR : UnaryFloat<ffloor, "ffloor", 0xB2>;
+defm FCEIL  : UnaryFloat<fceil,  "f_ceil",  0xB2>;
+defm FFLOOR : UnaryFloat<ffloor, "f_floor", 0xB2>;
 defm FTRUNC : UnaryFloat<ftrunc, "trunc",  0xB2>;
 
 defm FADD_R : CommBinaryFloat<fadd, "add",  0x90>;
@@ -229,13 +229,13 @@ defm FADD_S : CommBinaryFloat<strict_fadd, "add.strict",  0x90>;
 defm FMUL_S : CommBinaryFloat<strict_fmul, "mul.strict",  0x90>;
 
 defm FSUB_R    : BinaryFloat<fsub, "sub", 0xA0>;
-defm FDIV_R    : BinaryFloat<fdiv, "sdiv", 0xA1>;
-defm FREM_R    : BinaryFloat<frem, "srem", 0xA3>;
+defm FDIV_R    : BinaryFloat<fdiv, "s_div", 0xA1>;
+defm FREM_R    : BinaryFloat<frem, "s_rem", 0xA3>;
 defm FSUB_S    : BinaryFloat<strict_fsub, "sub.strict", 0xA0>;
-defm FDIV_S    : BinaryFloat<strict_fdiv, "sdiv.strict", 0xA1>;
-defm FREM_S    : BinaryFloat<strict_frem, "srem.strict", 0xA3>;
+defm FDIV_S    : BinaryFloat<strict_fdiv, "s_div.strict", 0xA1>;
+defm FREM_S    : BinaryFloat<strict_frem, "s_rem.strict", 0xA3>;
 
-defm COPYSIGN : BinaryFloat<fcopysign, "copysign", 0x98>;
+defm COPYSIGN : BinaryFloat<fcopysign, "copy_sign", 0x98>;
 defm FPOW     : BinaryFloat<fpow, "pow", 0xA4>;
 
 defm O : CmpFloat<SETO, "o", 0x5b>;

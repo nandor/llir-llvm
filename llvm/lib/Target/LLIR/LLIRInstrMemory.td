@@ -23,7 +23,7 @@ class LLIRSt
     < (outs)
     , (ins AddrTy:$addr, ValTy:$val)
     , [(Node ValTy:$val, AddrTy:$addr)]
-    , "st\t[${addr}], $val"
+    , "store\t[${addr}], $val"
     , Opcode
     >
 {
@@ -42,7 +42,7 @@ class LLIRLd
     < (outs DstTy:$dst)
     , (ins AddrTy:$addr)
     , [(set DstTy:$dst, (Node AddrTy:$addr))]
-    , !strconcat("ld.", !strconcat(Name, "\t$dst, [${addr}]"))
+    , !strconcat("load.", !strconcat(Name, "\t$dst, [${addr}]"))
     , Opcode
     >
 {

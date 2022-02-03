@@ -17,7 +17,7 @@ def PPC_ATOMIC_STLXR_32 : I
   < (outs I32:$dst)
   , (ins I32:$val, I64:$addr)
   , [(set I32:$dst, (int_llir_stlxr I32:$val, I64:$addr))]
-  , "ppc_sc.i32\t$dst, $addr, $val"
+  , "ppc_store_cond.i32\t$dst, $addr, $val"
   , 0xE1
   >;
 
@@ -25,7 +25,7 @@ def PPC_ATOMIC_STLXR_64 : I
   < (outs I32:$dst)
   , (ins I64:$val, I64:$addr)
   , [(set I32:$dst, (int_llir_stlxr I64:$val, I64:$addr))]
-  , "ppc_sc.i32\t$dst, $addr, $val"
+  , "ppc_store_cond.i32\t$dst, $addr, $val"
   , 0xE1
   >;
 
@@ -33,7 +33,7 @@ def PPC_ATOMIC_LDAXR_32 : I
   < (outs I32:$dst)
   , (ins I64:$addr)
   , [(set I32:$dst, (int_llir_ldaxr I64:$addr))]
-  , "ppc_ll.i32\t$dst, $addr"
+  , "ppc_load_link.i32\t$dst, $addr"
   , 0xE1
   >;
 
@@ -41,7 +41,7 @@ def PPC_ATOMIC_LDAXR_64 : I
   < (outs I64:$dst)
   , (ins I64:$addr)
   , [(set I64:$dst, (int_llir_ldaxr I64:$addr))]
-  , "ppc_ll.i64\t$dst, $addr"
+  , "ppc_load_link.i64\t$dst, $addr"
   , 0xE1
   >;
 

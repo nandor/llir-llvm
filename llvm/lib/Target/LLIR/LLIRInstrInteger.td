@@ -330,10 +330,10 @@ multiclass OverflowInt
     >;
 }
 
-defm POPCNT : UnaryInt<ctpop, "popcnt", 0x90>;
+defm POPCNT : UnaryInt<ctpop, "pop_count", 0x90>;
 defm CLZ : UnaryInt<ctlz, "clz", 0x90>;
 defm CTZ : UnaryInt<cttz, "ctz", 0x90>;
-defm BSWAP : UnaryInt<bswap, "bswap", 0x90>;
+defm BSWAP : UnaryInt<bswap, "byte_swap", 0x90>;
 
 defm ADD : CommBinaryInt<add, "add", 0x90>;
 defm XOR : CommBinaryInt<xor, "xor", 0x90>;
@@ -344,10 +344,11 @@ defm MULHS : CommBinaryInt<mulhs, "mul_h_s", 0x90>;
 defm MULHU : CommBinaryInt<mulhu, "mul_h_u", 0x90>;
 
 defm SUB  : BinaryInt<sub,  "sub",  0xA0>;
-defm SDIV : BinaryInt<sdiv, "sdiv", 0xA1>;
-defm UDIV : BinaryInt<udiv, "udiv", 0xA2>;
-defm SREM : BinaryInt<srem, "srem", 0xA3>;
-defm UREM : BinaryInt<urem, "urem", 0xA4>;
+
+defm SDIV : BinaryInt<sdiv, "s_div", 0xA1>;
+defm UDIV : BinaryInt<udiv, "u_div", 0xA2>;
+defm SREM : BinaryInt<srem, "s_rem", 0xA3>;
+defm UREM : BinaryInt<urem, "u_rem", 0xA4>;
 
 defm SRL  : ShiftInt<srl,  "srl",  0xA5>;
 defm SHL  : ShiftInt<shl,  "sll",  0xA6>;
@@ -412,9 +413,9 @@ def : Pat
   , (SELECT_I128 I8:$cond, I128:$rhs, I128:$lhs)
   >;
 
-defm SADDO : OverflowInt<LLIRsaddo, "saddo", 0x70>;
-defm UADDO : OverflowInt<LLIRuaddo, "uaddo", 0x71>;
-defm SSUBO : OverflowInt<LLIRssubo, "ssubo", 0x72>;
-defm USUBO : OverflowInt<LLIRusubo, "usubo", 0x73>;
-defm SMULO : OverflowInt<LLIRsmulo, "smulo", 0x74>;
-defm UMULO : OverflowInt<LLIRumulo, "umulo", 0x75>;
+defm SADDO : OverflowInt<LLIRsaddo, "o_s_add", 0x70>;
+defm UADDO : OverflowInt<LLIRuaddo, "o_u_add", 0x71>;
+defm SSUBO : OverflowInt<LLIRssubo, "o_s_sub", 0x72>;
+defm USUBO : OverflowInt<LLIRusubo, "o_u_sub", 0x73>;
+defm SMULO : OverflowInt<LLIRsmulo, "o_s_mul", 0x74>;
+defm UMULO : OverflowInt<LLIRumulo, "o_u_mul", 0x75>;

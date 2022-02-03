@@ -36,7 +36,7 @@ def RETURN : TerminatorInst<(ins variable_ops), [(LLIRreturn)], "", 0x70>
 
 def JT : BranchInst<(ins I8:$cond, bb_op:$dst), [], "jt \t$cond, $dst", 0x72>;
 def JF : BranchInst<(ins I8:$cond, bb_op:$dst), [], "jf \t$cond, $dst", 0x73>;
-def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jmp \t$dst", 0x71>
+def JMP : BranchInst<(ins bb_op:$dst), [(br bb:$dst)], "jump \t$dst", 0x71>
 {
   let isBarrier = 1;
 }

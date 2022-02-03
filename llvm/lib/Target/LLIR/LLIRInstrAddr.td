@@ -83,7 +83,7 @@ let hasSideEffects = 1 in
       < (outs)
       , (ins I32:$frame)
       , [(LLIRvastart I32:$frame)]
-      , "vastart\t$frame"
+      , "va_start\t$frame"
       , 0x00
       >;
 
@@ -118,7 +118,7 @@ let hasSideEffects = 1 in
       < (outs)
       , (ins I64:$frame)
       , [(LLIRvastart I64:$frame)]
-      , "vastart\t$frame"
+      , "va_start\t$frame"
       , 0x00
       >;
 
