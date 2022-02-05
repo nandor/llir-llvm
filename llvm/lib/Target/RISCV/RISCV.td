@@ -226,6 +226,9 @@ include "RISCVSchedSiFive7.td"
 
 def : ProcessorModel<"generic-rv32", NoSchedModel, []>;
 def : ProcessorModel<"generic-rv64", NoSchedModel, [Feature64Bit]>;
+def : ProcessorModel<"generic-rv64gc", NoSchedModel, [Feature64Bit,
+                                                      FeatureStdExtF,
+                                                      FeatureStdExtD]>;
 
 def : ProcessorModel<"rocket-rv32", RocketModel, []>;
 def : ProcessorModel<"rocket-rv64", RocketModel, [Feature64Bit]>;

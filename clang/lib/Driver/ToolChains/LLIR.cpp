@@ -124,7 +124,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
     if (const Arg *A = Args.getLastArg(options::OPT_mcpu_EQ)) {
       CmdArgs.push_back(A->getValue());
     } else {
-      CmdArgs.push_back("generic-rv64");
+      CmdArgs.push_back("generic-rv64gc");
     }
     break;
   }
