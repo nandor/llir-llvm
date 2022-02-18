@@ -24,6 +24,7 @@ add_llvm_component_library(LLVMAsmPrinter
   WinException.cpp
   CodeViewDebug.cpp
   WasmException.cpp
+  LLIRException.cpp
 
   DEPENDS
   intrinsics_gen

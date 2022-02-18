@@ -14,6 +14,7 @@
 #include "CodeViewDebug.h"
 #include "DwarfDebug.h"
 #include "DwarfException.h"
+#include "LLIRException.h"
 #include "WasmException.h"
 #include "WinCFGuard.h"
 #include "WinException.h"
@@ -344,30 +345,34 @@ bool AsmPrinter::doInitialization(Module &M) {
   }
 
   EHStreamer *ES = nullptr;
-  switch (MAI->getExceptionHandlingType()) {
-  case ExceptionHandling::None:
-    break;
-  case ExceptionHandling::SjLj:
-  case ExceptionHandling::DwarfCFI:
-    ES = new DwarfCFIException(this);
-    break;
-  case ExceptionHandling::ARM:
-    ES = new ARMException(this);
-    break;
-  case ExceptionHandling::WinEH:
-    switch (MAI->getWinEHEncodingType()) {
-    default: llvm_unreachable("unsupported unwinding information encoding");
-    case WinEH::EncodingType::Invalid:
+  if (Target.isLLIR()) {
+    ES = new LLIRException(this);
+  } else {
+    switch (MAI->getExceptionHandlingType()) {
+    case ExceptionHandling::None:
       break;
-    case WinEH::EncodingType::X86:
-    case WinEH::EncodingType::Itanium:
-      ES = new WinException(this);
+    case ExceptionHandling::SjLj:
+    case ExceptionHandling::DwarfCFI:
+      ES = new DwarfCFIException(this);
+      break;
+    case ExceptionHandling::ARM:
+      ES = new ARMException(this);
+      break;
+    case ExceptionHandling::WinEH:
+      switch (MAI->getWinEHEncodingType()) {
+      default: llvm_unreachable("unsupported unwinding information encoding");
+      case WinEH::EncodingType::Invalid:
+        break;
+      case WinEH::EncodingType::X86:
+      case WinEH::EncodingType::Itanium:
+        ES = new WinException(this);
+        break;
+      }
+      break;
+    case ExceptionHandling::Wasm:
+      ES = new WasmException(this);
       break;
     }
-    break;
-  case ExceptionHandling::Wasm:
-    ES = new WasmException(this);
-    break;
   }
   if (ES)
     Handlers.emplace_back(std::unique_ptr<EHStreamer>(ES), EHTimerName,

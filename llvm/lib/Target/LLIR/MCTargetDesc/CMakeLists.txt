@@ -1,7 +1,8 @@
 add_llvm_library(LLVMLLIRDesc
   LLIRAsmBackend.cpp
-  LLIRMCAsmInfo.cpp
   LLIRInstPrinter.cpp
+  LLIRMCAsmInfo.cpp
+  LLIRMCStreamer.cpp
   LLIRMCTargetDesc.cpp
   LLIRMCTargetStreamer.cpp
   LLIRObjectWriter.cpp

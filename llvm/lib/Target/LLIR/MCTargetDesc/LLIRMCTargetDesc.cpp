@@ -14,9 +14,13 @@
 #include "LLIRMCTargetDesc.h"
 
 #include "LLIRMCAsmInfo.h"
+#include "LLIRMCStreamer.h"
 #include "MCTargetDesc/LLIRInstPrinter.h"
 #include "MCTargetDesc/LLIRMCTargetStreamer.h"
+#include "llvm/MC/MCAsmBackend.h"
+#include "llvm/MC/MCCodeEmitter.h"
 #include "llvm/MC/MCInstrInfo.h"
+#include "llvm/MC/MCObjectWriter.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/Support/ErrorHandling.h"
@@ -64,6 +68,15 @@ static MCSubtargetInfo *createMCSubtargetInfo(const Triple &TT, StringRef CPU,
   return createLLIRMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
+static MCStreamer *createMCStreamer(const Triple &T, MCContext &Context,
+                                    std::unique_ptr<MCAsmBackend> &&MAB,
+                                    std::unique_ptr<MCObjectWriter> &&OW,
+                                    std::unique_ptr<MCCodeEmitter> &&Emitter,
+                                    bool RelaxAll) {
+  return createLLIRMCStreamer(Context, std::move(MAB), std::move(OW),
+                              std::move(Emitter), RelaxAll);
+}
+
 extern "C" void LLVMInitializeLLIRTargetMC() {
   // Register stuff for all targets and subtargets.
   for (Target *T : {&getTheLLIR_X86_32Target(), &getTheLLIR_X86_64Target(),
@@ -87,5 +100,8 @@ extern "C" void LLVMInitializeLLIRTargetMC() {
 
     // Register the asm target streamer.
     TargetRegistry::RegisterAsmTargetStreamer(*T, createAsmTargetStreamer);
+
+    // Register the elf streamer.
+    TargetRegistry::RegisterELFStreamer(*T, createMCStreamer);
   }
 }
