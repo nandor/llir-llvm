@@ -15,15 +15,5 @@ void LLIRELFTargetObjectFile::Initialize(
     MCContext &Ctx,
     const TargetMachine &TM)
 {
-  TargetLoweringObjectFileLLIR::Initialize(Ctx, TM);
-}
-
-const MCExpr *LLIRELFTargetObjectFile::getTTypeGlobalReference(
-    const GlobalValue *GV,
-    unsigned Encoding,
-    const TargetMachine &TM,
-    MachineModuleInfo *MMI,
-    MCStreamer &Streamer) const
-{
-  llvm_unreachable("getTTypeGlobalReference");
+  TargetLoweringObjectFileLLIRELF::Initialize(Ctx, TM);
 }

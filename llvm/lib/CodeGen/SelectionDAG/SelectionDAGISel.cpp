@@ -1272,7 +1272,10 @@ bool SelectionDAGISel::PrepareEHLandingPad() {
   if (auto *RegMask = TRI.getCustomEHPadPreservedMask(*MF))
     MF->getRegInfo().addPhysRegsUsedFromRegMask(RegMask);
 
-  if (Pers == EHPersonality::Wasm_CXX) {
+  if (TM.getTargetTriple().isLLIR()) {
+    // Assign the call site to the landing pad's begin label.
+    MF->setCallSiteLandingPad(Label, SDB->LPadToCallSiteMap[MBB]);
+  } else if (Pers == EHPersonality::Wasm_CXX) {
     if (const auto *CPI = dyn_cast<CatchPadInst>(LLVMBB->getFirstNonPHI()))
       mapWasmLandingPadIndex(MBB, CPI);
   } else {

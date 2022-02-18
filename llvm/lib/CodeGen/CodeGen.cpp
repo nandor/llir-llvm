@@ -55,6 +55,7 @@ void llvm::initializeCodeGen(PassRegistry &Registry) {
   initializeLiveRangeShrinkPass(Registry);
   initializeLiveStacksPass(Registry);
   initializeLiveVariablesPass(Registry);
+  initializeLLIREHPreparePass(Registry);
   initializeLocalStackSlotPassPass(Registry);
   initializeLowerIntrinsicsPass(Registry);
   initializeMIRCanonicalizerPass(Registry);

@@ -29,59 +29,68 @@ def Is64Bit       : Predicate<"Subtarget->is64Bit()">;
 // LLIR-specific DAG Node Types.
 //===----------------------------------------------------------------------===//
 
-def SDT_LLIRargument : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
-def SDT_LLIRsymbol   : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
-def SDT_LLIRswitch   : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
-def SDT_LLIRvastart  : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
-def SDT_LLIRvalue    : SDTypeProfile<1,  0, []>;
+def SDT_LLIRargument     : SDTypeProfile<1,  1, [SDTCisVT<1, i32>]>;
+def SDT_LLIRsymbol       : SDTypeProfile<1,  1, [SDTCisSameAs<0, 1>, SDTCisPtrTy<0>]>;
+def SDT_LLIRswitch       : SDTypeProfile<0, -1, [SDTCisPtrTy<0>]>;
+def SDT_LLIRvastart      : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
+def SDT_LLIRvalue        : SDTypeProfile<1,  0, []>;
+def SDT_LLIRalloca       : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
+def SDT_LLIRbarrier      : SDTypeProfile<0,  0, []>;
+def SDT_LLIRlanding_pad2 : SDTypeProfile<2,  0, []>;
 
-def SDT_LLIRcall     : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
-def SDT_LLIRcall_va  : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
-def SDT_LLIRtcall    : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
-def SDT_LLIRtcall_va : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
-def SDT_LLIRvoid     : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
-def SDT_LLIRvoid_va  : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
-def SDT_LLIRtvoid    : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
-def SDT_LLIRtvoid_va : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+def LLIRreturn      : SDNode<"LLIRISD::RETURN",          SDTNone,             [SDNPHasChain, SDNPVariadic]>;
+def LLIRargument    : SDNode<"LLIRISD::ARGUMENT",        SDT_LLIRargument>;
+def LLIRsymbol      : SDNode<"LLIRISD::SYMBOL",          SDT_LLIRsymbol>;
+def LLIRswitch      : SDNode<"LLIRISD::SWITCH",          SDT_LLIRswitch,      [SDNPHasChain, SDNPVariadic]>;
+def LLIRvastart     : SDNode<"LLIRISD::VASTART",         SDT_LLIRvastart,     [SDNPHasChain]>;
+def LLIRrdtsc       : SDNode<"LLIRISD::RDTSC",           SDT_LLIRvalue,       [SDNPHasChain]>;
+def LLIRalloca      : SDNode<"LLIRISD::ALLOCA",          SDT_LLIRalloca,      [SDNPHasChain]>;
+def LLIRBarrier     : SDNode<"LLIRISD::BARRIER",         SDT_LLIRbarrier,     [SDNPHasChain, SDNPSideEffect]>;
+def LLIRMFence      : SDNode<"LLIRISD::MFENCE",          SDT_LLIRbarrier,     [SDNPHasChain]>;
+def LLIRLandingPad2 : SDNode<"LLIRISD::LANDING_PAD",     SDT_LLIRlanding_pad2, [SDNPHasChain]>;
+
+//===----------------------------------------------------------------------===//
+// Overflow-specific DAG Nodes.
+//===----------------------------------------------------------------------===//
 
 def SDT_LLIRover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
 
-def SDT_LLIRalloca   : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
-
-def SDT_LLIRbarrier  : SDTypeProfile<0, 0, []>;
+def LLIRsaddo  : SDNode<"LLIRISD::SADDO", SDT_LLIRover>;
+def LLIRuaddo : SDNode<"LLIRISD::UADDO", SDT_LLIRover>;
+def LLIRssubo : SDNode<"LLIRISD::SSUBO", SDT_LLIRover>;
+def LLIRusubo : SDNode<"LLIRISD::USUBO", SDT_LLIRover>;
+def LLIRsmulo : SDNode<"LLIRISD::SMULO", SDT_LLIRover>;
+def LLIRumulo : SDNode<"LLIRISD::UMULO", SDT_LLIRover>;
 
 //===----------------------------------------------------------------------===//
-// LLIR-specific DAG Nodes.
+// Call-specific DAG Nodes.
 //===----------------------------------------------------------------------===//
 
-def LLIRreturn    : SDNode<"LLIRISD::RETURN",   SDTNone, [SDNPHasChain, SDNPVariadic]>;
-def LLIRargument  : SDNode<"LLIRISD::ARGUMENT", SDT_LLIRargument>;
-def LLIRsymbol    : SDNode<"LLIRISD::SYMBOL",   SDT_LLIRsymbol>;
-def LLIRswitch    : SDNode<"LLIRISD::SWITCH",   SDT_LLIRswitch, [SDNPHasChain, SDNPVariadic]>;
-def LLIRvastart   : SDNode<"LLIRISD::VASTART",  SDT_LLIRvastart, [SDNPHasChain]>;
+def SDT_LLIRcall      : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
+def SDT_LLIRcall_va   : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_LLIRvoid      : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
+def SDT_LLIRvoid_va   : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+def SDT_LLIRtcall     : SDTypeProfile<1, -1, [SDTCisVT<1, i32>]>;
+def SDT_LLIRtcall_va  : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, i32>]>;
+def SDT_LLIRtvoid     : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
+def SDT_LLIRtvoid_va  : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+def SDT_LLIRinvoke    : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, OtherVT>]>;
+def SDT_LLIRinvoke_va : SDTypeProfile<1, -3, [SDTCisVT<1, i32>, SDTCisVT<2, i32>, SDTCisVT<3, OtherVT>]>;
+def SDT_LLIRivoid     : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, OtherVT>]>;
+def SDT_LLIRivoid_va  : SDTypeProfile<0, -3, [SDTCisVT<0, i32>, SDTCisVT<1, i32>, SDTCisVT<1, OtherVT>]>;
 
-def LLIRcall      : SDNode<"LLIRISD::CALL",     SDT_LLIRcall,     [SDNPHasChain, SDNPVariadic]>;
-def LLIRcall_va   : SDNode<"LLIRISD::CALL_VA",  SDT_LLIRcall_va,  [SDNPHasChain, SDNPVariadic]>;
-def LLIRtcall     : SDNode<"LLIRISD::TCALL",    SDT_LLIRtcall,    [SDNPHasChain, SDNPVariadic]>;
-def LLIRtcall_va  : SDNode<"LLIRISD::TCALL_VA", SDT_LLIRtcall_va, [SDNPHasChain, SDNPVariadic]>;
-def LLIRvoid      : SDNode<"LLIRISD::VOID",     SDT_LLIRvoid,     [SDNPHasChain, SDNPVariadic]>;
-def LLIRvoid_va   : SDNode<"LLIRISD::VOID_VA",  SDT_LLIRvoid_va,  [SDNPHasChain, SDNPVariadic]>;
-def LLIRtvoid     : SDNode<"LLIRISD::TVOID",    SDT_LLIRtvoid,    [SDNPHasChain, SDNPVariadic]>;
-def LLIRtvoid_va  : SDNode<"LLIRISD::TVOID_VA", SDT_LLIRtvoid_va, [SDNPHasChain, SDNPVariadic]>;
-
-def LLIRsaddo     : SDNode<"LLIRISD::SADDO",    SDT_LLIRover>;
-def LLIRuaddo     : SDNode<"LLIRISD::UADDO",    SDT_LLIRover>;
-def LLIRssubo     : SDNode<"LLIRISD::SSUBO",    SDT_LLIRover>;
-def LLIRusubo     : SDNode<"LLIRISD::USUBO",    SDT_LLIRover>;
-def LLIRsmulo     : SDNode<"LLIRISD::SMULO",    SDT_LLIRover>;
-def LLIRumulo     : SDNode<"LLIRISD::UMULO",    SDT_LLIRover>;
-
-def LLIRrdtsc     : SDNode<"LLIRISD::RDTSC",    SDT_LLIRvalue, [SDNPHasChain]>;
-
-def LLIRalloca    : SDNode<"LLIRISD::ALLOCA",   SDT_LLIRalloca, [SDNPHasChain]>;
-
-def LLIRBarrier   : SDNode<"LLIRISD::BARRIER",  SDT_LLIRbarrier, [SDNPHasChain, SDNPSideEffect]>;
-def LLIRMFence    : SDNode<"LLIRISD::MFENCE",   SDT_LLIRbarrier, [SDNPHasChain]>;
+def LLIRcall      : SDNode<"LLIRISD::CALL",            SDT_LLIRcall,      [SDNPHasChain, SDNPVariadic]>;
+def LLIRcall_va   : SDNode<"LLIRISD::CALL_VA",         SDT_LLIRcall_va,   [SDNPHasChain, SDNPVariadic]>;
+def LLIRtcall     : SDNode<"LLIRISD::TCALL",           SDT_LLIRtcall,     [SDNPHasChain, SDNPVariadic]>;
+def LLIRtcall_va  : SDNode<"LLIRISD::TCALL_VA",        SDT_LLIRtcall_va,  [SDNPHasChain, SDNPVariadic]>;
+def LLIRinvoke    : SDNode<"LLIRISD::INVOKE",          SDT_LLIRinvoke,    [SDNPHasChain, SDNPVariadic]>;
+def LLIRinvoke_va : SDNode<"LLIRISD::INVOKE_VA",       SDT_LLIRinvoke_va, [SDNPHasChain, SDNPVariadic]>;
+def LLIRvoid      : SDNode<"LLIRISD::CALL_VOID",       SDT_LLIRvoid,      [SDNPHasChain, SDNPVariadic]>;
+def LLIRvoid_va   : SDNode<"LLIRISD::CALL_VOID_VA",    SDT_LLIRvoid_va,   [SDNPHasChain, SDNPVariadic]>;
+def LLIRtvoid     : SDNode<"LLIRISD::TCALL_VOID",      SDT_LLIRtvoid,     [SDNPHasChain, SDNPVariadic]>;
+def LLIRtvoid_va  : SDNode<"LLIRISD::TCALL_VOID_VA",   SDT_LLIRtvoid_va,  [SDNPHasChain, SDNPVariadic]>;
+def LLIRivoid     : SDNode<"LLIRISD::INVOKE_VOID",     SDT_LLIRivoid,     [SDNPHasChain, SDNPVariadic]>;
+def LLIRivoid_va  : SDNode<"LLIRISD::INVOKE_VOID_VA",  SDT_LLIRivoid_va,  [SDNPHasChain, SDNPVariadic]>;
 
 
 //===----------------------------------------------------------------------===//

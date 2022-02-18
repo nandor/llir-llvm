@@ -178,3 +178,12 @@ let Predicates = [IsX86] in
   def X86_MFENCE : I <(outs), (ins), [(LLIRMFence)], "x86_m_fence", 0xE1>;
   def X86_BARRIER : I <(outs), (ins), [(LLIRBarrier)], "x86_barrier", 0xE1>;
 }
+
+// Landing pad.
+def X86_LANDING_PAD : I
+  < (outs I64:$ptr, I32:$sel)
+  , (ins)
+  , [(set I64:$ptr, I32:$sel, LLIRLandingPad2)]
+  , "landing_pad.i64.i32\t$ptr, $sel"
+  , 0x20
+  >;

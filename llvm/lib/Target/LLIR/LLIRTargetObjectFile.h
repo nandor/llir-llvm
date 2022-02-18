@@ -16,19 +16,11 @@ namespace llvm {
 class MCContext;
 class TargetMachine;
 
-class LLIRELFTargetObjectFile : public TargetLoweringObjectFileLLIR {
+class LLIRELFTargetObjectFile : public TargetLoweringObjectFileLLIRELF {
 public:
-  LLIRELFTargetObjectFile() : TargetLoweringObjectFileLLIR() {}
+  LLIRELFTargetObjectFile() : TargetLoweringObjectFileLLIRELF() {}
 
   void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
-
-  const MCExpr *getTTypeGlobalReference(
-      const GlobalValue *GV,
-      unsigned Encoding,
-      const TargetMachine &TM,
-      MachineModuleInfo *MMI,
-      MCStreamer &Streamer
-  ) const override;
 };
 
 } // end namespace llvm

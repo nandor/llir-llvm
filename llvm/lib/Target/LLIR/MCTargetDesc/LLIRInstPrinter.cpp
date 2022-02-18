@@ -94,7 +94,8 @@ static void printFlags(llvm::raw_ostream &OS, uint64_t imm)
 
 void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
                                 const MCInst *MI, const MCSubtargetInfo &STI,
-                                bool isVoid, bool isVA, bool isTail) {
+                                bool isVoid, bool isVA, bool isTail,
+                                bool isInvoke) {
   unsigned start = isVoid ? 0 : 1;
   if (isVA) {
     OS << '\t' << Op << '.' << MI->getOperand(start++).getImm() << '.';
@@ -102,6 +103,10 @@ void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
     OS << '\t' << Op << '.';
   }
   printCallingConv(OS, MI->getOperand(start++).getImm());
+  unsigned throwOp = 0;
+  if (isInvoke) {
+    throwOp = start++;
+  }
   OS << '\t';
 
   // Return value.
@@ -122,6 +127,11 @@ void LLIRInstPrinter::printCall(const char *Op, llvm::raw_ostream &OS,
     printOperand(MI, i + 1, STI, OS);
     printFlags(OS, MI->getOperand(i).getImm());
   }
+  // Throw block.
+  if (isInvoke) {
+    OS << ", ";
+    printOperand(MI, throwOp, STI, OS);
+  }
 }
 
 void LLIRInstPrinter::printReturn(llvm::raw_ostream &OS, const MCInst *MI,
@@ -140,127 +150,26 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
                                 StringRef Annot, const MCSubtargetInfo &STI,
                                 raw_ostream &OS) {
   switch (MI->getOpcode()) {
-    case LLIR::CALL_I8:
-      printCall("call.i8", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_I8_VA:
-      printCall("call.i8", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_I16:
-      printCall("call.i16", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_I16_VA:
-      printCall("call.i16", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_I32:
-      printCall("call.i32", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_I32_VA:
-      printCall("call.i32", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_F32:
-      printCall("call.f32", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_F32_VA:
-      printCall("call.f32", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_I64:
-      printCall("call.i64", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_I64_VA:
-      printCall("call.i64", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_I128:
-      printCall("call.i128", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_I128_VA:
-      printCall("call.i128", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_F64:
-      printCall("call.f64", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_F64_VA:
-      printCall("call.f64", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_F80:
-      printCall("call.f80", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_F80_VA:
-      printCall("call.f80", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_F128:
-      printCall("call.f128", OS, MI, STI, 0, 0, 0);
-      break;
-    case LLIR::CALL_F128_VA:
-      printCall("call.f128", OS, MI, STI, 0, 1, 0);
-      break;
-    case LLIR::CALL_VOID:
-      printCall("call", OS, MI, STI, 1, 0, 0);
-      break;
-    case LLIR::CALL_VOID_VA:
-      printCall("call", OS, MI, STI, 1, 1, 0);
-      break;
+#define MAKE_CALL(name, op, v, t, i)\
+  case LLIR::name##_I8:   printCall(op ".i8",   OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_I16:  printCall(op ".i16",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_I32:  printCall(op ".i32",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_F32:  printCall(op ".f32",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_I64:  printCall(op ".i64",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_I128: printCall(op ".i128", OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_F64:  printCall(op ".f64",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_F80:  printCall(op ".f80",  OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_F128: printCall(op ".f128", OS, MI, STI, 0, v, t, i); break; \
+  case LLIR::name##_VOID: printCall(op,         OS, MI, STI, 1, v, t, i); break;
 
-    case LLIR::TCALL_I8:
-      printCall("tcall.i8", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_I8_VA:
-      printCall("tcall.i8", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_I16:
-      printCall("tcall.i16", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_I16_VA:
-      printCall("tcall.i16", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_I32:
-      printCall("tcall.i32", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_I32_VA:
-      printCall("tcall.i32", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_F32:
-      printCall("tcall.f32", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_F32_VA:
-      printCall("tcall.f32", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_I64:
-      printCall("tcall.i64", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_I64_VA:
-      printCall("tcall.i64", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_I128:
-      printCall("tcall.i128", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_I128_VA:
-      printCall("tcall.i128", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_F64:
-      printCall("tcall.f64", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_F64_VA:
-      printCall("tcall.f64", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_F80:
-      printCall("tcall.f80", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_F80_VA:
-      printCall("tcall.f80", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_F128:
-      printCall("tcall.f128", OS, MI, STI, 0, 0, 1);
-      break;
-    case LLIR::TCALL_F128_VA:
-      printCall("tcall.f128", OS, MI, STI, 0, 1, 1);
-      break;
-    case LLIR::TCALL_VOID:
-      printCall("tcall", OS, MI, STI, 1, 0, 1);
-      break;
-    case LLIR::TCALL_VOID_VA:
-      printCall("tcall", OS, MI, STI, 1, 1, 1);
-      break;
+    MAKE_CALL(CALL,      "call",   0, 0, 0)
+    MAKE_CALL(CALL_VA,   "call",   1, 0, 0)
+    MAKE_CALL(TCALL,     "tcall",  0, 1, 0)
+    MAKE_CALL(TCALL_VA,  "tcall",  1, 1, 0)
+    MAKE_CALL(INVOKE,    "invoke", 0, 0, 1)
+    MAKE_CALL(INVOKE_VA, "invoke", 1, 0, 1)
+
+#undef MAKE_CALL
 
     case LLIR::SWITCH_I32:
     case LLIR::SWITCH_I64: {

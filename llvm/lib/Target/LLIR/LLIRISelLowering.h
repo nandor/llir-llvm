@@ -29,10 +29,14 @@ enum NodeType : unsigned {
   CALL_VA,
   TCALL,
   TCALL_VA,
-  VOID,
-  VOID_VA,
-  TVOID,
-  TVOID_VA,
+  INVOKE,
+  INVOKE_VA,
+  CALL_VOID,
+  CALL_VOID_VA,
+  TCALL_VOID,
+  TCALL_VOID_VA,
+  INVOKE_VOID,
+  INVOKE_VOID_VA,
   // Symbols.
   SYMBOL,
   // Control flow.
@@ -58,6 +62,8 @@ enum NodeType : unsigned {
   MFENCE,
   // No-op barrier.
   BARRIER,
+  // Landing pad instruction.
+  LANDING_PAD,
 };
 } // end namespace LLIRISD
 
@@ -129,6 +135,11 @@ public:
   SDValue LowerFP_ROUND(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerFP_TO_INT(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerINT_TO_FP(SDValue Op, SelectionDAG &DAG) const;
+
+  SDValue LowerEH_RETURN(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerEH_SJLJ_SETJMP(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerEH_SJLJ_LONGJMP(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerEH_SJLJ_SETUP_DISPATCH(SDValue Op, SelectionDAG &DAG) const;
 
   void ReplaceNodeResults(SDNode *N, SmallVectorImpl<SDValue>&Results,
                           SelectionDAG &DAG) const override;

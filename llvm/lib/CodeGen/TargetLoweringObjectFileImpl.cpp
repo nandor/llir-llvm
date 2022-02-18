@@ -2348,15 +2348,15 @@ MCSection *TargetLoweringObjectFileXCOFF::getSectionForTOCEntry(
       XCOFF::XTY_SD, SectionKind::getData());
 }
 
-void TargetLoweringObjectFileLLIR::Initialize(MCContext &Ctx,
+void TargetLoweringObjectFileLLIRELF::Initialize(MCContext &Ctx,
                                               const TargetMachine &TM) {
-  TargetLoweringObjectFile::Initialize(Ctx, TM);
+  TargetLoweringObjectFileELF::Initialize(Ctx, TM);
   TTypeEncoding = 0;
   PersonalityEncoding = 0;
   LSDAEncoding = 0;
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getSectionForConstant(
+MCSection *TargetLoweringObjectFileLLIRELF::getSectionForConstant(
     const DataLayout &DL, SectionKind Kind, const Constant *C,
     Align &Alignment) const {
   if (Kind.isReadOnlyWithRel())
@@ -2366,7 +2366,7 @@ MCSection *TargetLoweringObjectFileLLIR::getSectionForConstant(
   llvm_unreachable("invalid section kind");
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getExplicitSectionGlobal(
+MCSection *TargetLoweringObjectFileLLIRELF::getExplicitSectionGlobal(
     const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
   StringRef SectionName = GO->getSection();
   if (isa<Function>(GO))
@@ -2374,7 +2374,7 @@ MCSection *TargetLoweringObjectFileLLIR::getExplicitSectionGlobal(
   return getContext().getLLIRSection(SectionName, SectionKind::getData());
 }
 
-MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
+MCSection *TargetLoweringObjectFileLLIRELF::SelectSectionForGlobal(
     const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
   if (isa<Function>(GO))
     return TextSection;
@@ -2408,50 +2408,38 @@ MCSection *TargetLoweringObjectFileLLIR::SelectSectionForGlobal(
   llvm_unreachable("invalid section kind");
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getSectionForJumpTable(
+MCSection *TargetLoweringObjectFileLLIRELF::getSectionForJumpTable(
     const Function &F, const TargetMachine &TM) const {
   llvm_unreachable("not implemented");
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getSectionForMachineBasicBlock(
+MCSection *TargetLoweringObjectFileLLIRELF::getSectionForMachineBasicBlock(
     const Function &F, const MachineBasicBlock &MBB,
     const TargetMachine &TM) const {
   llvm_unreachable("not implemented");
 }
 
-bool TargetLoweringObjectFileLLIR::shouldPutJumpTableInFunctionSection(
+bool TargetLoweringObjectFileLLIRELF::shouldPutJumpTableInFunctionSection(
     bool UsesLabelDifference, const Function &F) const {
   llvm_unreachable("not implemented");
 }
 
-const MCExpr *TargetLoweringObjectFileLLIR::getTTypeGlobalReference(
-    const GlobalValue *GV, unsigned Encoding, const TargetMachine &TM,
-    MachineModuleInfo *MMI, MCStreamer &Streamer) const {
-  llvm_unreachable("not implemented");
-}
-
-MCSymbol *TargetLoweringObjectFileLLIR::getCFIPersonalitySymbol(
-    const GlobalValue *GV, const TargetMachine &TM,
-    MachineModuleInfo *MMI) const {
-  llvm_unreachable("not implemented");
-}
-
-MCSection *TargetLoweringObjectFileLLIR::getStaticCtorSection(
+MCSection *TargetLoweringObjectFileLLIRELF::getStaticCtorSection(
     unsigned Priority, const MCSymbol *KeySym) const {
   llvm_unreachable("not implemented");
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getStaticDtorSection(
+MCSection *TargetLoweringObjectFileLLIRELF::getStaticDtorSection(
     unsigned Priority, const MCSymbol *KeySym) const {
   llvm_unreachable("not implemented");
 }
 
-const MCExpr *TargetLoweringObjectFileLLIR::lowerRelativeReference(
+const MCExpr *TargetLoweringObjectFileLLIRELF::lowerRelativeReference(
     const GlobalValue *LHS, const GlobalValue *RHS,
     const TargetMachine &TM) const {
   llvm_unreachable("not implemented");
 }
 
-MCSection *TargetLoweringObjectFileLLIR::getSectionForCommandLines() const {
+MCSection *TargetLoweringObjectFileLLIRELF::getSectionForCommandLines() const {
   return nullptr;
 }

@@ -30,7 +30,7 @@ LLIRMCAsmInfo::LLIRMCAsmInfo(const Triple &TheTriple) {
   HasNoDeadStrip = false;
   SupportsDebugInformation = false;
   HasIdentDirective = true;
-  ExceptionsType = ExceptionHandling::None;
+  ExceptionsType = ExceptionHandling::DwarfCFI;
   PrivateGlobalPrefix = ".L";
   PrivateLabelPrefix = ".L";
   LCOMMDirectiveAlignmentType = LCOMM::ByteAlignment;

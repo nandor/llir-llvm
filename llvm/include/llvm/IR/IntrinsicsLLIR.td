@@ -17,4 +17,6 @@ def int_llir_ldaxr : Intrinsic<[llvm_anyint_ty], [llvm_anyptr_ty]>;
 def int_llir_stxr : Intrinsic<[llvm_i32_ty], [llvm_anyint_ty, llvm_anyptr_ty]>;
 def int_llir_stlxr : Intrinsic<[llvm_i32_ty], [llvm_anyint_ty, llvm_anyptr_ty]>;
 
+def int_llir_landing_pad_x86_64 : Intrinsic<[llvm_ptr_ty, llvm_i32_ty], []>;
+
 }

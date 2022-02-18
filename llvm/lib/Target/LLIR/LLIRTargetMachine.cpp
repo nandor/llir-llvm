@@ -34,6 +34,11 @@ public:
 
   FunctionPass *createTargetRegisterAllocator(bool) override { return nullptr; }
 
+  bool addPreISel() override {
+    addPass(createLLIREHPass());
+    return true;
+  }
+
   void addIRPasses() override {
     addPass(createAtomicExpandPass());
     TargetPassConfig::addIRPasses();

@@ -550,6 +550,7 @@ int main(int argc, char **argv) {
   initializeWriteBitcodePassPass(Registry);
   initializeHardwareLoopsPass(Registry);
   initializeTypePromotionPass(Registry);
+  initializeLLIREHPreparePass(Registry);
 
 #ifdef BUILD_EXAMPLES
   initializeExampleIRTransforms(Registry);

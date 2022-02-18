@@ -268,10 +268,10 @@ public:
                                         const TargetMachine &TM) const override;
 };
 
-class TargetLoweringObjectFileLLIR : public TargetLoweringObjectFile {
+class TargetLoweringObjectFileLLIRELF : public TargetLoweringObjectFileELF {
 public:
-  TargetLoweringObjectFileLLIR() = default;
-  ~TargetLoweringObjectFileLLIR() override = default;
+  TargetLoweringObjectFileLLIRELF() = default;
+  ~TargetLoweringObjectFileLLIRELF() override = default;
 
   void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
 
@@ -297,19 +297,6 @@ public:
 
   bool shouldPutJumpTableInFunctionSection(bool UsesLabelDifference,
                                            const Function &F) const override;
-
-  /// Return an MCExpr to use for a reference to the specified type info global
-  /// variable from exception handling information.
-  const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
-                                        unsigned Encoding,
-                                        const TargetMachine &TM,
-                                        MachineModuleInfo *MMI,
-                                        MCStreamer &Streamer) const override;
-
-  // The symbol that gets passed to .cfi_personality.
-  MCSymbol *getCFIPersonalitySymbol(const GlobalValue *GV,
-                                    const TargetMachine &TM,
-                                    MachineModuleInfo *MMI) const override;
 
   MCSection *getStaticCtorSection(unsigned Priority,
                                   const MCSymbol *KeySym) const override;

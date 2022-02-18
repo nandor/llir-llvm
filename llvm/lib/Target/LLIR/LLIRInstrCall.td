@@ -12,35 +12,67 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
-multiclass CALL<LLIRRegClass vt, SDNode node, SDNode node_va>
-{
-  def "" : CallInst
-    < (outs vt:$dst)
+foreach i = [I8, I16, I32, I64, I128, F32, F64, F80, F128] in {
+  def CALL_ # i : CallInst
+    < (outs i:$dst)
     , (ins i32imm:$conv, variable_ops)
-    , [(set vt:$dst, (node timm:$conv))]
+    , [(set i:$dst, (LLIRcall timm:$conv))]
     , ""
     , 0x50
     >;
 
-  def _VA : CallInst
-    < (outs vt:$dst)
+  def CALL_VA_ # i : CallInst
+    < (outs i:$dst)
     , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
-    , [(set vt:$dst, (node_va timm:$conv, timm:$fixed))]
+    , [(set i:$dst, (LLIRcall_va timm:$conv, timm:$fixed))]
+    , ""
+    , 0x50
+    >;
+
+  def TCALL_ # i : CallInst
+    < (outs i:$dst)
+    , (ins i32imm:$conv, variable_ops)
+    , [(set i:$dst, (LLIRtcall timm:$conv))]
+    , ""
+    , 0x50
+    >
+  {
+    let isTerminator = 1;
+  }
+
+  def TCALL_VA_ # i : CallInst
+    < (outs i:$dst)
+    , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+    , [(set i:$dst, (LLIRtcall_va timm:$conv, timm:$fixed))]
     , ""
     , 0x51
-    >;
-}
+    >
+  {
+    let isTerminator = 1;
+  }
 
-defm CALL_I8   : CALL<I8,   LLIRcall, LLIRcall_va>;
-defm CALL_I16  : CALL<I16,  LLIRcall, LLIRcall_va>;
-defm CALL_I32  : CALL<I32,  LLIRcall, LLIRcall_va>;
-defm CALL_I64  : CALL<I64,  LLIRcall, LLIRcall_va>;
-defm CALL_I128 : CALL<I128, LLIRcall, LLIRcall_va>;
-defm CALL_F32  : CALL<F32,  LLIRcall, LLIRcall_va>;
-defm CALL_F64  : CALL<F64,  LLIRcall, LLIRcall_va>;
-defm CALL_F80  : CALL<F80,  LLIRcall, LLIRcall_va>;
-defm CALL_F128 : CALL<F128, LLIRcall, LLIRcall_va>;
+  def INVOKE_ # i : CallInst
+    < (outs i:$dst)
+    , (ins i32imm:$conv, bb_op:$throw, variable_ops)
+    , [(set i:$dst, (LLIRtcall timm:$conv, bb:$throw))]
+    , ""
+    , 0x50
+    >
+  {
+    let isTerminator = 1;
+  }
+
+  def INVOKE_VA_ # i : CallInst
+    < (outs i:$dst)
+    , (ins i32imm:$fixed, i32imm:$conv, bb_op:$throw, variable_ops)
+    , [(set i:$dst, (LLIRtcall_va timm:$conv, timm:$fixed, bb:$throw))]
+    , ""
+    , 0x51
+    >
+  {
+    let isTerminator = 1;
+  }
+}
 
 def CALL_VOID : CallInst
   < (outs)
@@ -49,51 +81,6 @@ def CALL_VOID : CallInst
   , ""
   , 0x53
   >;
-
-def CALL_VOID_VA : CallInst
-  < (outs)
-  , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
-  , [(LLIRvoid_va timm:$conv, timm:$fixed)]
-  , ""
-  , 0x53
-  >;
-
-
-
-multiclass TCALL<LLIRRegClass vt, SDNode node, SDNode node_va>
-{
-  def "" : CallInst
-    < (outs vt:$dst)
-    , (ins i32imm:$conv, variable_ops)
-    , [(set vt:$dst, (node timm:$conv))]
-    , ""
-    , 0x50
-    >
-  {
-    let isTerminator = 1;
-  }
-
-  def _VA : CallInst
-    < (outs vt:$dst)
-    , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
-    , [(set vt:$dst, (node_va timm:$conv, timm:$fixed))]
-    , ""
-    , 0x51
-    >
-  {
-    let isTerminator = 1;
-  }
-}
-
-defm TCALL_I8   : TCALL<I8,   LLIRtcall, LLIRtcall_va>;
-defm TCALL_I16  : TCALL<I16,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_I32  : TCALL<I32,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_I64  : TCALL<I64,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_I128 : TCALL<I128, LLIRtcall, LLIRtcall_va>;
-defm TCALL_F32  : TCALL<F32,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_F64  : TCALL<F64,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_F80  : TCALL<F80,  LLIRtcall, LLIRtcall_va>;
-defm TCALL_F128 : TCALL<F128, LLIRtcall, LLIRtcall_va>;
 
 def TCALL_VOID : CallInst
   < (outs)
@@ -106,10 +93,40 @@ def TCALL_VOID : CallInst
   let isTerminator = 1;
 }
 
-def TCALL_VOID_VA : CallInst
+def INVOKE_VOID : CallInst
+  < (outs)
+  , (ins i32imm:$conv, bb_op:$throw, variable_ops)
+  , [(LLIRivoid timm:$conv, bb:$throw)]
+  , ""
+  , 0x54
+  >
+{
+  let isTerminator = 1;
+}
+
+def CALL_VA_VOID : CallInst
+  < (outs)
+  , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
+  , [(LLIRvoid_va timm:$conv, timm:$fixed)]
+  , ""
+  , 0x53
+  >;
+
+def TCALL_VA_VOID : CallInst
   < (outs)
   , (ins i32imm:$fixed, i32imm:$conv, variable_ops)
   , [(LLIRtvoid_va timm:$conv, timm:$fixed)]
+  , ""
+  , 0x54
+  >
+{
+  let isTerminator = 1;
+}
+
+def INVOKE_VA_VOID : CallInst
+  < (outs)
+  , (ins i32imm:$fixed, i32imm:$conv, bb_op:$throw, variable_ops)
+  , [(LLIRtvoid_va timm:$conv, timm:$fixed, bb:$throw)]
   , ""
   , 0x54
   >

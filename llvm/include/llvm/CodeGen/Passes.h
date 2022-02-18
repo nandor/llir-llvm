@@ -360,6 +360,9 @@ namespace llvm {
   /// WebAssembly's exception handling scheme.
   FunctionPass *createWasmEHPass();
 
+  /// createLLIREHPass - Adapts exception handling to use LLIR landing_pad.
+  FunctionPass *createLLIREHPass();
+
   /// LocalStackSlotAllocation - This pass assigns local frame indices to stack
   /// slots relative to one another and allocates base registers to access them
   /// when it is estimated by the target to be out of range of normal frame
