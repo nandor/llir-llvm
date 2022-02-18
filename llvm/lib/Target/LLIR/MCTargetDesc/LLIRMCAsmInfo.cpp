@@ -34,6 +34,7 @@ LLIRMCAsmInfo::LLIRMCAsmInfo(const Triple &TheTriple) {
   PrivateGlobalPrefix = ".L";
   PrivateLabelPrefix = ".L";
   LCOMMDirectiveAlignmentType = LCOMM::ByteAlignment;
+  IsLLIR = true;
 }
 
 const MCExpr* LLIRMCAsmInfo::getExprForPersonalitySymbol(

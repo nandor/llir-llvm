@@ -1348,9 +1348,13 @@ void AsmPrinter::emitFunctionBody() {
 
   if (needFuncLabelsForEHOrDebugInfo(*MF, *MAI) ||
       MAI->hasDotTypeDotSizeDirective()) {
-    // Create a symbol for the end of function.
-    CurrentFnEnd = createTempSymbol("func_end");
-    OutStreamer->emitLabel(CurrentFnEnd);
+    if (MAI->isLLIR()) {
+
+    } else {
+      // Create a symbol for the end of function.
+      CurrentFnEnd = createTempSymbol("func_end");
+      OutStreamer->emitLabel(CurrentFnEnd);
+    }
   }
 
   // If the target wants a .size directive for the size of the function, emit
@@ -1858,9 +1862,13 @@ void AsmPrinter::SetupMachineFunction(MachineFunction &MF) {
       F.hasFnAttribute("xray-instruction-threshold") ||
       needFuncLabelsForEHOrDebugInfo(MF, *MAI) || NeedsLocalForSize ||
       MF.getTarget().Options.EmitStackSizeSection || MF.hasBBLabels()) {
-    CurrentFnBegin = createTempSymbol("func_begin");
-    if (NeedsLocalForSize)
-      CurrentFnSymForSize = CurrentFnBegin;
+    if (MAI->isLLIR()) {
+
+    } else {
+      CurrentFnBegin = createTempSymbol("func_begin");
+      if (NeedsLocalForSize)
+        CurrentFnSymForSize = CurrentFnBegin;
+    }
   }
 
   ORE = &getAnalysis<MachineOptimizationRemarkEmitterPass>().getORE();

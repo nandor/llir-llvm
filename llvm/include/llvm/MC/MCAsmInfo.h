@@ -431,6 +431,9 @@ protected:
   // If true, emit function descriptor symbol on AIX.
   bool NeedsFunctionDescriptors = false;
 
+  // Indicate whether this is an LLIR target.
+  bool IsLLIR = false;
+
 public:
   explicit MCAsmInfo();
   virtual ~MCAsmInfo();
@@ -702,6 +705,7 @@ public:
   void setRelaxELFRelocations(bool V) { RelaxELFRelocations = V; }
   bool hasMipsExpressions() const { return HasMipsExpressions; }
   bool needsFunctionDescriptors() const { return NeedsFunctionDescriptors; }
+  bool isLLIR() const { return IsLLIR; }
 };
 
 } // end namespace llvm
