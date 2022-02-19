@@ -55,7 +55,7 @@ def LLIRLandingPad2 : SDNode<"LLIRISD::LANDING_PAD",     SDT_LLIRlanding_pad2, [
 
 def SDT_LLIRover     : SDTypeProfile<1,  2, [SDTCisSameAs<1, 2>]>;
 
-def LLIRsaddo  : SDNode<"LLIRISD::SADDO", SDT_LLIRover>;
+def LLIRsaddo : SDNode<"LLIRISD::SADDO", SDT_LLIRover>;
 def LLIRuaddo : SDNode<"LLIRISD::UADDO", SDT_LLIRover>;
 def LLIRssubo : SDNode<"LLIRISD::SSUBO", SDT_LLIRover>;
 def LLIRusubo : SDNode<"LLIRISD::USUBO", SDT_LLIRover>;
@@ -77,7 +77,7 @@ def SDT_LLIRtvoid_va  : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, i32>
 def SDT_LLIRinvoke    : SDTypeProfile<1, -2, [SDTCisVT<1, i32>, SDTCisVT<2, OtherVT>]>;
 def SDT_LLIRinvoke_va : SDTypeProfile<1, -3, [SDTCisVT<1, i32>, SDTCisVT<2, i32>, SDTCisVT<3, OtherVT>]>;
 def SDT_LLIRivoid     : SDTypeProfile<0, -2, [SDTCisVT<0, i32>, SDTCisVT<1, OtherVT>]>;
-def SDT_LLIRivoid_va  : SDTypeProfile<0, -3, [SDTCisVT<0, i32>, SDTCisVT<1, i32>, SDTCisVT<1, OtherVT>]>;
+def SDT_LLIRivoid_va  : SDTypeProfile<0, -3, [SDTCisVT<0, i32>, SDTCisVT<1, i32>, SDTCisVT<2, OtherVT>]>;
 
 def LLIRcall      : SDNode<"LLIRISD::CALL",            SDT_LLIRcall,      [SDNPHasChain, SDNPVariadic]>;
 def LLIRcall_va   : SDNode<"LLIRISD::CALL_VA",         SDT_LLIRcall_va,   [SDNPHasChain, SDNPVariadic]>;

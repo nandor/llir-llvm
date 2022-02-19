@@ -54,7 +54,7 @@ foreach i = [I8, I16, I32, I64, I128, F32, F64, F80, F128] in {
   def INVOKE_ # i : CallInst
     < (outs i:$dst)
     , (ins i32imm:$conv, bb_op:$throw, variable_ops)
-    , [(set i:$dst, (LLIRtcall timm:$conv, bb:$throw))]
+    , [(set i:$dst, (LLIRinvoke timm:$conv, bb:$throw))]
     , ""
     , 0x50
     >
@@ -65,7 +65,7 @@ foreach i = [I8, I16, I32, I64, I128, F32, F64, F80, F128] in {
   def INVOKE_VA_ # i : CallInst
     < (outs i:$dst)
     , (ins i32imm:$fixed, i32imm:$conv, bb_op:$throw, variable_ops)
-    , [(set i:$dst, (LLIRtcall_va timm:$conv, timm:$fixed, bb:$throw))]
+    , [(set i:$dst, (LLIRinvoke_va timm:$conv, timm:$fixed, bb:$throw))]
     , ""
     , 0x51
     >
@@ -126,7 +126,7 @@ def TCALL_VA_VOID : CallInst
 def INVOKE_VA_VOID : CallInst
   < (outs)
   , (ins i32imm:$fixed, i32imm:$conv, bb_op:$throw, variable_ops)
-  , [(LLIRtvoid_va timm:$conv, timm:$fixed, bb:$throw)]
+  , [(LLIRivoid_va timm:$conv, timm:$fixed, bb:$throw)]
   , ""
   , 0x54
   >
