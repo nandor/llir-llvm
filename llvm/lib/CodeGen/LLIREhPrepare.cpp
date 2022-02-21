@@ -23,9 +23,6 @@ namespace {
 class LLIREHPrepare : public FunctionPass {
   Function *LandingPadFn = nullptr; // llir.landing_pad
 
-
-  void addLandingPadX86_64(LandingPadInst *I);
-
 public:
   static char ID; // Pass identification, replacement for typeid
 
@@ -47,34 +44,5 @@ INITIALIZE_PASS_END(LLIREHPrepare, DEBUG_TYPE, "Prepare LLIR exceptions",
 FunctionPass *llvm::createLLIREHPass() { return new LLIREHPrepare(); }
 
 bool LLIREHPrepare::runOnFunction(Function &F) {
-  auto Arch = Triple(F.getParent()->getTargetTriple()).getArch();
-
-
-  bool Changed = false;
-  for (BasicBlock &BB : F) {
-    for (auto It = BB.begin(); It != BB.end(); ) {
-      if (LandingPadInst *CPI = dyn_cast<LandingPadInst>(&*It++)) {
-        switch (Arch) {
-          default: llvm_unreachable("unknown architecture");
-          case Triple::llir_x86_64: addLandingPadX86_64(CPI); break;
-        }
-        Changed = true;
-      }
-    }
-  }
-  return Changed;
-}
-
-void LLIREHPrepare::addLandingPadX86_64(LandingPadInst *I)
-{
-  auto *BB = I->getParent();
-  auto *M = BB->getParent()->getParent();
-  if (!LandingPadFn) {
-    LandingPadFn =
-        Intrinsic::getDeclaration(M, Intrinsic::llir_landing_pad_x86_64);
-  }
-
-  IRBuilder<> IRB(BB->getContext());
-  IRB.SetInsertPoint(&*BB->getFirstInsertionPt());
-  I->replaceAllUsesWith(IRB.CreateCall(LandingPadFn));
+  return true;
 }

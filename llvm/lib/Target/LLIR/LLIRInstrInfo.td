@@ -36,7 +36,6 @@ def SDT_LLIRvastart      : SDTypeProfile<0,  1, [SDTCisPtrTy<0>]>;
 def SDT_LLIRvalue        : SDTypeProfile<1,  0, []>;
 def SDT_LLIRalloca       : SDTypeProfile<1,  2, [SDTCisInt<1>, SDTCisVT<2, i64>]>;
 def SDT_LLIRbarrier      : SDTypeProfile<0,  0, []>;
-def SDT_LLIRlanding_pad2 : SDTypeProfile<2,  0, []>;
 
 def LLIRreturn      : SDNode<"LLIRISD::RETURN",          SDTNone,             [SDNPHasChain, SDNPVariadic]>;
 def LLIRargument    : SDNode<"LLIRISD::ARGUMENT",        SDT_LLIRargument>;
@@ -47,7 +46,6 @@ def LLIRrdtsc       : SDNode<"LLIRISD::RDTSC",           SDT_LLIRvalue,       [S
 def LLIRalloca      : SDNode<"LLIRISD::ALLOCA",          SDT_LLIRalloca,      [SDNPHasChain]>;
 def LLIRBarrier     : SDNode<"LLIRISD::BARRIER",         SDT_LLIRbarrier,     [SDNPHasChain, SDNPSideEffect]>;
 def LLIRMFence      : SDNode<"LLIRISD::MFENCE",          SDT_LLIRbarrier,     [SDNPHasChain]>;
-def LLIRLandingPad2 : SDNode<"LLIRISD::LANDING_PAD",     SDT_LLIRlanding_pad2, [SDNPHasChain]>;
 
 //===----------------------------------------------------------------------===//
 // Overflow-specific DAG Nodes.

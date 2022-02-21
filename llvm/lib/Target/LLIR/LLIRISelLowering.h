@@ -62,8 +62,6 @@ enum NodeType : unsigned {
   MFENCE,
   // No-op barrier.
   BARRIER,
-  // Landing pad instruction.
-  LANDING_PAD,
 };
 } // end namespace LLIRISD
 
@@ -177,6 +175,12 @@ public:
   /// If the AM is not supported, it returns a negative value.
   int getScalingFactorCost(const DataLayout &DL, const AddrMode &AM, Type *Ty,
                            unsigned AS) const override;
+
+  const MCInstrDesc &GetLandingPadOpcode() const override;
+
+  virtual MVT getExceptionPointerRegisterTy() const override;
+  virtual MVT getExceptionSelectorRegisterTy() const override;
+
 private:
   const LLIRSubtarget *Subtarget;
 };

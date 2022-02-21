@@ -1258,14 +1258,6 @@ bool SelectionDAGISel::PrepareEHLandingPad() {
     return true;
   }
 
-  // Add a label to mark the beginning of the landing pad.  Deletion of the
-  // landing pad can thus be detected via the MachineModuleInfo.
-  MCSymbol *Label = MF->addLandingPad(MBB);
-
-  const MCInstrDesc &II = TII->get(TargetOpcode::EH_LABEL);
-  BuildMI(*MBB, FuncInfo->InsertPt, SDB->getCurDebugLoc(), II)
-    .addSym(Label);
-
   // If the unwinder does not preserve all registers, ensure that the
   // function marks the clobbered registers as used.
   const TargetRegisterInfo &TRI = *MF->getSubtarget().getRegisterInfo();
@@ -1273,20 +1265,42 @@ bool SelectionDAGISel::PrepareEHLandingPad() {
     MF->getRegInfo().addPhysRegsUsedFromRegMask(RegMask);
 
   if (TM.getTargetTriple().isLLIR()) {
-    // Assign the call site to the landing pad's begin label.
-    MF->setCallSiteLandingPad(Label, SDB->LPadToCallSiteMap[MBB]);
-  } else if (Pers == EHPersonality::Wasm_CXX) {
-    if (const auto *CPI = dyn_cast<CatchPadInst>(LLVMBB->getFirstNonPHI()))
-      mapWasmLandingPadIndex(MBB, CPI);
+    const MCInstrDesc &II = TLI->GetLandingPadOpcode();
+    MachineRegisterInfo &MRI = MF->getRegInfo();
+
+    auto MIB = BuildMI(*MBB, FuncInfo->InsertPt, SDB->getCurDebugLoc(), II);
+
+    if (!FuncInfo->ExceptionPointerVirtReg) {
+      FuncInfo->ExceptionPointerVirtReg = MRI.createVirtualRegister(PtrRC);
+    }
+    MIB.addDef(FuncInfo->ExceptionPointerVirtReg);
+
+    if (!FuncInfo->ExceptionSelectorVirtReg) {
+      FuncInfo->ExceptionSelectorVirtReg = MRI.createVirtualRegister(PtrRC);
+    }
+    MIB.addDef(FuncInfo->ExceptionSelectorVirtReg);
   } else {
-    // Assign the call site to the landing pad's begin label.
-    MF->setCallSiteLandingPad(Label, SDB->LPadToCallSiteMap[MBB]);
-    // Mark exception register as live in.
-    if (unsigned Reg = TLI->getExceptionPointerRegister(PersonalityFn))
-      FuncInfo->ExceptionPointerVirtReg = MBB->addLiveIn(Reg, PtrRC);
-    // Mark exception selector register as live in.
-    if (unsigned Reg = TLI->getExceptionSelectorRegister(PersonalityFn))
-      FuncInfo->ExceptionSelectorVirtReg = MBB->addLiveIn(Reg, PtrRC);
+    // Add a label to mark the beginning of the landing pad.  Deletion of the
+    // landing pad can thus be detected via the MachineModuleInfo.
+    MCSymbol *Label = MF->addLandingPad(MBB);
+
+    const MCInstrDesc &II = TII->get(TargetOpcode::EH_LABEL);
+    BuildMI(*MBB, FuncInfo->InsertPt, SDB->getCurDebugLoc(), II)
+      .addSym(Label);
+
+    if (Pers == EHPersonality::Wasm_CXX) {
+      if (const auto *CPI = dyn_cast<CatchPadInst>(LLVMBB->getFirstNonPHI()))
+        mapWasmLandingPadIndex(MBB, CPI);
+    } else {
+      // Assign the call site to the landing pad's begin label.
+      MF->setCallSiteLandingPad(Label, SDB->LPadToCallSiteMap[MBB]);
+      // Mark exception register as live in.
+      if (unsigned Reg = TLI->getExceptionPointerRegister(PersonalityFn))
+        FuncInfo->ExceptionPointerVirtReg = MBB->addLiveIn(Reg, PtrRC);
+      // Mark exception selector register as live in.
+      if (unsigned Reg = TLI->getExceptionSelectorRegister(PersonalityFn))
+        FuncInfo->ExceptionSelectorVirtReg = MBB->addLiveIn(Reg, PtrRC);
+    }
   }
 
   return true;

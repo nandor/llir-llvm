@@ -183,7 +183,13 @@ let Predicates = [IsX86] in
 def X86_LANDING_PAD : I
   < (outs I64:$ptr, I32:$sel)
   , (ins)
-  , [(set I64:$ptr, I32:$sel, LLIRLandingPad2)]
-  , "landing_pad.i64.i32\t$ptr, $sel"
+  , []
+  , "landing_pad.i64.i64\t$ptr, $sel"
   , 0x20
-  >;
+  >
+{
+  let hasSideEffects = 1;
+  let isBarrier = 1;
+  let isNotDuplicable = 1;
+  let hasCtrlDep = 1;
+}

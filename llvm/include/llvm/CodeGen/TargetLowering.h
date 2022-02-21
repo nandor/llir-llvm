@@ -4547,6 +4547,22 @@ private:
   SDValue buildSREMEqFold(EVT SETCCVT, SDValue REMNode, SDValue CompTargetNode,
                           ISD::CondCode Cond, DAGCombinerInfo &DCI,
                           const SDLoc &DL) const;
+
+public:
+  virtual const MCInstrDesc &GetLandingPadOpcode() const
+  {
+    llvm_unreachable("not implemented for this target");
+  }
+
+  virtual MVT getExceptionPointerRegisterTy() const
+  {
+    llvm_unreachable("not implemented for this target");
+  }
+
+  virtual MVT getExceptionSelectorRegisterTy() const
+  {
+    llvm_unreachable("not implemented for this target");
+  }
 };
 
 /// Given an LLVM IR type and return type attributes, compute the return value

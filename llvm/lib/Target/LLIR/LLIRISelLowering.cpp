@@ -822,11 +822,6 @@ SDValue LLIRTargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
     case Intrinsic::llir_stxr: {
       return SDValue();
     }
-    case Intrinsic::llir_landing_pad_x86_64: {
-      return DAG.getNode(LLIRISD::LANDING_PAD, SDLoc(Op),
-                         DAG.getVTList(MVT::i64, MVT::i32, MVT::Other),
-                         Op.getOperand(0));
-    }
   }
 }
 
@@ -885,7 +880,6 @@ const char *LLIRTargetLowering::getTargetNodeName(unsigned Opcode) const {
     MAKE_CASE(LLIRISD::SC)
     MAKE_CASE(LLIRISD::BARRIER)
     MAKE_CASE(LLIRISD::MFENCE)
-    MAKE_CASE(LLIRISD::LANDING_PAD)
   }
 #undef MAKE_CASE
   return nullptr;
@@ -1652,6 +1646,26 @@ int LLIRTargetLowering::getScalingFactorCost(const DataLayout &DL,
   }
   if (Subtarget->isPPC64le()) {
     return TargetLowering::getScalingFactorCost(DL, AM, Ty, AS);
+  }
+  llvm_unreachable("unknown subtarget");
+}
+
+const MCInstrDesc &LLIRTargetLowering::GetLandingPadOpcode() const {
+  if (Subtarget->isX86_64()) {
+    return Subtarget->getInstrInfo()->get(LLIR::X86_LANDING_PAD);
+  }
+  llvm_unreachable("unknown subtarget");
+}
+
+MVT LLIRTargetLowering::getExceptionPointerRegisterTy() const {
+  if (Subtarget->isX86_64()) {
+    return MVT::i64;
+  }
+  llvm_unreachable("unknown subtarget");
+}
+MVT LLIRTargetLowering::getExceptionSelectorRegisterTy() const {
+  if (Subtarget->isX86_64()) {
+    return MVT::i32;
   }
   llvm_unreachable("unknown subtarget");
 }
