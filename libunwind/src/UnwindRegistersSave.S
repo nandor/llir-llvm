@@ -57,7 +57,27 @@ DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
 
 #ifdef __llir__
 DEFINE_LIBUNWIND_FUNCTION(__unw_getcontext)
-  trap
+  .call     c
+  .args     i64
+
+  arg.i64   $0, 0
+
+  # 56: %rsp
+  get.i64   $10, $frame_addr
+  mov.i64   $11, 8
+  add.i64   $12, $10, $11
+  mov.i64   $20, 56
+  add.i64   $21, $0, $20
+  store     $21, $12
+
+  # 128: %rip
+  get.i64   $10, $ret_addr
+  mov.i64   $20, 128
+  add.i64   $21, $0, $20
+  store     $21, $10
+
+  mov.i32   $0, 0
+  ret       $0
   .end
 
 #else
