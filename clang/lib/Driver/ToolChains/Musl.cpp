@@ -158,6 +158,9 @@ void tools::musl::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back("-dynamic-linker");
   CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
 
+  // Generate .eh_frame_hdr section.
+  CmdArgs.push_back("--eh-frame-hdr");
+
   // Prepare flags for shared/static libs.
   if (Args.hasArg(options::OPT_static)) {
     CmdArgs.push_back("-static");

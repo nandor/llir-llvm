@@ -244,6 +244,8 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
       CmdArgs.push_back("-dynamic-linker");
       CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
+
+      CmdArgs.push_back("--eh-frame-hdr");
       break;
     }
     default: {
