@@ -9,11 +9,11 @@
 #include <stdint.h>
 
 // Put 4-byte zero which is the length field in FDE at the end as a terminator.
+#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
 const int32_t __EH_FRAME_LIST_END__[]
     __attribute__((section(".eh_frame"), aligned(sizeof(int32_t)),
                    visibility("hidden"), used)) = {0};
 
-#if !defined(CRT_HAS_INITFINI_ARRAY) && !defined(__llir__)
 typedef void (*fp)(void);
 fp __CTOR_LIST_END__[]
     __attribute__((section(".ctors"), visibility("hidden"), used)) = {0};

@@ -234,6 +234,9 @@ class MCStreamer {
   /// discussion for future inclusion.
   bool AllowAutoPadding = false;
 
+  /// Emit zeros at the end of the .eh_frame section.
+  bool PrintEhFrameListEnd = false;
+
 protected:
   MCStreamer(MCContext &Ctx);
 
@@ -285,6 +288,9 @@ public:
 
   void setAllowAutoPadding(bool v) { AllowAutoPadding = v; }
   bool getAllowAutoPadding() const { return AllowAutoPadding; }
+
+  void setPrintEhFrameListEnd(bool v) { PrintEhFrameListEnd = v; }
+  bool getPrintEhFrameListEnd() const { return PrintEhFrameListEnd; }
 
   /// When emitting an object file, create and emit a real label. When emitting
   /// textual assembly, this should do nothing to avoid polluting our output.

@@ -693,6 +693,12 @@ void MCELFStreamer::finishImpl() {
   finalizeCGProfile();
   emitFrames(nullptr);
 
+  if (getPrintEhFrameListEnd()) {
+    const MCObjectFileInfo *MOFI = getContext().getObjectFileInfo();
+    SwitchSection(const_cast<MCObjectFileInfo *>(MOFI)->getEHFrameSection());
+    emitIntValue(0, 4);
+  }
+
   this->MCObjectStreamer::finishImpl();
 }
 
