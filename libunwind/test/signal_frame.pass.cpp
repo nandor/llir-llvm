@@ -10,6 +10,7 @@
 // Ensure that functions marked as signal frames are reported as such.
 
 // UNSUPPORTED: libunwind-arm-ehabi
+// UNSUPPORTED: llir
 
 #include <assert.h>
 #include <stdlib.h>

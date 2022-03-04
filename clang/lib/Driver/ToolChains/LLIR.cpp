@@ -223,6 +223,7 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   }
 
   // Prepare flags for shared/static libs.
+  CmdArgs.push_back("--eh-frame-hdr");
   if (Args.hasArg(options::OPT_static)) {
     CmdArgs.push_back("-static");
   } else if (Args.hasArg(options::OPT_shared)) {
@@ -244,8 +245,6 @@ void tools::llir::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
       CmdArgs.push_back("-dynamic-linker");
       CmdArgs.push_back(Args.MakeArgString(DynamicLinkerPath));
-
-      CmdArgs.push_back("--eh-frame-hdr");
       break;
     }
     default: {

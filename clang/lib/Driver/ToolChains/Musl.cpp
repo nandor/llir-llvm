@@ -100,6 +100,13 @@ void tools::musl::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   }
   }
 
+  // Prepare flags for shared/static libs.
+  if (Args.hasArg(options::OPT_static)) {
+    CmdArgs.push_back("-static");
+  } else if (Args.hasArg(options::OPT_shared)) {
+    CmdArgs.push_back("-shared");
+  }
+
   // Forward linker flags.
   Args.AddAllArgs(CmdArgs, options::OPT_L);
   Args.AddAllArgs(CmdArgs, options::OPT_u);
@@ -160,13 +167,6 @@ void tools::musl::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Generate .eh_frame_hdr section.
   CmdArgs.push_back("--eh-frame-hdr");
-
-  // Prepare flags for shared/static libs.
-  if (Args.hasArg(options::OPT_static)) {
-    CmdArgs.push_back("-static");
-  } else if (Args.hasArg(options::OPT_shared)) {
-    CmdArgs.push_back("-shared");
-  }
 
   // Add libunwind.
   {
