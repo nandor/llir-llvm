@@ -136,6 +136,12 @@ void LLIRMCTargetAsmStreamer::emitNoInline()
   OS << "\t.noinline\n";
 }
 
+void LLIRMCTargetAsmStreamer::emitCFIPersonality(const MCSymbol *Sym)
+{
+  OS << "\t.personality " << Sym->getName() << "\n";
+}
+
+
 LLIRMCTargetLLIRStreamer::LLIRMCTargetLLIRStreamer(MCStreamer &S)
   : LLIRMCTargetStreamer(S)
 {
@@ -191,6 +197,11 @@ void LLIRMCTargetLLIRStreamer::emitEnd()
 }
 
 void LLIRMCTargetLLIRStreamer::emitNoInline()
+{
+  llvm_unreachable("LLIRMCTargetLLIRStreamer::emitNoInline");
+}
+
+void LLIRMCTargetLLIRStreamer::emitCFIPersonality(const MCSymbol *Sym)
 {
   llvm_unreachable("LLIRMCTargetLLIRStreamer::emitNoInline");
 }

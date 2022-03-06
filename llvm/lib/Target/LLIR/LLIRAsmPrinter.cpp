@@ -76,6 +76,7 @@ void LLIRAsmPrinter::emitFunctionBodyStart() {
   auto *FuncInfo = MF->getInfo<LLIRMachineFunctionInfo>();
   auto &F = MF->getFunction();
   auto &Streamer = getTargetStreamer();
+  auto &TLOF = getObjFileLowering();
 
   for (unsigned I = 0, N = MFI.getNumObjects(); I < N; ++I) {
     auto Size = MFI.getAnyObjectSize(I);
@@ -92,6 +93,13 @@ void LLIRAsmPrinter::emitFunctionBodyStart() {
   }
   if (MF->getFunction().isVarArg()) {
     Streamer.emitVarArg();
+  }
+
+
+  if (F.hasPersonalityFn()) {
+    auto *Fn = dyn_cast<Function>(F.getPersonalityFn()->stripPointerCasts());
+    assert(Fn && "invalid personality function");
+    Streamer.emitCFIPersonality(TLOF.getCFIPersonalitySymbol(Fn, TM, MMI));
   }
 
   auto &Params = FuncInfo->getParams();

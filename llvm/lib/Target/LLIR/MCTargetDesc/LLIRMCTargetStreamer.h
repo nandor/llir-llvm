@@ -41,6 +41,8 @@ public:
   virtual void emitEnd() = 0;
   /// .noinline
   virtual void emitNoInline() = 0;
+  /// .cfi_personality
+  virtual void emitCFIPersonality(const MCSymbol *Sym) = 0;
 };
 
 // This part is for ascii assembly output
@@ -58,6 +60,7 @@ public:
   virtual void emitThreadLocal() override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
+  virtual void emitCFIPersonality(const MCSymbol *Sym) override;
 
 private:
   formatted_raw_ostream &OS;
@@ -78,6 +81,7 @@ public:
   virtual void emitThreadLocal() override;
   virtual void emitEnd() override;
   virtual void emitNoInline() override;
+  virtual void emitCFIPersonality(const MCSymbol *Sym) override;
 };
 } // end namespace llvm
 
