@@ -1652,7 +1652,7 @@ int LLIRTargetLowering::getScalingFactorCost(const DataLayout &DL,
 
 const MCInstrDesc &LLIRTargetLowering::GetLandingPadOpcode() const {
   if (Subtarget->isX86_64()) {
-    return Subtarget->getInstrInfo()->get(LLIR::X86_LANDING_PAD);
+    return Subtarget->getInstrInfo()->get(LLIR::LANDING_PAD_I64_I64);
   }
   llvm_unreachable("unknown subtarget");
 }

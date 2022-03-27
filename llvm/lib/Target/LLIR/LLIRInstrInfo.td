@@ -174,4 +174,4 @@ include "LLIRInstrX86.td"
 include "LLIRInstrAArch64.td"
 include "LLIRInstrRISCV.td"
 include "LLIRInstrPPC.td"
-
+include "LLIRInstrLandingPad.td"

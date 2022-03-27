@@ -178,18 +178,3 @@ let Predicates = [IsX86] in
   def X86_MFENCE : I <(outs), (ins), [(LLIRMFence)], "x86_m_fence", 0xE1>;
   def X86_BARRIER : I <(outs), (ins), [(LLIRBarrier)], "x86_barrier", 0xE1>;
 }
-
-// Landing pad.
-def X86_LANDING_PAD : I
-  < (outs I64:$ptr, I32:$sel)
-  , (ins)
-  , []
-  , "landing_pad.i64.i64\t$ptr, $sel"
-  , 0x20
-  >
-{
-  let hasSideEffects = 1;
-  let isBarrier = 1;
-  let isNotDuplicable = 1;
-  let hasCtrlDep = 1;
-}

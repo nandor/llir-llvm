@@ -19,13 +19,14 @@
 namespace llvm {
 
 class LLIRInstPrinter : public MCInstPrinter {
- public:
+public:
   LLIRInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &MII,
                   const MCRegisterInfo &MRI);
 
   void printRegName(raw_ostream &OS, unsigned RegNo) const override;
 
-  void printInst(const MCInst *MI, uint64_t Address, StringRef Annot, const MCSubtargetInfo &STI,  raw_ostream &O) override;
+  void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
+                 const MCSubtargetInfo &STI, raw_ostream &O) override;
 
   void printInstruction(const MCInst *MI, uint64_t Address,
                         const MCSubtargetInfo &STI, raw_ostream &O);
@@ -38,14 +39,17 @@ class LLIRInstPrinter : public MCInstPrinter {
 
   static const char *getRegisterName(unsigned RegNo);
 
- private:
-   void printReturn(llvm::raw_ostream &OS, const MCInst *MI,
-                    const MCSubtargetInfo &STI);
+private:
+  void printCall(const char *Op, llvm::raw_ostream &OS, const MCInst *MI,
+                 const MCSubtargetInfo &STI, bool isVoid, bool isVA,
+                 bool isTail, bool isInvoke);
 
-   void printCall(const char *Op, llvm::raw_ostream &OS, const MCInst *MI,
-                  const MCSubtargetInfo &STI, bool isVoid, bool isVA,
-                  bool isTail, bool isInvoke);
+  void printReturn(llvm::raw_ostream &OS, const MCInst *MI,
+                   const MCSubtargetInfo &STI);
+
+  void printLandingPad(const char *type, raw_ostream &OS, const MCInst *MI,
+                       const MCSubtargetInfo &STI);
 };
-}  // end namespace llvm
+} // end namespace llvm
 
 #endif

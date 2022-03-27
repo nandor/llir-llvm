@@ -17,6 +17,7 @@
 
 #include "LLIRAsmPrinter.h"
 #include "LLIRMachineFunctionInfo.h"
+#include "MCTargetDesc/LLIRMCExpr.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineFunction.h"
@@ -31,8 +32,8 @@
 #include "llvm/Support/raw_ostream.h"
 using namespace llvm;
 
-MCSymbol *LLIRMCInstLower::GetSymbolFromOperand(
-    const MachineOperand &MO) const {
+MCSymbol *
+LLIRMCInstLower::GetSymbolFromOperand(const MachineOperand &MO) const {
   const DataLayout &DL = MF.getDataLayout();
   MCSymbol *Sym = nullptr;
   SmallString<128> Name;
@@ -76,69 +77,80 @@ void LLIRMCInstLower::Lower(const MachineInstr *MI, MCInst &OutMI) const {
   for (unsigned i = 0, e = MI->getNumOperands(); i != e; ++i) {
     const MachineOperand &MO = MI->getOperand(i);
 
-    MCOperand MCOp;
     switch (MO.getType()) {
-      case MachineOperand::MO_MachineBasicBlock: {
-        const MCSymbol *Sym = MO.getMBB()->getSymbol();
-        MCOp = MCOperand::createExpr(MCSymbolRefExpr::create(Sym, Ctx));
-        break;
+    case MachineOperand::MO_MachineBasicBlock: {
+      const MCSymbol *Sym = MO.getMBB()->getSymbol();
+      OutMI.addOperand(
+          MCOperand::createExpr(MCSymbolRefExpr::create(Sym, Ctx)));
+      break;
+    }
+    case MachineOperand::MO_Register: {
+      if (MO.isImplicit()) {
+        continue;
       }
-      case MachineOperand::MO_Register: {
-        if (MO.isImplicit()) {
+
+      if (Register::isVirtualRegister(MO.getReg())) {
+        const auto &MF = *MI->getParent()->getParent();
+        const auto &MFI = *MF.getInfo<LLIRMachineFunctionInfo>();
+        OutMI.addOperand(MCOperand::createReg(LLIR::NUM_TARGET_REGS +
+                                              MFI.getGMReg(MO.getReg())));
+      } else {
+        OutMI.addOperand(MCOperand::createReg(MO.getReg()));
+      }
+
+      break;
+    }
+    case MachineOperand::MO_Immediate: {
+      OutMI.addOperand(MCOperand::createImm(MO.getImm()));
+      break;
+    }
+    case MachineOperand::MO_FPImmediate: {
+      // TODO(nand): proper 80-bit float support
+      APFloat Val = MO.getFPImm()->getValueAPF();
+      bool ignored;
+      Val.convert(APFloat::IEEEdouble(), APFloat::rmTowardZero, &ignored);
+      OutMI.addOperand(MCOperand::createFPImm(Val.convertToDouble()));
+      break;
+    }
+    case MachineOperand::MO_GlobalAddress: {
+      OutMI.addOperand(LowerSymbolOperand(
+          GetSymbolFromOperand(MO), MO.getOffset(),
+          MO.getGlobal()->getValueType()->isFunctionTy(), false));
+      break;
+    }
+    case MachineOperand::MO_BlockAddress: {
+      OutMI.addOperand(LowerSymbolOperand(
+          Printer.GetBlockAddressSymbol(MO.getBlockAddress()), MO.getOffset(),
+          false, false));
+      break;
+    }
+    case MachineOperand::MO_ExternalSymbol: {
+      // TODO(nand): remove hardcoded symbols.
+      OutMI.addOperand(
+          LowerSymbolOperand(GetSymbolFromOperand(MO), 0, true, true));
+      break;
+    }
+    case MachineOperand::MO_ConstantPoolIndex: {
+      // TODO(nand): remove hardcoded symbols.
+      OutMI.addOperand(LowerSymbolOperand(Printer.GetCPISymbol(MO.getIndex()),
+                                          0, true, true));
+      break;
+    }
+    case MachineOperand::MO_Metadata: {
+      for (const MDOperand &op : MO.getMetadata()->operands()) {
+        if (auto *str = dyn_cast_or_null<MDString>(&*op)) {
+          OutMI.addOperand(
+              MCOperand::createExpr(LLIRMCExpr::create(str->getString(), Ctx)));
           continue;
         }
-
-        if (Register::isVirtualRegister(MO.getReg())) {
-          const auto &MF = *MI->getParent()->getParent();
-          const auto &MFI = *MF.getInfo<LLIRMachineFunctionInfo>();
-          MCOp = MCOperand::createReg(LLIR::NUM_TARGET_REGS +
-                                      MFI.getGMReg(MO.getReg()));
-        } else {
-          MCOp = MCOperand::createReg(MO.getReg());
-        }
-
-        break;
+        llvm_unreachable("invalid metadata kind");
       }
-      case MachineOperand::MO_Immediate: {
-        MCOp = MCOperand::createImm(MO.getImm());
-        break;
-      }
-      case MachineOperand::MO_FPImmediate: {
-        // TODO(nand): proper 80-bit float support
-        APFloat Val = MO.getFPImm()->getValueAPF();
-        bool ignored;
-        Val.convert(APFloat::IEEEdouble(), APFloat::rmTowardZero, &ignored);
-        MCOp = MCOperand::createFPImm(Val.convertToDouble());
-        break;
-      }
-      case MachineOperand::MO_GlobalAddress: {
-        MCOp = LowerSymbolOperand(
-            GetSymbolFromOperand(MO), MO.getOffset(),
-            MO.getGlobal()->getValueType()->isFunctionTy(), false);
-        break;
-      }
-      case MachineOperand::MO_BlockAddress: {
-        MCOp = LowerSymbolOperand(
-            Printer.GetBlockAddressSymbol(MO.getBlockAddress()),
-            MO.getOffset(), false, false);
-        break;
-      }
-      case MachineOperand::MO_ExternalSymbol: {
-        // TODO(nand): remove hardcoded symbols.
-        MCOp = LowerSymbolOperand(GetSymbolFromOperand(MO), 0, true, true);
-        break;
-      }
-      case MachineOperand::MO_ConstantPoolIndex: {
-        // TODO(nand): remove hardcoded symbols.
-        MCOp = LowerSymbolOperand(Printer.GetCPISymbol(MO.getIndex()), 0, true, true);
-        break;
-      }
-      default: {
-        MI->print(errs());
-        llvm_unreachable("unknown operand type");
-      }
+      break;
     }
-
-    OutMI.addOperand(MCOp);
+    default: {
+      MI->print(errs());
+      llvm_unreachable("unknown operand type");
+    }
+    }
   }
 }

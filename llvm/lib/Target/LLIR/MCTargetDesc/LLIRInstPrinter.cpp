@@ -15,6 +15,7 @@
 
 #include "LLIR.h"
 #include "MCTargetDesc/LLIRMCTargetDesc.h"
+#include "MCTargetDesc/LLIRMCExpr.h"
 #include "llvm/IR/CallingConv.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
@@ -146,6 +147,23 @@ void LLIRInstPrinter::printReturn(llvm::raw_ostream &OS, const MCInst *MI,
   }
 }
 
+void LLIRInstPrinter::printLandingPad(const char *type, raw_ostream &OS,
+                                      const MCInst *MI,
+                                      const MCSubtargetInfo &STI) {
+  OS << "\tlanding_pad" << type << '\t';
+  for (unsigned i = 0, n = MI->getNumOperands(); i < n; ++i) {
+    auto MO = MI->getOperand(i);
+    if (i != 0) {
+      if (MO.isExpr() && isa<LLIRMCExpr>(MO.getExpr())) {
+        OS << " ";
+      } else {
+        OS << ", ";
+      }
+    }
+    printOperand(MI, i, STI, OS);
+  }
+}
+
 void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
                                 StringRef Annot, const MCSubtargetInfo &STI,
                                 raw_ostream &OS) {
@@ -184,6 +202,10 @@ void LLIRInstPrinter::printInst(const MCInst *MI, uint64_t Address,
 
     case LLIR::RETURN:
       printReturn(OS, MI, STI);
+      break;
+
+    case LLIR::LANDING_PAD_I64_I64:
+      printLandingPad(".i64.i64", OS, MI, STI);
       break;
 
     default: {

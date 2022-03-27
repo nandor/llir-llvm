@@ -1267,6 +1267,7 @@ bool SelectionDAGISel::PrepareEHLandingPad() {
   if (TM.getTargetTriple().isLLIR()) {
     const MCInstrDesc &II = TLI->GetLandingPadOpcode();
     MachineRegisterInfo &MRI = MF->getRegInfo();
+    LLVMContext &Ctx = FuncInfo->Fn->getContext();
 
     auto MIB = BuildMI(*MBB, FuncInfo->InsertPt, SDB->getCurDebugLoc(), II);
 
@@ -1279,6 +1280,57 @@ bool SelectionDAGISel::PrepareEHLandingPad() {
       FuncInfo->ExceptionSelectorVirtReg = MRI.createVirtualRegister(PtrRC);
     }
     MIB.addDef(FuncInfo->ExceptionSelectorVirtReg);
+
+    std::string annot;
+    raw_string_ostream os(annot);
+    os << "@cxx_lsda(";
+
+    const Instruction *FirstI = MBB->getBasicBlock()->getFirstNonPHI();
+    if (const auto *pad = dyn_cast<LandingPadInst>(FirstI)) {
+
+      bool isCatchAll = false;
+      std::vector<GlobalValue *> catches, filters;
+
+      for (unsigned i = 0, n = pad->getNumClauses(); i < n; ++i) {
+        os << " ";
+
+        auto *clause = pad->getClause(i);
+        if (pad->isCatch(i)) {
+          if (auto op = dyn_cast<GlobalValue>(clause->stripPointerCasts())) {
+            catches.push_back(op);
+          } else {
+            isCatchAll = true;
+          }
+        } else {
+          for (auto op : clause->operand_values()) {
+            filters.push_back(dyn_cast<GlobalValue>(op->stripPointerCasts()));
+          }
+        }
+      }
+      os << pad->isCleanup() << " " << isCatchAll << " (";
+      if (!catches.empty()) {
+        for (unsigned i = 0, n = catches.size(); i < n; ++i) {
+          if (i != 0)
+            os << " ";
+          os << catches[i]->getName();
+        }
+      }
+      os << ") (";
+      if (!filters.empty()) {
+        for (unsigned i = 0, n = filters.size(); i < n; ++i) {
+          if (i != 0)
+            os << " ";
+
+          os << filters[i]->getName();
+        }
+      }
+      os << ")";
+    } else {
+      llvm_unreachable("not implemented");
+    }
+
+    os << ")";
+    MIB.addMetadata(MDNode::get(Ctx, {MDString::get(Ctx, annot)}));
   } else {
     // Add a label to mark the beginning of the landing pad.  Deletion of the
     // landing pad can thus be detected via the MachineModuleInfo.
